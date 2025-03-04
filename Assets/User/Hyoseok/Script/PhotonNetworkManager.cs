@@ -1,34 +1,34 @@
+using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
-using UnityEngine;
 
 public class PhotonNetworkManager : MonoBehaviourPunCallbacks
 {
-    void Start()
+    private void Start()
     {
         PhotonNetwork.ConnectUsingSettings(); // Photon 서버 연결
     }
 
     public override void OnConnectedToMaster()
     {
-        Debug.Log("Connected to Master");
-        PhotonNetwork.JoinLobby(); // 로비에 참가
+        Debug.Log("Photon 서버에 연결됨!");
+        PhotonNetwork.JoinLobby(); // 로비 참가
     }
 
-    public void CreateRoom(string roomName)
+    public void CreateRoom()
     {
-        RoomOptions options = new RoomOptions { MaxPlayers = 4 };
-        PhotonNetwork.CreateRoom(roomName, options);
+        RoomOptions roomOptions = new RoomOptions { MaxPlayers = 4 }; // 최대 4명
+        PhotonNetwork.CreateRoom("TestRoom", roomOptions); // "TestRoom" 생성
     }
 
-    public void JoinRoom(string roomName)
+    public void JoinRoom()
     {
-        PhotonNetwork.JoinRoom(roomName);
+        PhotonNetwork.JoinRoom("TestRoom"); // "TestRoom"에 참가
     }
 
     public override void OnJoinedRoom()
     {
-        Debug.Log("Joined Room: " + PhotonNetwork.CurrentRoom.Name);
+        Debug.Log("방에 참가 성공!");
         PhotonNetwork.Instantiate("PlayerPrefab", Vector3.zero, Quaternion.identity);
     }
 }
