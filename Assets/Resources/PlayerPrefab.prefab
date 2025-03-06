@@ -85,6 +85,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1752136025096663272}
   - component: {fileID: 706299503191093230}
+  - component: {fileID: 5540091680608700823}
   m_Layer: 5
   m_Name: PlayerPrefab
   m_TagString: Untagged
@@ -129,6 +130,28 @@ MonoBehaviour:
   playerNameText: {fileID: 4504270434022822649}
   background: {fileID: 4177715007846159803}
   readyIcon: {fileID: 5608000271613677023}
+--- !u!114 &5540091680608700823
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2457809778533098021}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 0
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!1 &5578230117209212701
 GameObject:
   m_ObjectHideFlags: 0
