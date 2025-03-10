@@ -92,6 +92,12 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
     //  방 생성 로직
     public void CreateRoom(int gameMode)
     {
+        if (!PhotonNetwork.IsConnectedAndReady || !PhotonNetwork.InLobby)
+        {
+            Debug.LogError("🚨 CreateRoom() 호출 실패 - 현재 로비에 있지 않음!");
+            return;
+        }
+
         string roomName = "Room_" + Random.Range(1000, 9999);
         Debug.Log($"방 생성 시도: {roomName} (GameMode: {gameMode})");
 
@@ -102,9 +108,9 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
             CustomRoomPropertiesForLobby = new string[] { "GameMode" }
         };
 
-        bool result = PhotonNetwork.CreateRoom(roomName, options);
-        Debug.Log($"CreateRoom 결과: {result}");
+        PhotonNetwork.CreateRoom(roomName, options);
     }
+
 
     //  방 입장
     public void JoinRoom(string roomName)
@@ -120,12 +126,17 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
 
     public override void OnLeftRoom()
     {
-        statusText.text = "Left Room, Returning to Lobby...";
-        UIManager.instance.ShowMainUI();  // 다시 방 목록 UI로 전환
+        Debug.Log("방에서 퇴장했습니다. 로비로 돌아갑니다.");
+
+        // 방 나가면 메인 로비 UI를 보여줌
+        UIManager.instance.ShowMainUI();
+        statusText.text = "Left room. Back in Lobby.";
+        PhotonNetwork.JoinLobby();
     }
 
     public override void OnCreateRoomFailed(short returnCode, string message)
     {
         Debug.LogError($"방 생성 실패! 코드: {returnCode}, 메시지: {message}");
     }
+
 }
