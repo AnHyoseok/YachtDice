@@ -26,7 +26,6 @@ public class ShakeCup : MonoBehaviour
     private IEnumerator ShakerRouine()
     {
         isShakeing = true;
-        box.isTrigger = false;
         float elapsed = 0f;
         Vector3 originalPosition = transform.position;
 
@@ -48,8 +47,6 @@ public class ShakeCup : MonoBehaviour
             elapsed += Time.deltaTime;
             yield return null;
         }
-        //transform.position = originalPosition;
-        //box.isTrigger = true;
         isShakeing = false;
     }
     private void OnCollisionEnter(Collision collision)
