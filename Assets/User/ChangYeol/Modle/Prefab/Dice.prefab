@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 4273852960919832730}
   m_Layer: 0
   m_Name: Dice
-  m_TagString: Untagged
+  m_TagString: Dice
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -103,6 +103,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shakeForce: 2
   cupPos: {fileID: 7567118041841238983, guid: 3f3a8a726b3c64749be510a8d6f26687, type: 3}
+  cupTag: Cup
 --- !u!65 &5304782083198269749
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -148,6 +149,6 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 1
   m_IsKinematic: 0
-  m_Interpolate: 2
+  m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 2
+  m_CollisionDetection: 1

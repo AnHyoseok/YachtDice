@@ -12,6 +12,7 @@ public class ShakeCup : MonoBehaviour
     public float shakeDurtion = 1.5f;
 
     private bool isShakeing = false;
+
     private float shakeSpeedX, shakeSpeedY, shakeSpeedZ;
     private float shakeAmountX, shakeAmountY, shakeAmountZ;
     #endregion
@@ -47,10 +48,22 @@ public class ShakeCup : MonoBehaviour
             elapsed += Time.deltaTime;
             yield return null;
         }
-
-        transform.position = originalPosition;
+        //transform.position = originalPosition;
         //box.isTrigger = true;
         isShakeing = false;
+    }
+    private void OnCollisionEnter(Collision collision)
+    {
+        Rigidbody rb = collision.gameObject.GetComponent<Rigidbody>();
+        if (collision.gameObject.CompareTag("Dice"))
+        {
+            Debug.Log("¡÷ªÁ¿ß");
+
+            Vector3 normal = collision.contacts[0].normal;
+            Vector3 oppsiteForce = -normal * 2;
+
+            rb.AddForce(oppsiteForce, ForceMode.Impulse);
+        }
     }
 }
 

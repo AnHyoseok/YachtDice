@@ -8,7 +8,8 @@ public class Dice : MonoBehaviour
     private bool isRolling = false;
     public float shakeForce = 2f;
     public Transform cupPos;
-    private float maxDistance = 0.5f;
+    private float bounceForce = 0.5f;
+    public string cupTag = "Cup"; // ÄÅÀÇ ÅÂ±× ¼³Á¤
     #endregion
 
     private void Awake()
@@ -20,18 +21,8 @@ public class Dice : MonoBehaviour
     {
         if (isRolling) return;
         isRolling = true;
-
-        //rb.linearVelocity = Vector3.zero;
-        //rb.angularVelocity = Vector3.zero;
-        if (Vector3.Distance (transform.position,cupPos.position) > maxDistance)
-        {
-            transform.position = cupPos.position + new Vector3(Random.Range(-0.2f, 0.2f), 0, Random.Range(-0.2f, 0.2f));
-            rb.linearVelocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
-        }
-        Vector3 forceDirection = (cupPos.position - transform.position).normalized; //ÄÅ Áß¾ÓÀ» ÇâÇÏ´Â ¹æÇâ
-        Vector3 randomOffset = new Vector3(Random.Range(-0.3f, 0.3f), Random.Range(0.3f,0.8f), Random.Range(-0.3f, 0.3f));
-        rb.AddForce(forceDirection * shakeForce + randomOffset, ForceMode.Impulse);
+        Vector3 randomOffset = new Vector3(Random.Range(-0.5f, 0.5f), Random.Range(0.3f,0.8f), Random.Range(-0.5f, 0.5f));
+        rb.AddForce(randomOffset * shakeForce, ForceMode.Impulse);
         rb.AddTorque(Random.insideUnitSphere * shakeForce, ForceMode.Impulse);
         Invoke("StopRolling", 2f);
     }
@@ -39,6 +30,16 @@ public class Dice : MonoBehaviour
     {
         isRolling = false;
         Debug.Log("Dice Stopped");
+    }
+    private void OnCollisionEnter(Collision collision)
+    {
+        if(collision.gameObject.CompareTag(cupTag))
+        {
+            Vector3 normal = collision.contacts[0].normal;
+            Vector3 oppsiteForce = -normal * bounceForce;
+
+            rb.AddForce(oppsiteForce, ForceMode.Impulse);
+        }
     }
     public int GetDiceValue()
     {

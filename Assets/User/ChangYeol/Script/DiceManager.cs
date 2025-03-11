@@ -25,6 +25,10 @@ public class DiceManager : MonoBehaviour
     public ShakeCup cup;
     public Dice dice;
     public List<Dice> dicelist;
+    public float minRange = -0.4f;
+    public float maxRange = 0.4f;
+    public float maxRangeY = 1.8f;
+    public float minRangeY = 2.3f;
     //private int rollsLeft = 3;  //최대 3번 굴릴 수 있음
 
     private HashSet<float> usedYValues = new HashSet<float>(); // 중복 방지용 Y값 저장
@@ -41,7 +45,7 @@ public class DiceManager : MonoBehaviour
         }
         rollDice.onClick.AddListener(() => cup.ShakerCup());
     }
-    private void FixedUpdate()
+    private void Update()
     {
         if(Input.GetKey(KeyCode.S))
         {
@@ -52,13 +56,13 @@ public class DiceManager : MonoBehaviour
 
     public Vector3 GetUniqueRandomPosition()
     {
-        float x = Random.Range(-0.6f, 0.6f);
-        float z = Random.Range(-0.6f, 0.6f);
+        float x = Random.Range(minRange, maxRange);
+        float z = Random.Range(minRange, maxRange);
         float y;
 
         do
         {
-            y = Random.Range(2.2f, 2.8f);
+            y = Random.Range(minRangeY, maxRangeY);
         } while (usedYValues.Contains(y)); // Y 값이 중복되지 않을 때까지 반복
 
         usedYValues.Add(y); // 사용한 Y 값 저장
