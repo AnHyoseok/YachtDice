@@ -94,7 +94,7 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
     {
         if (!PhotonNetwork.IsConnectedAndReady || !PhotonNetwork.InLobby)
         {
-            Debug.LogError("🚨 CreateRoom() 호출 실패 - 현재 로비에 있지 않음!");
+            Debug.LogError(" CreateRoom() 호출 실패 - 현재 로비에 있지 않음!");
             return;
         }
 

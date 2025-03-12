@@ -6,10 +6,13 @@ using UnityEngine.UI;
 using System.Linq;
 using TMPro;
 using System.Collections;
+using Photon.Pun.Demo.PunBasics;
+using System.Collections.Generic;
 
 
 public class PhotonRoom : MonoBehaviourPunCallbacks
 {
+    
     public Transform redTeamPanel;
     public Transform blueTeamPanel;
     public GameObject playerPrefab;
@@ -18,9 +21,11 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
     public Button readyButton;
     public Button startGameButton;
     private bool isReady = false;
+    private List<int> usedProfileIndices = new List<int>(); //중복프로필확인용
 
     void Start()
     {
+        PhotonNetwork.AutomaticallySyncScene = true;
         if (PhotonNetwork.InRoom && PhotonNetwork.CurrentRoom != null)  //  방에 있을 때만 실행
         {
             Debug.Log($" {PhotonNetwork.LocalPlayer.NickName}님이 방에 입장했습니다! 팀 배정 시작.");
@@ -31,6 +36,7 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
             switchTeamButton.onClick.AddListener(SwitchTeam);
             startGameButton.gameObject.SetActive(PhotonNetwork.IsMasterClient);
             startGameButton.onClick.AddListener(StartGame);
+           
         }
         else
         {
@@ -44,15 +50,23 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
         Debug.Log($"{PhotonNetwork.LocalPlayer.NickName}님이 방에 입장했습니다!");
 
         AssignTeam();
+
+        //  나갔다가 다시 들어오면 Ready 상태를 false로 초기화
         PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable { { "Ready", false } });
+
         UpdateTeamUI();
 
-        //  Ready 버튼 이벤트 추가 (중복 방지)
+        //  Ready 버튼 UI 텍스트 초기화
         if (readyButton != null)
         {
             readyButton.onClick.RemoveAllListeners();
             readyButton.onClick.AddListener(ToggleReady);
-            Debug.Log(" Ready 버튼 이벤트 추가됨.");
+
+            TextMeshProUGUI buttonText = readyButton.GetComponentInChildren<TextMeshProUGUI>();
+            if (buttonText != null)
+            {
+                buttonText.text = "Ready"; //  버튼 UI 초기화
+            }
         }
         else
         {
@@ -62,6 +76,8 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
         UIManager.instance.ShowTeamUI();
     }
 
+
+
     public override void OnJoinedLobby()
     {
         Debug.Log(" 로비에 입장했습니다. 방 목록을 불러옵니다.");
@@ -70,16 +86,53 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
 
     void AssignTeam()
     {
-        // 현재 방에 들어온 순서에 따라 Red → Blue 번갈아 배정
-        int playerIndex = PhotonNetwork.PlayerList.Length;  // 방에 입장한 순서
+        // ✅ 프로필 강제 초기화
+        PlayerPrefab.InitializeProfiles();
 
-        string assignedTeam = (playerIndex % 2 == 1) ? "Red" : "Blue";  //
+        int redTeamCount = PhotonNetwork.PlayerList.Count(p => p.CustomProperties.ContainsKey("Team") && (string)p.CustomProperties["Team"] == "Red");
+        int blueTeamCount = PhotonNetwork.PlayerList.Count(p => p.CustomProperties.ContainsKey("Team") && (string)p.CustomProperties["Team"] == "Blue");
 
-        PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable { { "Team", assignedTeam }, { "Ready", false } });
+        string assignedTeam = (redTeamCount <= blueTeamCount) ? "Red" : "Blue"; // ✅ 팀 자동 배정
 
-        Debug.Log($" {PhotonNetwork.LocalPlayer.NickName}님이 {assignedTeam} 팀에 배정되었습니다!");
+        int assignedProfileIndex = GetUniqueProfileIndex(); // ✅ 중복 없는 프로필 선택
+
+        ExitGames.Client.Photon.Hashtable playerProperties = new ExitGames.Client.Photon.Hashtable
+    {
+        { "Team", assignedTeam },
+        { "Ready", false }, // ✅ 입장할 때 무조건 Ready 상태 초기화
+        { "ProfileImageIndex", assignedProfileIndex }
+    };
+
+        PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
+
+        Debug.Log($" {PhotonNetwork.LocalPlayer.NickName}님이 {assignedTeam} 팀에 배정되었습니다! 프로필 이미지 ID: {assignedProfileIndex}");
     }
 
+    int GetUniqueProfileIndex()
+    {
+        PlayerPrefab.InitializeProfiles(); // ✅ 프로필 초기화 확인
+
+        if (PlayerPrefab.ProfileCount == 0) return 0;
+
+        HashSet<int> usedProfileIndices = new HashSet<int>(
+            PhotonNetwork.PlayerList
+            .Where(p => p.CustomProperties.ContainsKey("ProfileImageIndex"))
+            .Select(p => (int)p.CustomProperties["ProfileImageIndex"])
+        );
+
+        List<int> availableProfiles = Enumerable.Range(0, PlayerPrefab.ProfileCount)
+                                                .Where(index => !usedProfileIndices.Contains(index))
+                                                .ToList();
+
+        if (availableProfiles.Count == 0)
+        {
+            Debug.LogWarning("⚠️ 모든 프로필이 사용되었습니다. 중복 허용!");
+            return Random.Range(0, PlayerPrefab.ProfileCount);
+        }
+
+        int selectedProfile = availableProfiles[Random.Range(0, availableProfiles.Count)];
+        return selectedProfile;
+    }
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
@@ -90,41 +143,44 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
 
     public override void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
     {
-        if (changedProps.ContainsKey("Team") || changedProps.ContainsKey("Ready"))
+        if (changedProps.ContainsKey("Team") || changedProps.ContainsKey("Ready") || changedProps.ContainsKey("ProfileImageIndex"))
         {
-            Debug.Log($" OnPlayerPropertiesUpdate() 호출됨 - {targetPlayer.NickName}의 속성 변경 감지!");
-            Debug.Log($" 변경된 속성: {string.Join(", ", changedProps.Keys)}");
+            Debug.Log($"OnPlayerPropertiesUpdate() 호출됨 - {targetPlayer.NickName} 속성 변경 감지!");
 
-            UpdateTeamUI();
+            UpdateTeamUI(); //  UI 업데이트하여 모든 클라이언트에서 같은 프로필을 보이게 함
             CheckAllReady();
         }
     }
+
+
 
     void UpdateTeamUI()
     {
         foreach (Transform child in redTeamPanel) Destroy(child.gameObject);
         foreach (Transform child in blueTeamPanel) Destroy(child.gameObject);
 
-        foreach (Player player in PhotonNetwork.PlayerList)
+        List<Player> sortedPlayers = PhotonNetwork.PlayerList
+            .OrderBy(p => p.CustomProperties.ContainsKey("Ready") ? (bool)p.CustomProperties["Ready"] : false) // ✅ Ready 상태에 따라 정렬
+            .ThenBy(p => p.CustomProperties.ContainsKey("Team") && (string)p.CustomProperties["Team"] == "Red" ? 0 : 1) // ✅ 레드팀 우선 정렬
+            .ToList();
+
+        foreach (Player player in sortedPlayers)
         {
             string team = player.CustomProperties.ContainsKey("Team") ? (string)player.CustomProperties["Team"] : "Red";
-            bool isReady = player.CustomProperties.ContainsKey("Ready") ? (bool)player.CustomProperties["Ready"] : false;
             bool isMaster = player.IsMasterClient;
 
-            //  플레이어 UI 프리팹 생성
             GameObject playerUI = Instantiate(Resources.Load<GameObject>("PlayerPrefab"));
             PlayerPrefab playerPrefabScript = playerUI.GetComponent<PlayerPrefab>();
 
             if (playerPrefabScript != null)
             {
-                playerPrefabScript.Setup(player);  //  플레이어 UI 업데이트
+                playerPrefabScript.Setup(player);
             }
             else
             {
                 Debug.LogError(" PlayerPrefab 스크립트가 PlayerPrefab 오브젝트에 추가되지 않았습니다.");
             }
 
-            // 팀에 따라 UI 배치
             if (team == "Red")
             {
                 playerUI.transform.SetParent(redTeamPanel, false);
@@ -133,11 +189,16 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
             {
                 playerUI.transform.SetParent(blueTeamPanel, false);
             }
-        }
 
-        //  Ready 상태 체크해서 Start 버튼 활성화 여부 갱신
-        CheckAllReady();
+            //// ✅ 방장 표시
+            //if (isMaster)
+            //{
+            //    playerPrefabScript.playerNameText.text = "[Master] " + player.NickName;
+            //}
+        }
     }
+
+
 
 
 
@@ -210,14 +271,40 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
         Debug.Log($" startGameButton 상태 - 활성화: {startGameButton.gameObject.activeSelf}, 상호작용 가능: {startGameButton.interactable}");
     }
 
-    void StartGame()
+    public void StartGame()
     {
-        if (PhotonNetwork.IsMasterClient)
+        if (!PhotonNetwork.IsMasterClient) 
+        
+     
+            return;
+        Debug.Log($" 현재 방의 플레이어 수: {PhotonNetwork.PlayerList.Length}");
+        foreach (Player player in PhotonNetwork.PlayerList)
         {
-            PhotonNetwork.LoadLevel("GameScene"); // 실제 게임 씬으로 전환
+            Debug.Log($"👤 씬 이동 전 플레이어 - 닉네임: {player.NickName}, ID: {player.ActorNumber}, 방장 여부: {player.IsMasterClient}");
         }
+
+        SavePlayerData(); //  씬 변경 전에 플레이어 정보 저장
+        Debug.Log(" GameScene으로 씬 이동 중...");
+        PhotonNetwork.LoadLevel("GameScene"); //  모든 플레이어가 동시에 이동
     }
 
+    //유저정보 저장 (팀, 프로필 , 닉네임)
+    void SavePlayerData()
+    {
+        foreach (Player player in PhotonNetwork.PlayerList)
+        {
+            ExitGames.Client.Photon.Hashtable playerData = new ExitGames.Client.Photon.Hashtable
+        {
+            { "Team", player.CustomProperties["Team"] },
+            { "ProfileImageIndex", player.CustomProperties["ProfileImageIndex"] },
+            { "NickName", player.NickName } // 닉네임 저장
+        };
+
+            player.SetCustomProperties(playerData);
+        }
+
+        Debug.Log("✅ 모든 플레이어의 정보를 저장했습니다.");
+    }
     public void LeaveRoom()
     {
         if (PhotonNetwork.InRoom)
@@ -237,26 +324,29 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
     {
         Debug.Log($" {otherPlayer.NickName}님이 방을 떠났습니다.");
 
-        //  방장이 나갔는지 확인
-        if (PhotonNetwork.IsMasterClient)
+        // ✅ 방장이 나갈 경우에만 방을 삭제
+        if (otherPlayer.IsMasterClient)
         {
             Debug.Log(" 방장이 떠났습니다. 방을 삭제하고 모든 플레이어를 강제 퇴장합니다.");
-            PhotonNetwork.CurrentRoom.IsOpen = false; //  방을 닫아서 새로운 입장 방지
-            PhotonNetwork.CurrentRoom.IsVisible = false; //  방 목록에서 숨김
+            PhotonNetwork.CurrentRoom.IsOpen = false;
+            PhotonNetwork.CurrentRoom.IsVisible = false;
 
             foreach (Player player in PhotonNetwork.PlayerList)
             {
-                if (!player.IsLocal) //  방장이 아닌 다른 플레이어들을 강제 퇴장
+                if (!player.IsLocal)
                 {
-                    Debug.Log("다른유저를 쫒아냅니다");
+                    Debug.Log("다른 유저를 강제 퇴장시킵니다.");
                     PhotonNetwork.CloseConnection(player);
                 }
             }
 
-            StartCoroutine(DestroyRoomAndExit()); //  비동기 처리로 방을 삭제 후 나가기
+            StartCoroutine(DestroyRoomAndExit());
+        }
+        else
+        {
+            Debug.Log(" 방장이 아닌 플레이어가 나갔으므로 방을 유지합니다.");
         }
 
-        //  UI 업데이트
         UpdateTeamUI();
         CheckAllReady();
     }
@@ -264,13 +354,19 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
     private IEnumerator DestroyRoomAndExit()
     {
         yield return new WaitForSeconds(0.5f); //  딜레이 후 퇴장 (Photon 네트워크 안정성 보장)
-        Debug.Log("dddddddd");
+ ;
         if (PhotonNetwork.InRoom)
         {
             PhotonNetwork.LeaveRoom(); //  방장이 방에서 나가기
         }
     }
+    public override void OnMasterClientSwitched(Player newMasterClient)
+    {
+        Debug.Log($"방장이 변경되었습니다. 새로운 방장: {newMasterClient.NickName}");
 
+        startGameButton.gameObject.SetActive(PhotonNetwork.IsMasterClient);
+        UpdateTeamUI();
+    }
 
     public void SwitchTeam()
     {

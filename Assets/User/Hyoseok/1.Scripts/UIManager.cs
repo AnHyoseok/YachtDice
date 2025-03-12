@@ -8,6 +8,8 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour
 {
     public Button goTitleButton;
+    public Image RoomBackGroundImg;
+    public Sprite[] roomBackgrounds;
     public TextMeshProUGUI playerNameText;  // 화면 좌측 상단에 닉네임 표시
     public GameObject canvasMain;  // 방 목록 UI
     public GameObject canvasTeam;  // 팀 UI
@@ -41,6 +43,7 @@ public class UIManager : MonoBehaviour
     {
         SceneManager.LoadScene("Title");
     }
+
     void UpdatePlayerNameUI()
     {
         if (playerNameText != null)
@@ -48,12 +51,21 @@ public class UIManager : MonoBehaviour
             playerNameText.text = PhotonNetwork.NickName;
         }
     }
-
+    // 랜덤 배경 설정
+    void SetRandomBackground()
+    {
+        if (roomBackgrounds.Length > 0)
+        {
+            int randomIndex = Random.Range(0, roomBackgrounds.Length);
+            RoomBackGroundImg.sprite = roomBackgrounds[randomIndex];
+        }
+    }
     // 팀 UI 표시 (방에 입장했을 때)
     public void ShowTeamUI()
     {
         canvasMain.SetActive(false);
         canvasTeam.SetActive(true);
+        SetRandomBackground();
     }
 
     // 방 목록 UI 표시 (방을 나갔을 때)
