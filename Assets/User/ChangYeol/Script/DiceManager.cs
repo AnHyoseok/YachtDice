@@ -41,6 +41,7 @@ public class DiceManager : MonoBehaviour
         for(int i = 0; i < 5; i++)
         {
             GameObject Adddice = Instantiate(dice.gameObject,GetUniqueRandomPosition(),Quaternion.identity);
+            Adddice.SetActive(false);
             dicelist.Add(Adddice.GetComponent<Dice>());
         }
         rollDice.onClick.AddListener(() => cup.ShakerCup());
@@ -144,5 +145,15 @@ public class DiceManager : MonoBehaviour
     public int GetUpperSectionScore()
     {
         return upperSectionScore;
+    }
+    public List<int> GetSortedDiceValues()
+    {
+        List<int> values = new List<int>();
+        foreach (Dice dice in dicelist)
+        {
+            values.Add(dice.GetDiceValue());
+        }
+        values.Sort();
+        return values;
     }
 }

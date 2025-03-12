@@ -7,8 +7,7 @@ public class CollisionCup : MonoBehaviour
         Rigidbody rb = collision.gameObject.GetComponent<Rigidbody>();
         if (collision.gameObject.CompareTag("Dice"))
         {
-            Debug.Log("주사위");
-
+            //Debug.Log("주사위");
             Vector3 normal = collision.contacts[0].normal;
             Vector3 oppsiteForce = -normal * 2;
 

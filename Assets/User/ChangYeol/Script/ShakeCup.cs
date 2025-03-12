@@ -4,7 +4,8 @@ using UnityEngine;
 public class ShakeCup : MonoBehaviour
 {
     #region Variables
-    public BoxCollider box;
+    public DiceManager diceManager;
+    private GameObject Dice;
     public float minShakeAmount = 0.1f;
     public float maxShakeAmount = 0.3f;
     public float minShakeSpeed = 5f;
@@ -61,6 +62,25 @@ public class ShakeCup : MonoBehaviour
 
             rb.AddForce(oppsiteForce, ForceMode.Impulse);
         }
+    }
+    public void ObjectInstantiate()
+    {
+        Vector3 offset = new Vector3(transform.position.x, transform.position.y + 0.35f, transform.position.z);
+        for(int i = 0; i < 2; i++)
+        {
+            Dice = Instantiate(diceManager.dice.gameObject, offset, Quaternion.identity);
+            Dice.gameObject.SetActive(true);
+            Rigidbody Dicerb = Dice.GetComponent<Rigidbody>();
+            Dicerb.AddForce(transform.up.normalized * 20, ForceMode.Acceleration);
+        }
+
+        /*foreach (Dice dice in diceManager.dicelist)
+        {
+            Dice = Instantiate(dice.gameObject, offset, Quaternion.identity);
+            Dice.gameObject.SetActive(true);
+            Rigidbody Dicerb = Dice.GetComponent<Rigidbody>();
+            Dicerb.AddForce(transform.up.normalized * 20, ForceMode.Acceleration);
+        }*/
     }
 }
 
