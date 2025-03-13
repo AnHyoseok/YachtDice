@@ -6,25 +6,28 @@ public class ShakeCup : MonoBehaviour
     #region Variables
     public DiceManager diceManager;
     private GameObject Dice;
-    public float minShakeAmount = 0.1f;
-    public float maxShakeAmount = 0.3f;
-    public float minShakeSpeed = 5f;
-    public float maxShakeSpeed = 10f;
-    public float shakeDurtion = 1.5f;
+    public Transform wall;
+    public float initialForce = 10f;
+
+    //public float minShakeAmount = 0.1f;
+    //public float maxShakeAmount = 0.3f;
+    //public float minShakeSpeed = 5f;
+    //public float maxShakeSpeed = 10f;
+    //public float shakeDurtion = 1.5f;
 
     private bool isShakeing = false;
 
-    private float shakeSpeedX, shakeSpeedY, shakeSpeedZ;
-    private float shakeAmountX, shakeAmountY, shakeAmountZ;
+    //private float shakeSpeedX, shakeSpeedY, shakeSpeedZ;
+    //private float shakeAmountX, shakeAmountY, shakeAmountZ;
     #endregion
     public void ShakerCup()
     {
         if(!isShakeing)
         {
-            StartCoroutine(ShakerRouine());
+            //StartCoroutine(ShakerRouine());
         }
     }
-    private IEnumerator ShakerRouine()
+    /*private IEnumerator ShakerRouine()
     {
         isShakeing = true;
         float elapsed = 0f;
@@ -49,7 +52,7 @@ public class ShakeCup : MonoBehaviour
             yield return null;
         }
         isShakeing = false;
-    }
+    }*/
     private void OnCollisionEnter(Collision collision)
     {
         Rigidbody rb = collision.gameObject.GetComponent<Rigidbody>();
@@ -65,22 +68,24 @@ public class ShakeCup : MonoBehaviour
     }
     public void ObjectInstantiate()
     {
-        Vector3 offset = new Vector3(transform.position.x, transform.position.y + 0.35f, transform.position.z);
-        for(int i = 0; i < 2; i++)
+        for (int i = 0; i < 5; i++)
         {
-            Dice = Instantiate(diceManager.dice.gameObject, offset, Quaternion.identity);
-            Dice.gameObject.SetActive(true);
-            Rigidbody Dicerb = Dice.GetComponent<Rigidbody>();
-            Dicerb.AddForce(transform.up.normalized * 20, ForceMode.Acceleration);
+            RandomPoition();
         }
-
-        /*foreach (Dice dice in diceManager.dicelist)
+    }
+    void RandomPoition()
+    {
+        Vector3 offset = diceManager.GetUniqueRandomPosition(transform.position.x,transform.position.x + 0.01f);
+        Quaternion randomRot = Quaternion.Euler(Random.Range(0,360),Random.Range(0,360),Random.Range(0,360));
+        Dice = Instantiate(diceManager.dice.gameObject, offset, randomRot);
+        diceManager.dicelist.Add(Dice.GetComponent<Dice>());
+        Rigidbody dicerb = Dice.GetComponent<Rigidbody>();
+        if(dicerb != null && wall != null)
         {
-            Dice = Instantiate(dice.gameObject, offset, Quaternion.identity);
-            Dice.gameObject.SetActive(true);
-            Rigidbody Dicerb = Dice.GetComponent<Rigidbody>();
-            Dicerb.AddForce(transform.up.normalized * 20, ForceMode.Acceleration);
-        }*/
+            Vector3 forceDirection = (wall.position - offset).normalized;
+            dicerb.AddForce(forceDirection * initialForce, ForceMode.Impulse);
+            Debug.Log("wall방향으로");
+        }
     }
 }
 

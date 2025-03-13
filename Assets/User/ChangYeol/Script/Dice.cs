@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 using static UnityEditor.PlayerSettings;
@@ -7,13 +8,14 @@ public class Dice : MonoBehaviour
 {
     #region Variables
     private Rigidbody rb;
-    private bool isRolling = false;
     public float shakeForce = 2f;
 
     public float friction = 0.98f;
     public float stopThreshld = 0.05f;
+    public float nudgeForce = 0.5f; // ¸ð¼­¸® ´ê¾ÒÀ» ¶§ ¾àÇÑ Èû Ãß°¡
 
     private bool isSliding = false;
+    public List<TriggerDice> diceList;
     #endregion
 
     private void Awake()
@@ -23,60 +25,79 @@ public class Dice : MonoBehaviour
     }
     private void FixedUpdate()
     {
-
         if(isSliding)
         {
-            rb.linearVelocity *= friction;
-            rb.angularVelocity *= friction;
-
+            rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, Vector3.zero, (1 - friction) * Time.deltaTime);
+            rb.angularVelocity = Vector3.Lerp(rb.angularVelocity, Vector3.zero, (1 - friction) * Time.deltaTime);
+            if(rb.linearVelocity.magnitude < 0.2f && rb.linearVelocity.magnitude > stopThreshld)
+            {
+                rb.AddForce(Random.onUnitSphere * nudgeForce, ForceMode.Impulse);
+                Debug.Log("³Ê¹« ´À¸®°Ô ¸ØÃß´Â Áß ¡æ »ìÂ¦ ¹Ð¾îÁÜ");
+            }
             if(rb.linearVelocity.magnitude < stopThreshld)
             {
                 rb.linearVelocity = Vector3.zero;
                 rb.angularVelocity = Vector3.zero;
                 isSliding = false;
+                Debug.Log("ÁÖ»çÀ§ ¸ØÃã");
             }
         }
-    }
-    public void RollDice()
-    {
-        if (isRolling) return;
-        isRolling = true;
-        Vector3 randomOffset = new Vector3(Random.Range(-0.5f, 0.5f), Random.Range(0.3f,0.8f), Random.Range(-0.5f, 0.5f));
-        rb.AddForce(randomOffset * shakeForce, ForceMode.Impulse);
-        rb.AddTorque(Random.insideUnitSphere * shakeForce, ForceMode.Impulse);
-        Invoke("StopRolling", 2f);
-    }
-    void StopRolling()
-    {
-        isRolling = false;
-        Debug.Log("Dice Stopped");
+        NudgeDice();
     }
     public int GetDiceValue()
     {
-        if (rb.linearVelocity.magnitude > 0.1f) return 0;
-
-        Vector3 up = transform.up;
-        if (Vector3.Dot(up, Vector3.up) > 0.9f) return 6;
-        if (Vector3.Dot(up, Vector3.down) > 0.9f) return 1;
-        if (Vector3.Dot(up, Vector3.right) > 0.9f) return 2;
-        if (Vector3.Dot(up, Vector3.left) > 0.9f) return 5;
-        if (Vector3.Dot(up, Vector3.forward) > 0.9f) return 3;
-        if (Vector3.Dot(up, Vector3.back) > 0.9f) return 4;
+        foreach(TriggerDice triggerDice in diceList)
+        {
+            if(triggerDice.diceValue > 0)
+            {
+                return triggerDice.diceValue;
+            }
+        }
         return 0;
     }
     void SetupDicePhysics(Rigidbody rb)
     {
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
-        rb.interpolation = RigidbodyInterpolation.Extrapolate;
-        rb.linearDamping = 1.5f;
-        rb.angularDamping = 1f;
+        rb.interpolation = RigidbodyInterpolation.Interpolate;
+        rb.linearDamping = 0.02f;
+        rb.angularDamping = 0.02f;
     }
-    private void OnCollisionStay(Collision collision)
+    public void NudgeDice()
     {
-        if(collision.gameObject.CompareTag("Ground") /*&& rb.linearVelocity.magnitude < stopThreshld*/)
+        if (rb.linearVelocity.magnitude > 0.05f || rb.angularVelocity.magnitude > 0.05f) return;
+
+        float threshold = 0.85f;
+        float edgeMin = 0.3f;
+        float edgeMax = 0.6f;
+        Vector3 up = transform.up;
+
+        float[] dotValues =
         {
-            //isSliding = true;
-            Debug.Log("afouhfo;;" + GetDiceValue());
+            Mathf.Abs(Vector3.Dot(up, Vector3.up)),
+            Mathf.Abs(Vector3.Dot(up, Vector3.down)),
+            Mathf.Abs(Vector3.Dot(up, Vector3.right)),
+            Mathf.Abs(Vector3.Dot(up, Vector3.left)),
+            Mathf.Abs(Vector3.Dot(up, Vector3.forward)),
+            Mathf.Abs(Vector3.Dot(up, Vector3.back))
+        };
+        float maxDot = Mathf.Max(dotValues);
+        bool isProperly = maxDot >= threshold;
+        bool isEdge = maxDot >= edgeMin && maxDot <= edgeMax;
+
+        if (isProperly) return;
+        if (!isEdge) return;
+
+        Vector3 smallForce = new Vector3(Random.Range(-0.2f, 0.2f), 0, Random.Range(-0.2f, 0.2f));
+        rb.AddForce(smallForce, ForceMode.Impulse);
+
+        Debug.Log("ÁÖ»çÀ§ ¸ð¼­¸®");
+    }
+    private void OnCollisionEnter(Collision collision)
+    {
+        if(collision.gameObject.CompareTag("Ground"))
+        {
+            isSliding = true;
+            Debug.Log("¹Ì²ô·¯Áü");
         }
     }
 }

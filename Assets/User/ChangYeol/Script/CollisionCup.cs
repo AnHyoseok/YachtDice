@@ -5,13 +5,22 @@ public class CollisionCup : MonoBehaviour
     private void OnCollisionEnter(Collision collision)
     {
         Rigidbody rb = collision.gameObject.GetComponent<Rigidbody>();
-        if (collision.gameObject.CompareTag("Dice"))
+        if (rb != null && collision.gameObject.CompareTag("Dice"))
         {
-            //Debug.Log("주사위");
-            Vector3 normal = collision.contacts[0].normal;
-            Vector3 oppsiteForce = -normal * 2;
+            ContactPoint contact = collision.contacts[0];
+            Vector3 bounceDirection = Vector3.Reflect(rb.linearVelocity, contact.normal);
+            float impactForce = collision.relativeVelocity.magnitude;
+            float dynamicBounceForce = Mathf.Clamp(impactForce * 2f, 2f, 5f);
+            rb.linearVelocity = Vector3.zero;
+            rb.AddForce(bounceDirection.normalized * dynamicBounceForce, ForceMode.Impulse);
 
-            rb.AddForce(oppsiteForce, ForceMode.Impulse);
+            float maxVelocity = 5f;
+            if(rb.linearVelocity.magnitude > maxVelocity)
+            {
+                rb.linearVelocity = rb.linearVelocity.normalized * maxVelocity;
+            }
+
+            Debug.Log("벽에 부딫힘");
         }
     }
 }

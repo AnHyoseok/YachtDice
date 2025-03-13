@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 6277716761266077492}
   m_Layer: 0
   m_Name: DiceFace_5
-  m_TagString: Dice
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -29,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 1810029887201595501}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 0.569}
+  m_LocalPosition: {x: 0, y: 0, z: 0.61}
   m_LocalScale: {x: 0.7, y: 0.2, z: 0.7}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -153,7 +153,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 2.77, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7649430254150758790}
@@ -230,8 +230,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shakeForce: 2
-  friction: 0.98
+  friction: 0.95
   stopThreshld: 0.05
+  diceList:
+  - {fileID: 6288598012149736515}
+  - {fileID: 8318418679701725465}
+  - {fileID: 1986820389276057107}
+  - {fileID: 8891494349097388508}
+  - {fileID: 6277716761266077492}
+  - {fileID: 8000445327154374582}
 --- !u!65 &5304782083198269749
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -261,7 +268,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2491154826321782748}
   serializedVersion: 4
-  m_Mass: 1
+  m_Mass: 0.8
   m_Drag: 0
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -295,7 +302,7 @@ GameObject:
   - component: {fileID: 8891494349097388508}
   m_Layer: 0
   m_Name: DiceFace_4
-  m_TagString: Dice
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -309,7 +316,7 @@ Transform:
   m_GameObject: {fileID: 2530853596432772595}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: -0.569, y: 0, z: 0}
+  m_LocalPosition: {x: -0.61, y: 0, z: 0}
   m_LocalScale: {x: 0.7, y: 0.2, z: 0.7}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -417,7 +424,7 @@ GameObject:
   - component: {fileID: 1986820389276057107}
   m_Layer: 0
   m_Name: DiceFace_3
-  m_TagString: Dice
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -431,7 +438,7 @@ Transform:
   m_GameObject: {fileID: 4399238267542101601}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: -0.569}
+  m_LocalPosition: {x: 0, y: 0, z: -0.61}
   m_LocalScale: {x: 0.7, y: 0.2, z: 0.7}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -539,7 +546,7 @@ GameObject:
   - component: {fileID: 8000445327154374582}
   m_Layer: 0
   m_Name: DiceFace_6
-  m_TagString: Dice
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -553,7 +560,7 @@ Transform:
   m_GameObject: {fileID: 7455438498518559087}
   serializedVersion: 2
   m_LocalRotation: {x: -1, y: 0, z: 0, w: 0}
-  m_LocalPosition: {x: 0, y: -0.569, z: 0}
+  m_LocalPosition: {x: 0, y: -0.61, z: 0}
   m_LocalScale: {x: 0.7, y: 0.2, z: 0.7}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -661,7 +668,7 @@ GameObject:
   - component: {fileID: 6288598012149736515}
   m_Layer: 0
   m_Name: DiceFace_1
-  m_TagString: Dice
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -675,7 +682,7 @@ Transform:
   m_GameObject: {fileID: 7663748035248873080}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.569, z: 0}
+  m_LocalPosition: {x: 0, y: 0.61, z: 0}
   m_LocalScale: {x: 0.7, y: 0.2, z: 0.7}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -783,7 +790,7 @@ GameObject:
   - component: {fileID: 8318418679701725465}
   m_Layer: 0
   m_Name: DiceFace_2
-  m_TagString: Dice
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -797,7 +804,7 @@ Transform:
   m_GameObject: {fileID: 9072260942385934075}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: -0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: 0.569, y: 0, z: 0}
+  m_LocalPosition: {x: 0.61, y: 0, z: 0}
   m_LocalScale: {x: 0.7, y: 0.2, z: 0.7}
   m_ConstrainProportionsScale: 0
   m_Children: []

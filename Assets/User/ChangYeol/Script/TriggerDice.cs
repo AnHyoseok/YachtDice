@@ -1,17 +1,39 @@
-using System.Collections;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class TriggerDice : MonoBehaviour
 {
     public int diceValue = 0;
+    private Dictionary<int, float> faceAreas = new Dictionary<int, float>();
     void OnTriggerEnter(Collider other)
     {
         if(other.tag == ("Ground"))
         {
-            string faceName = gameObject.name;
-            diceValue = int.Parse(faceName.Replace("DiceFace_", ""));
+            int faceNumber = GetFaceNumberFromName(gameObject.name);
+            float faceArea = other.bounds.size.x * other.bounds.size.z;
 
-            Debug.Log(diceValue);
+            if(!faceAreas.ContainsKey(faceNumber))
+            {
+                faceAreas.Add(faceNumber, faceArea);
+            }
+            else
+            {
+                faceAreas[faceNumber] += faceArea;
+            }
+            int bestFace = diceValue;
+            float maxArea = faceAreas.ContainsKey(diceValue) ? faceAreas[diceValue] : 0;
+
+            foreach (var face in faceAreas)
+            {
+                if (face.Value > maxArea)
+                {
+                    maxArea = face.Value;
+                    bestFace = face.Key;
+                }
+            }
+
+            diceValue = bestFace;
+            Debug.Log($"주사위 면 {faceNumber}가 {faceArea}의 면적으로 닿음");
         }
     }
     private void OnTriggerExit(Collider other)
@@ -20,5 +42,9 @@ public class TriggerDice : MonoBehaviour
         {
             diceValue = 0;
         }
+    }
+    private int GetFaceNumberFromName(string faceName)
+    {
+        return int.Parse(faceName.Replace("DiceFace_", ""));
     }
 }
