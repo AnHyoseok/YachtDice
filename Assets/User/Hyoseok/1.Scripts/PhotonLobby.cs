@@ -5,9 +5,11 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using TMPro;
 using ExitGames.Client.Photon;
+using System.Collections;
 
 public class PhotonLobby : MonoBehaviourPunCallbacks
 {
+    public Button refreshButton;
     public TextMeshProUGUI statusText;
     public GameObject roomPrefab;
     public Transform roomListParent;
@@ -15,6 +17,7 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
 
     void Start()
     {
+        refreshButton.onClick.AddListener(RefreshRoomList);
         roomButtons = new List<GameObject>();  // 초기화 추가
         statusText.text = "Connecting to Photon...";
         PhotonNetwork.ConnectUsingSettings();
@@ -33,39 +36,37 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
 
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
-        if (roomListParent == null)
+        if (roomListParent == null || roomPrefab == null)
         {
-            Debug.LogError(" [ERROR] roomListParent가 null입니다! Inspector에서 설정하세요.");
+            Debug.LogError("❌ roomListParent 또는 roomPrefab이 null입니다! Inspector에서 설정하세요.");
             return;
         }
 
-        if (roomPrefab == null)
-        {
-            Debug.LogError(" [ERROR] roomPrefab이 null입니다! Inspector에서 설정하세요.");
-            return;
-        }
-
-        if (roomButtons == null)
-        {
-            Debug.LogError(" [ERROR] roomButtons 리스트가 초기화되지 않았습니다!");
-            roomButtons = new List<GameObject>();  // 초기화
-        }
-
-        // 기존 방 목록 삭제
+        // ✅ 기존 방 목록 UI 초기화 (중복 추가 방지)
         foreach (GameObject button in roomButtons)
         {
             Destroy(button);
         }
         roomButtons.Clear();
 
-        // 새로운 방 목록 생성
+        // ✅ 새로운 방 목록 추가
         foreach (RoomInfo room in roomList)
         {
+            if (room.RemovedFromList || room.PlayerCount == 0) // 삭제된 방 제거
+            {
+                Debug.Log($"삭제된 방: {room.Name}");
+                continue;
+            }
+
             GameObject roomButton = Instantiate(roomPrefab, roomListParent);
             roomButton.GetComponentInChildren<TextMeshProUGUI>().text = $"{room.Name} ({room.PlayerCount}/{room.MaxPlayers})";
             roomButton.GetComponent<Button>().onClick.AddListener(() => JoinRoom(room.Name));
             roomButtons.Add(roomButton);
+
+            Debug.Log($"새로 추가된 방: {room.Name}");
         }
+
+        Debug.Log($"현재 UI에 표시된 방 개수: {roomButtons.Count}");
     }
 
 
@@ -104,10 +105,9 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
         RoomOptions options = new RoomOptions()
         {
             MaxPlayers = (byte)(gameMode * 2),
-            CustomRoomProperties = new Hashtable() { { "GameMode", gameMode } },
+            CustomRoomProperties = new ExitGames.Client.Photon.Hashtable() { { "GameMode", gameMode } },
             CustomRoomPropertiesForLobby = new string[] { "GameMode" }
         };
-
         PhotonNetwork.CreateRoom(roomName, options);
     }
 
@@ -128,15 +128,55 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
     {
         Debug.Log("방에서 퇴장했습니다. 로비로 돌아갑니다.");
 
-        // 방 나가면 메인 로비 UI를 보여줌
+        // ✅ 기존 방 목록 정리
+        foreach (GameObject button in roomButtons)
+        {
+            Destroy(button);
+        }
+        roomButtons.Clear();
+
+        // ✅ 메인 UI 전환
         UIManager.instance.ShowMainUI();
+
+        // ✅ 상태 메시지 업데이트
         statusText.text = "Left room. Back in Lobby.";
+
+        // ✅ 로비 재입장
         PhotonNetwork.JoinLobby();
     }
+
 
     public override void OnCreateRoomFailed(short returnCode, string message)
     {
         Debug.LogError($"방 생성 실패! 코드: {returnCode}, 메시지: {message}");
+    }
+
+
+    public void RefreshRoomList()
+    {
+        if (PhotonNetwork.IsConnectedAndReady) //  연결 상태 확인
+        {
+            if (PhotonNetwork.InLobby)
+            {
+                PhotonNetwork.LeaveLobby();
+                StartCoroutine(RejoinLobby());
+            }
+            else
+            {
+                PhotonNetwork.JoinLobby();
+            }
+        }
+        else
+        {
+            Debug.LogError(" Photon이 아직 연결되지 않음. JoinLobby() 호출 불가능!");
+        }
+    }
+
+
+    private IEnumerator RejoinLobby()
+    {
+        yield return new WaitUntil(() => PhotonNetwork.IsConnectedAndReady); //  Photon 연결될 때까지 대기
+        PhotonNetwork.JoinLobby();
     }
 
 }

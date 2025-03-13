@@ -15,6 +15,7 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
     
     public Transform redTeamPanel;
     public Transform blueTeamPanel;
+    public RectTransform teamPanel;
     public GameObject playerPrefab;
 
     public Button switchTeamButton;
@@ -56,6 +57,14 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
 
         UpdateTeamUI();
 
+        //  1:1 또는 2:2 모드에 따라 TeamPanel 크기 변경
+        if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("GameMode"))
+        {
+            int gameMode = (int)PhotonNetwork.CurrentRoom.CustomProperties["GameMode"];
+            SetTeamPanelSize(gameMode);
+        }
+
+
         //  Ready 버튼 UI 텍스트 초기화
         if (readyButton != null)
         {
@@ -76,6 +85,18 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
         UIManager.instance.ShowTeamUI();
     }
 
+    void SetTeamPanelSize(int gameMode)
+    {
+        if (teamPanel != null)
+        {
+            //패널 크기 값
+            int leftRightValue = (gameMode == 1) ? 411 : 158; //  1:1 → 411, 2:2 → 158
+            teamPanel.offsetMin = new Vector2(leftRightValue, teamPanel.offsetMin.y); 
+            teamPanel.offsetMax = new Vector2(-leftRightValue, teamPanel.offsetMax.y); 
+            Debug.Log($" TeamPanel 크기 조정됨: Left={leftRightValue}, Right={leftRightValue}");
+        }
+      
+    }
 
 
     public override void OnJoinedLobby()
@@ -86,31 +107,80 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
 
     void AssignTeam()
     {
-        // ✅ 프로필 강제 초기화
+        //  프로필 강제 초기화
         PlayerPrefab.InitializeProfiles();
 
-        int redTeamCount = PhotonNetwork.PlayerList.Count(p => p.CustomProperties.ContainsKey("Team") && (string)p.CustomProperties["Team"] == "Red");
-        int blueTeamCount = PhotonNetwork.PlayerList.Count(p => p.CustomProperties.ContainsKey("Team") && (string)p.CustomProperties["Team"] == "Blue");
+        //  플레이어가 이전에 있던 방 정보 확인
+        string lastRoomName = PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("LastRoom")
+            ? (string)PhotonNetwork.LocalPlayer.CustomProperties["LastRoom"]
+            : null;
 
-        string assignedTeam = (redTeamCount <= blueTeamCount) ? "Red" : "Blue"; // ✅ 팀 자동 배정
+        string assignedTeam = null;
 
-        int assignedProfileIndex = GetUniqueProfileIndex(); // ✅ 중복 없는 프로필 선택
+        //  같은 방에 재입장한 경우, 이전 팀 유지
+        if (lastRoomName != null && lastRoomName == PhotonNetwork.CurrentRoom.Name)
+        {
+            assignedTeam = PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("Team")
+                ? (string)PhotonNetwork.LocalPlayer.CustomProperties["Team"]
+                : null;
+        }
+
+        //  다른 방이면 새로운 팀 배정
+        if (assignedTeam == null)
+        {
+            int redTeamCount = PhotonNetwork.PlayerList.Count(p => p.CustomProperties.ContainsKey("Team") && (string)p.CustomProperties["Team"] == "Red");
+            int blueTeamCount = PhotonNetwork.PlayerList.Count(p => p.CustomProperties.ContainsKey("Team") && (string)p.CustomProperties["Team"] == "Blue");
+
+            assignedTeam = (blueTeamCount < redTeamCount) ? "Blue" : "Red"; //  팀 균형 유지
+        }
+
+        int assignedProfileIndex = GetUniqueProfileIndex(); //  중복 없는 프로필 선택
+
+        //  UI 먼저 변경 (네트워크 딜레이 없이 즉시 반영)
+        UpdateLocalUI(PhotonNetwork.LocalPlayer, assignedTeam, assignedProfileIndex);
 
         ExitGames.Client.Photon.Hashtable playerProperties = new ExitGames.Client.Photon.Hashtable
     {
         { "Team", assignedTeam },
-        { "Ready", false }, // ✅ 입장할 때 무조건 Ready 상태 초기화
-        { "ProfileImageIndex", assignedProfileIndex }
+        { "Ready", false }, // 입장할 때 무조건 Ready 상태 초기화
+        { "ProfileImageIndex", assignedProfileIndex },
+        { "LastRoom", PhotonNetwork.CurrentRoom.Name } //  현재 방 정보 저장
     };
 
         PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
 
-        Debug.Log($" {PhotonNetwork.LocalPlayer.NickName}님이 {assignedTeam} 팀에 배정되었습니다! 프로필 이미지 ID: {assignedProfileIndex}");
+        Debug.Log($" {PhotonNetwork.LocalPlayer.NickName}님이 {PhotonNetwork.CurrentRoom.Name} 방에서 {assignedTeam} 팀에 배정됨! (프로필: {assignedProfileIndex})");
+
+        //  UI 즉시 업데이트
+        UpdateTeamUI();
     }
 
+    void UpdateLocalUI(Player player, string team, int profileIndex)
+    {
+        //  플레이어 프로필과 팀 정보를 즉시 반영하여 시각적 딜레이 제거
+        if (player.CustomProperties.ContainsKey("ProfileImageIndex"))
+        {
+            player.CustomProperties["ProfileImageIndex"] = profileIndex;
+        }
+        else
+        {
+            player.CustomProperties.Add("ProfileImageIndex", profileIndex);
+        }
+
+        if (player.CustomProperties.ContainsKey("Team"))
+        {
+            player.CustomProperties["Team"] = team;
+        }
+        else
+        {
+            player.CustomProperties.Add("Team", team);
+        }
+
+        UpdateTeamUI();
+    }
     int GetUniqueProfileIndex()
     {
-        PlayerPrefab.InitializeProfiles(); // ✅ 프로필 초기화 확인
+        PlayerPrefab.InitializeProfiles(); //  프로필 초기화 확인
 
         if (PlayerPrefab.ProfileCount == 0) return 0;
 
@@ -126,13 +196,14 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
 
         if (availableProfiles.Count == 0)
         {
-            Debug.LogWarning("⚠️ 모든 프로필이 사용되었습니다. 중복 허용!");
+            Debug.LogWarning(" 모든 프로필이 사용됨! 랜덤으로 할당.");
             return Random.Range(0, PlayerPrefab.ProfileCount);
         }
 
         int selectedProfile = availableProfiles[Random.Range(0, availableProfiles.Count)];
         return selectedProfile;
     }
+
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
@@ -374,27 +445,38 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
 
         string currentTeam = PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("Team")
             ? (string)PhotonNetwork.LocalPlayer.CustomProperties["Team"]
-            : "Red";  // 기본값
+            : "Red";
 
         string newTeam = (currentTeam == "Red") ? "Blue" : "Red";
 
-        Debug.Log($"🔄 {PhotonNetwork.LocalPlayer.NickName}님이 {currentTeam} → {newTeam} 변경 시도 중...");
+        int maxPlayers = PhotonNetwork.CurrentRoom.MaxPlayers;
+        int maxTeamSize = maxPlayers / 2; // 각 팀의 최대 인원 (1:1 -> 1명, 2:2 -> 2명)
 
-        // 팀 속성을 변경
+        int redTeamCount = PhotonNetwork.PlayerList.Count(p => p.CustomProperties.ContainsKey("Team") && (string)p.CustomProperties["Team"] == "Red");
+        int blueTeamCount = PhotonNetwork.PlayerList.Count(p => p.CustomProperties.ContainsKey("Team") && (string)p.CustomProperties["Team"] == "Blue");
+
+        // 이동하려는 팀이 이미 꽉 차 있으면 막음
+        if (newTeam == "Red" && redTeamCount >= maxTeamSize)
+        {
+            Debug.LogWarning(" 빨간팀이 이미 꽉 찼습니다! 팀 변경 불가.");
+            return;
+        }
+        if (newTeam == "Blue" && blueTeamCount >= maxTeamSize)
+        {
+            Debug.LogWarning(" 파란팀이 이미 꽉 찼습니다! 팀 변경 불가.");
+            return;
+        }
+
         PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable { { "Team", newTeam } });
 
-        //  UI 즉시 업데이트
+        Debug.Log($" {PhotonNetwork.LocalPlayer.NickName}님이 {currentTeam} → {newTeam} 팀으로 변경됨.");
+
+        //  UI 즉시 반영
         UpdateTeamUI();
-
     }
 
-    public override void OnLeftRoom()
-    {
-        Debug.Log(" 방 나가기 성공! 로비로 재입장합니다...");
-        UIManager.instance.ShowMainUI(); // UI 갱신
 
-        PhotonNetwork.JoinLobby(); //  로비로 다시 입장 필수!
-    }
+
 
 
 }
