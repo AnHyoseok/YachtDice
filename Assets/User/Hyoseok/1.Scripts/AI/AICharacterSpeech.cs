@@ -1,29 +1,34 @@
 using UnityEngine;
-using TMPro;
 using System.Collections;
 
 public class AICharacterSpeech : MonoBehaviour
 {
-    public SpeechBubble speechBubble; //  인스펙터에서 직접 할당
+    public SpeechBubble speechBubble;
+    [SerializeField]private float nextSpeechTime=15f;
 
     private string[] dialogueLines = new string[]
-    {
-        "Hello! Have a great day!",
-        "Are you looking for treasure here?",
-        "This place might be dangerous. Be careful!",
-        "Let me know if you need any help.",
-        "I heard something strange nearby.",
-        "I think I saw something shiny!",
-        "Teamwork is the key to success!",
-        "Follow this path, there might be something ahead.",
-        "Wow, your gear looks cool!",
-        "Is this your first time here? Nice to meet you!"
+    {   
+        //인사말
+        "Hello!\nHave a great day!",
+        "Let me know\n if you need any help.",
+        "Teamwork is the key\n to success!",
+        "Is this your first time\n here? Nice to meet you!",
+
+        //다이스 게임 팁
+        "Try to aim for a\n Yahtzee early in the game!",
+        "Keep high-value dice\n for better scoring chances.",
+        "If you can't get a\n good roll, go for chance!",
+        "Full house gives\n decent points in a pinch.",
+        "Don't waste your Yahtzee!\n Save it for later turns.",
+        "Straights are tricky.\n Keep a sequence if possible!",
+        "Rolling again?\n Make sure it’s worth the risk!",
+        "Lower scores are fine.\n Keep your options open!",
+        "Three of a kind?\n Make sure it's high value!",
+        "Need a bonus?\n Fill in the upper section first!"
     };
 
     private void Start()
     {
-     
-
         StartCoroutine(ChangeDialogueRoutine());
     }
 
@@ -32,7 +37,7 @@ public class AICharacterSpeech : MonoBehaviour
         while (true)
         {
             SpeakRandom();
-            yield return new WaitForSeconds(5f);
+            yield return new WaitForSeconds(nextSpeechTime); 
         }
     }
 
@@ -40,15 +45,8 @@ public class AICharacterSpeech : MonoBehaviour
     {
         if (speechBubble != null)
         {
-            //  말풍선이 비활성화되었으면 다시 활성화
-            if (!speechBubble.gameObject.activeSelf)
-            {
-                speechBubble.gameObject.SetActive(true);
-            }
-
             string randomDialogue = dialogueLines[Random.Range(0, dialogueLines.Length)];
-            speechBubble.ShowMessage(randomDialogue,3f);
+            speechBubble.ShowMessage(randomDialogue);
         }
-     
     }
 }

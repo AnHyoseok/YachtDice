@@ -128,20 +128,20 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
     {
         Debug.Log("방에서 퇴장했습니다. 로비로 돌아갑니다.");
 
-        // ✅ 기존 방 목록 정리
+        //  기존 방 목록 정리
         foreach (GameObject button in roomButtons)
         {
             Destroy(button);
         }
         roomButtons.Clear();
 
-        // ✅ 메인 UI 전환
+        //  메인 UI 전환
         UIManager.instance.ShowMainUI();
 
-        // ✅ 상태 메시지 업데이트
+        //  상태 메시지 업데이트
         statusText.text = "Left room. Back in Lobby.";
 
-        // ✅ 로비 재입장
+        //  로비 재입장
         PhotonNetwork.JoinLobby();
     }
 

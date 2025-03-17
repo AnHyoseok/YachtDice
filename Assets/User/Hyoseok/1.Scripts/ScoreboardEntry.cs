@@ -15,7 +15,7 @@ public class ScoreboardEntry : MonoBehaviour
         if (playerNameText != null)
         {
             bool isMaster = player.IsMasterClient; //  방장 여부 확인
-            string displayName = isMaster ? "[Master] " + player.NickName : player.NickName;
+            string displayName = isMaster ?   player.NickName+ "[M]" : player.NickName;
             playerNameText.text = displayName;
         }
 
@@ -47,4 +47,35 @@ public class ScoreboardEntry : MonoBehaviour
             teamColor.color = (team == "Red") ? Color.red : Color.blue; //  팀 색상 적용
         }
     }
+    public void SetAIData(string aiName, ExitGames.Client.Photon.Hashtable properties)
+    {
+        if (playerNameText != null)
+        {
+            playerNameText.text =  aiName+ "[AI]"; // AI 이름 표시
+        }
+
+        int profileIndex = properties.ContainsKey("ProfileIndex") ? (int)properties["ProfileIndex"] : 0;
+
+        if (profileSprites != null && profileSprites.Length > 0)
+        {
+            if (profileIndex >= profileSprites.Length)
+            {
+                Debug.LogWarning($" AI 프로필 인덱스 {profileIndex}가 범위를 초과했습니다. 기본 프로필(0번) 사용.");
+                profileIndex = 0;
+            }
+
+            profileImage.sprite = profileSprites[profileIndex];
+        }
+        else
+        {
+            Debug.LogWarning(" profileSprites 배열이 비어 있습니다. 기본 이미지 사용.");
+        }
+
+        if (properties.ContainsKey("Team"))
+        {
+            string team = (string)properties["Team"];
+            teamColor.color = (team == "Red") ? Color.red : Color.blue;
+        }
+    }
+
 }

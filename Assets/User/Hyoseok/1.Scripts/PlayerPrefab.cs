@@ -1,24 +1,28 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using Photon.Realtime;
 using TMPro;
+using Photon.Pun;
 
 public class PlayerPrefab : MonoBehaviour
 {
     public static int ProfileCount { get; private set; } = 0;
     public TextMeshProUGUI playerNameText;
     public Image profileImage;
-    public static Sprite[] ProfileSprites;
+    public static Sprite[] ProfileSprites; //í”Œë ˆì´ì–´ í”„ë¡œí•„
+ 
     public Image readyIcon;
     public Image teamColor;
     public Sprite[] profileSprites;
-
+    public Sprite[] aiProfileSprites;     // AI ì „ìš© í”„ë¡œí•„ 
+    public Button removeAIButton; // AI ì‚­ì œ ë²„íŠ¼
+    private string aiName; // ì‚­ì œí•  AI ì´ë¦„ ì €ì¥
     void Awake()
     {
         InitializeProfiles();
     }
 
-    //  ÇÁ·ÎÇÊ ÃÊ±âÈ­ (°ÔÀÓ ½ÃÀÛ ½Ã ½ÇÇàµÇµµ·Ï Ãß°¡)
+    //  í”„ë¡œí•„ ì´ˆê¸°í™” (ê²Œì„ ì‹œì‘ ì‹œ ì‹¤í–‰ë˜ë„ë¡ ì¶”ê°€)
     public static void InitializeProfiles()
     {
         if (ProfileSprites == null || ProfileSprites.Length == 0)
@@ -31,7 +35,7 @@ public class PlayerPrefab : MonoBehaviour
                 {
                     ProfileSprites = instance.profileSprites;
                     ProfileCount = instance.profileSprites.Length;
-                    Debug.Log($" ProfileSprites ÃÊ±âÈ­ ¿Ï·á! ÃÑ {ProfileCount}°³ ÇÁ·ÎÇÊ »ç¿ë °¡´É");
+                    Debug.Log($" ProfileSprites ì´ˆê¸°í™” ì™„ë£Œ! ì´ {ProfileCount}ê°œ í”„ë¡œí•„ ì‚¬ìš© ê°€ëŠ¥");
                 }
             }
         }
@@ -42,7 +46,7 @@ public class PlayerPrefab : MonoBehaviour
         if (playerNameText != null)
         {
             bool isMaster = player.IsMasterClient;
-            string displayName = isMaster ? "[Master] " + player.NickName : player.NickName;
+            string displayName = isMaster ?  player.NickName+"[M]" : player.NickName;
             playerNameText.text = displayName;
         }
 
@@ -71,8 +75,49 @@ public class PlayerPrefab : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning("Àß¸øµÈ ÇÁ·ÎÇÊ ÀÎµ¦½ºÀÔ´Ï´Ù!");
+                Debug.LogWarning("ì˜ëª»ëœ í”„ë¡œí•„ ì¸ë±ìŠ¤ì…ë‹ˆë‹¤!");
             }
         }
     }
+
+    public void SetupAI(string aiName, string team, bool isReady, int profileIndex)
+    {
+        this.aiName = aiName;
+
+        if (playerNameText != null)
+        {
+            playerNameText.text = aiName + "(AI)";
+        }
+
+        teamColor.color = (team == "Red") ? Color.red : Color.blue;
+        readyIcon.gameObject.SetActive(isReady);
+
+        // ğŸ”¹ AI ì „ìš© í”„ë¡œí•„ ì ìš©
+        if (aiProfileSprites != null && profileIndex < aiProfileSprites.Length && profileImage != null)
+        {
+            profileImage.sprite = aiProfileSprites[profileIndex];
+        }
+        else
+        {
+            Debug.LogWarning("AI í”„ë¡œí•„ ì¸ë±ìŠ¤ê°€ ë²”ìœ„ë¥¼ ë²—ì–´ë‚¬ìŠµë‹ˆë‹¤. ê¸°ë³¸ê°’ì„ ì‚¬ìš©í•©ë‹ˆë‹¤.");
+        }
+
+        // AI ì‚­ì œ ë²„íŠ¼ í™œì„±í™” ë° í´ë¦­ ì´ë²¤íŠ¸ ì¶”ê°€
+        if (removeAIButton != null)
+        {
+            removeAIButton.gameObject.SetActive(true);
+            removeAIButton.onClick.RemoveAllListeners();
+            removeAIButton.onClick.AddListener(RemoveAI);
+        }
+    }
+
+
+    public void RemoveAI()
+    {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            PhotonRoom.instance.RemoveSpecificAI(aiName);
+        }
+    }
+
 }

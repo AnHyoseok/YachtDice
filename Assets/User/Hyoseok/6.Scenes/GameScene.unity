@@ -6357,6 +6357,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53b03f01137455244aca7e8020f8c189, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerList: []
   playerA: {fileID: 0}
   playerB: {fileID: 0}
   isPlayerATurn: 0

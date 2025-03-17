@@ -17,10 +17,13 @@ public class UIManager : MonoBehaviour
     public GameObject playerNamePanel;  // 플레이어 이름 설정 UI 패널
     public TMP_InputField nameInputField;  // 플레이어 이름 입력 필드
     public TextMeshProUGUI warningText; // 경고 메시지 UI
-    public GameObject warningPanel; //경고 패널 
+    public GameObject warningPanel; // 경고 패널 
+
+    public Button addAIButton;
+
 
     public static UIManager instance;
- 
+
     void Awake()
     {
         if (instance == null) instance = this;
@@ -28,11 +31,16 @@ public class UIManager : MonoBehaviour
 
     void Start()
     {
+        // AI 추가 버튼
+        addAIButton.onClick.AddListener(() => PhotonRoom.instance.AddAIPlayer());
+       
+
         goTitleButton.onClick.AddListener(OnTitleGo);
+
         // 기본 이름 설정값
         if (string.IsNullOrEmpty(PhotonNetwork.NickName))
         {
-            PhotonNetwork.NickName = "User" + Random.Range(100000, 999999);
+            PhotonNetwork.NickName = "User" + Random.Range(10, 9999);
         }
 
         UpdatePlayerNameUI();
@@ -51,6 +59,7 @@ public class UIManager : MonoBehaviour
             playerNameText.text = PhotonNetwork.NickName;
         }
     }
+
     // 랜덤 배경 설정
     void SetRandomBackground()
     {
@@ -60,6 +69,7 @@ public class UIManager : MonoBehaviour
             RoomBackGroundImg.sprite = roomBackgrounds[randomIndex];
         }
     }
+
     // 팀 UI 표시 (방에 입장했을 때)
     public void ShowTeamUI()
     {
@@ -119,15 +129,17 @@ public class UIManager : MonoBehaviour
     }
 
     // 경고 메시지 표시 (1초 후 자동 사라짐)
-    void ShowWarning(string message)
+    public static void ShowWarning(string message)
     {
-        warningText.text = message;
-        warningPanel.SetActive(true);
-        StopAllCoroutines();  
-        StartCoroutine(HideWarningAfterDelay());
+       
+
+        instance.warningText.text = message;
+        instance.warningPanel.SetActive(true);
+        instance.StopAllCoroutines();
+        instance.StartCoroutine(instance.HideWarningAfterDelay());
     }
 
-    IEnumerator HideWarningAfterDelay()
+    private IEnumerator HideWarningAfterDelay()
     {
         yield return new WaitForSeconds(1f);
         warningPanel.SetActive(false);

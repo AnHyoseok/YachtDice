@@ -29,22 +29,50 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
 
     void InitializeScoreboard()
     {
+        // 네트워크 플레이어 추가
         foreach (Player player in PhotonNetwork.PlayerList)
         {
-            Debug.Log($" Scoreboard 생성 중: {player.NickName} (ID: {player.ActorNumber}, 방장 여부: {player.IsMasterClient})");
+            AddPlayerToScoreboard(player.NickName, player);
+        }
 
-            GameObject scoreboardEntry = Instantiate(scoreboardPrefab, scoreboardPanel);
-            ScoreboardEntry entryScript = scoreboardEntry.GetComponent<ScoreboardEntry>();
+        // AI 플레이어 추가
+        if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("AIPlayers"))
+        {
+            string[] aiPlayers = (string[])PhotonNetwork.CurrentRoom.CustomProperties["AIPlayers"];
+            foreach (string aiName in aiPlayers)
+            {
+                if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(aiName))
+                {
+                    ExitGames.Client.Photon.Hashtable aiProperties =
+                        (ExitGames.Client.Photon.Hashtable)PhotonNetwork.CurrentRoom.CustomProperties[aiName];
 
-            if (entryScript != null)
-            {
-                entryScript.SetPlayerData(player);
-                Debug.Log($" ScoreboardEntry 생성 완료: {player.NickName}");
+                    AddAIToScoreboard(aiName, aiProperties);
+                }
             }
-            else
-            {
-                Debug.LogError(" ScoreboardEntry 스크립트를 찾을 수 없습니다.");
-            }
+        }
+    }
+    // 플레이어 추가 함수 (실제 네트워크 유저)
+    void AddPlayerToScoreboard(string name, Player player)
+    {
+        GameObject scoreboardEntry = Instantiate(scoreboardPrefab, scoreboardPanel);
+        ScoreboardEntry entryScript = scoreboardEntry.GetComponent<ScoreboardEntry>();
+
+        if (entryScript != null)
+        {
+            entryScript.SetPlayerData(player);
+            Debug.Log($" ScoreboardEntry 생성 완료: {name}");
+        }
+    }
+    // AI 추가 함수
+    void AddAIToScoreboard(string aiName, ExitGames.Client.Photon.Hashtable properties)
+    {
+        GameObject scoreboardEntry = Instantiate(scoreboardPrefab, scoreboardPanel);
+        ScoreboardEntry entryScript = scoreboardEntry.GetComponent<ScoreboardEntry>();
+
+        if (entryScript != null)
+        {
+            entryScript.SetAIData(aiName, properties);
+            Debug.Log($" AI ScoreboardEntry 생성 완료: {aiName}");
         }
     }
 }
