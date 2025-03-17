@@ -230,8 +230,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shakeForce: 2
-  friction: 0.95
+  friction: 0.995
   stopThreshld: 0.05
+  nudgeForce: 0.2
   diceList:
   - {fileID: 6288598012149736515}
   - {fileID: 8318418679701725465}

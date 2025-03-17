@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Rendering;
 using static UnityEditor.PlayerSettings;
 
@@ -16,6 +17,8 @@ public class Dice : MonoBehaviour
 
     private bool isSliding = false;
     public List<TriggerDice> diceList;
+
+    public bool isStopDice;
     #endregion
 
     private void Awake()
@@ -25,14 +28,14 @@ public class Dice : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        if(isSliding)
+        if(isSliding && !rb.isKinematic)
         {
             rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, Vector3.zero, (1 - friction) * Time.deltaTime);
             rb.angularVelocity = Vector3.Lerp(rb.angularVelocity, Vector3.zero, (1 - friction) * Time.deltaTime);
             if(rb.linearVelocity.magnitude < 0.2f && rb.linearVelocity.magnitude > stopThreshld)
             {
                 rb.AddForce(Random.onUnitSphere * nudgeForce, ForceMode.Impulse);
-                Debug.Log("³Ê¹« ´À¸®°Ô ¸ØÃß´Â Áß ¡æ »ìÂ¦ ¹Ð¾îÁÜ");
+                //Debug.Log("³Ê¹« ´À¸®°Ô ¸ØÃß´Â Áß ¡æ »ìÂ¦ ¹Ð¾îÁÜ");
             }
             if(rb.linearVelocity.magnitude < stopThreshld)
             {
@@ -58,7 +61,7 @@ public class Dice : MonoBehaviour
     void SetupDicePhysics(Rigidbody rb)
     {
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
-        rb.interpolation = RigidbodyInterpolation.Interpolate;
+        rb.interpolation = RigidbodyInterpolation.Extrapolate;
         rb.linearDamping = 0.02f;
         rb.angularDamping = 0.02f;
     }
@@ -89,15 +92,13 @@ public class Dice : MonoBehaviour
 
         Vector3 smallForce = new Vector3(Random.Range(-0.2f, 0.2f), 0, Random.Range(-0.2f, 0.2f));
         rb.AddForce(smallForce, ForceMode.Impulse);
-
-        Debug.Log("ÁÖ»çÀ§ ¸ð¼­¸®");
     }
     private void OnCollisionEnter(Collision collision)
     {
         if(collision.gameObject.CompareTag("Ground"))
         {
             isSliding = true;
-            Debug.Log("¹Ì²ô·¯Áü");
+            //Debug.Log("¹Ì²ô·¯Áü");
         }
     }
 }

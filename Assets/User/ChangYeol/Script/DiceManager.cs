@@ -20,10 +20,9 @@ public class DiceScore
     public const string YAHTZEE = "YAHTZEE";
     public const string CHANCE = "CHANCE";
 }
-public class DiceManager : MonoBehaviour
+public class DiceManager : Singleton<DiceManager>
 {
     #region Vaiables
-    
     public Transform dicetrans;
     public float spacing = 0.8f;
     public float moveSpeed = 2f;
@@ -32,6 +31,7 @@ public class DiceManager : MonoBehaviour
     public ShakeCup cup;
     public Dice dice;
     public List<Dice> dicelist;
+    public List<Dice> newdicelist;
     public float minRange = -0.5f;
     public float maxRange = 0.5f;
     public float minRangeY = 1f;
@@ -42,23 +42,12 @@ public class DiceManager : MonoBehaviour
     private int upperSectionScore = 0;
     private bool boonsGiven = false;
     public Button rollDice;
+    public bool isArray = false;
     #endregion
-    private void Awake()
-    {
-        //for(int i = 0; i < 5; i++)
-        //{
-        //    GameObject Adddice = Instantiate(dice.gameObject,GetUniqueRandomPosition(),Quaternion.identity);
-        //    Adddice.SetActive(false);
-        //    dicelist.Add(Adddice.GetComponent<Dice>());
-        //}
-        //rollDice.onClick.AddListener(() => cup.ShakerCup());
-    }
+
     private void Update()
     {
-        if(Input.GetKey(KeyCode.S))
-        {
-            cup.ShakerCup();
-        }
+        CheckDiceStopped();
     }
 
     public Vector3 GetUniqueRandomPosition(float minRangeX, float maxRangeX)
@@ -143,55 +132,86 @@ public class DiceManager : MonoBehaviour
     {
         return upperSectionScore;
     }
-    public void Dicearray()
+    void CheckDiceStopped()
     {
-        dicelist.Sort((a, b) => a.GetDiceValue().CompareTo(b.GetDiceValue()));
-        for(int i = 0; i < dicelist.Count; i++)
+        if (!isArray)
         {
-            int index = dicelist[i].GetDiceValue();
-            switch (index)
+            bool allStopped = dicelist.All(dice => dice.GetComponent<Rigidbody>().linearVelocity.magnitude < 0.1f
+            && dice.GetComponent<Rigidbody>().angularVelocity.magnitude < 0.1f);
+
+            if(allStopped && dicelist.Count > 0)
             {
-                case 1:
-                    StartCoroutine(MoveDiceToSortedPosition(new Quaternion(-180f, 0f, 0f, 0)));
-                    break;
-                case 2:
-                    StartCoroutine(MoveDiceToSortedPosition(new Quaternion(0f, 0f, -90f, 0)));
-                    break;
-                case 3:
-                    StartCoroutine(MoveDiceToSortedPosition(new Quaternion(-90f, 0f, 0f, 0)));
-                    break;
-                case 4:
-                    StartCoroutine(MoveDiceToSortedPosition(new Quaternion(0f, 0f, 90f, 0)));
-                    break;
-                case 5:
-                    StartCoroutine(MoveDiceToSortedPosition(new Quaternion(90f, 0f, 0f, 0)));
-                    break;
-                case 6:
-                    StartCoroutine(MoveDiceToSortedPosition(new Quaternion(0f, 0f, 0f, 0)));
-                    break;
+                Dicearray();
             }
         }
     }
-    private IEnumerator MoveDiceToSortedPosition(Quaternion targetRotation)
+    public void DiceArrays()
     {
-        for (int i = 0; i < dicelist.Count; i++)
-        {
-            Vector3 targetPosition = dicetrans.position + new Vector3(i * spacing, 0, 0);
-            GameObject dice = dicelist[i].gameObject;
+        isArray = false;
+        Dicearray();
+    }
+    void Dicearray()
+    {
+        if (isArray) return;
+        isArray = true;
+        Debug.Log("정렬 중");
 
+        dicelist.Sort((a, b) => a.GetDiceValue().CompareTo(b.GetDiceValue()));
+
+        StartCoroutine(MoveDiceToSortedPosition());
+    }
+    private IEnumerator MoveDiceToSortedPosition()
+    {
+        int diceCount = dicelist.Count;
+        if (diceCount == 0) yield break;
+
+        float totalWidth = (diceCount - 1) * spacing;
+        Vector3 startPosition = dicetrans.position - new Vector3(totalWidth / 2, 0, 0);
+
+        for (int i = 0; i < diceCount; i++)
+        {
+            GameObject dice = dicelist[i].gameObject;
+            Rigidbody rb = dice.GetComponent<Rigidbody>(); // Rigidbody 가져오기
+
+            int faceValue = dice.GetComponent<Dice>().GetDiceValue();
+            Quaternion targetRotation = GetTargetRotation(faceValue);
+
+            Vector3 targetPosition = startPosition + new Vector3(i * spacing, 0, 0);
             float elapsedTime = 0f;
             Vector3 initaialPosition = dice.transform.position;
             Quaternion initialRotation = dice.transform.rotation;
-
             while (elapsedTime < 1f)
             {
                 dice.transform.position = Vector3.Lerp(initaialPosition, targetPosition, elapsedTime);
                 dice.transform.rotation = Quaternion.Lerp(initialRotation, targetRotation, elapsedTime);
                 elapsedTime += Time.deltaTime * moveSpeed;
+
                 yield return null;
             }
             dice.transform.position = targetPosition;
             dice.transform.rotation = targetRotation;
+            for(int j= 0;j < dice.GetComponent<Dice>().diceList.Count; j++)
+            {
+                BoxCollider box = dice.GetComponent<Dice>().diceList[j].GetComponent<BoxCollider>();
+                box.enabled = false;
+            }
+            if (rb != null)
+            {
+                rb.isKinematic = true; // 완전히 멈추도록 설정
+            }
         }
+    }
+    private Quaternion GetTargetRotation(int faceValue)
+    {
+        switch(faceValue)
+        {
+            case 1: return Quaternion.Euler(-180f, 0f, 0f);
+            case 2: return Quaternion.Euler(0f, 0f, -90f);
+            case 3: return Quaternion.Euler(-90f, 0f, 0f);
+            case 4: return Quaternion.Euler(0f, 0f, 90f);
+            case 5: return Quaternion.Euler(90f, 0f, 0f);
+            case 6: return Quaternion.Euler(0f, 0f, 0f);
+        }
+        return Quaternion.identity;
     }
 }
