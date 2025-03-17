@@ -1514,9 +1514,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 697467554}
+  - component: {fileID: 697467555}
+  - component: {fileID: 697467556}
   m_Layer: 0
   m_Name: SelectDicePos2
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1536,6 +1538,39 @@ Transform:
   m_Children: []
   m_Father: {fileID: 733545514}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &697467555
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 697467553}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.55, y: 0.3, z: 0.6}
+  m_Center: {x: 0, y: -0.15, z: 0}
+--- !u!114 &697467556
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 697467553}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3652ea9db46cbe4b83ee6f48d5ad183, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &703351790
 GameObject:
   m_ObjectHideFlags: 0
@@ -1740,13 +1775,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62c3d99f155cdcd4dad89c8610b9bb35, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  shakeCup: {fileID: 0}
   targetPositions:
   - {fileID: 1432219199}
   - {fileID: 697467554}
   - {fileID: 1248415626}
   - {fileID: 1601540889}
   - {fileID: 1604612840}
-  moveSpeed: 2
+  moveSpeed: 10
   turnLimit: 5
 --- !u!1 &734511946
 GameObject:
@@ -2515,9 +2551,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1129088134}
+  - component: {fileID: 1129088135}
   m_Layer: 0
   m_Name: ArrayDicePos
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: 7250588514170254948, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2537,6 +2574,27 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1129088135
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1129088133}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 8, y: 0.05, z: 0.2}
+  m_Center: {x: 0, y: -0.32, z: 0}
 --- !u!1 &1149906267
 GameObject:
   m_ObjectHideFlags: 0
@@ -2769,9 +2827,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1248415626}
+  - component: {fileID: 1248415627}
+  - component: {fileID: 1248415628}
   m_Layer: 0
   m_Name: SelectDicePos3
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2791,6 +2851,39 @@ Transform:
   m_Children: []
   m_Father: {fileID: 733545514}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1248415627
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1248415625}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.55, y: 0.3, z: 0.6}
+  m_Center: {x: 0, y: -0.15, z: 0}
+--- !u!114 &1248415628
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1248415625}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3652ea9db46cbe4b83ee6f48d5ad183, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1281080300
 GameObject:
   m_ObjectHideFlags: 0
@@ -3131,9 +3224,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1432219199}
+  - component: {fileID: 1432219200}
+  - component: {fileID: 1432219201}
   m_Layer: 0
   m_Name: SelectDicePos1
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3153,6 +3248,39 @@ Transform:
   m_Children: []
   m_Father: {fileID: 733545514}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1432219200
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1432219198}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.55, y: 0.3, z: 0.6}
+  m_Center: {x: 0, y: -0.15, z: 0}
+--- !u!114 &1432219201
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1432219198}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3652ea9db46cbe4b83ee6f48d5ad183, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1497259015
 GameObject:
   m_ObjectHideFlags: 0
@@ -3667,9 +3795,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1601540889}
+  - component: {fileID: 1601540890}
+  - component: {fileID: 1601540891}
   m_Layer: 0
   m_Name: SelectDicePos4
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3689,6 +3819,39 @@ Transform:
   m_Children: []
   m_Father: {fileID: 733545514}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1601540890
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1601540888}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.55, y: 0.3, z: 0.6}
+  m_Center: {x: 0, y: -0.15, z: 0}
+--- !u!114 &1601540891
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1601540888}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3652ea9db46cbe4b83ee6f48d5ad183, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1603363135
 GameObject:
   m_ObjectHideFlags: 0
@@ -3730,9 +3893,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1604612840}
+  - component: {fileID: 1604612841}
+  - component: {fileID: 1604612842}
   m_Layer: 0
   m_Name: SelectDicePos5
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3752,6 +3917,39 @@ Transform:
   m_Children: []
   m_Father: {fileID: 733545514}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1604612841
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1604612839}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.55, y: 0.3, z: 0.6}
+  m_Center: {x: 0, y: -0.15, z: 0}
+--- !u!114 &1604612842
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1604612839}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3652ea9db46cbe4b83ee6f48d5ad183, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1690679484
 GameObject:
   m_ObjectHideFlags: 0
@@ -5464,15 +5662,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dicetrans: {fileID: 1129088134}
   spacing: 0.8
-  moveSpeed: 2
+  moveSpeed: 3
   cup: {fileID: 3469287836958276106}
   dice: {fileID: 384049437191513344, guid: ede434e11494c344ba953343b8e37c8a, type: 3}
   dicelist: []
+  newdicelist: []
   minRange: -0.5
   maxRange: 0.5
   minRangeY: 1
   maxRangeY: 2
   rollDice: {fileID: 1740718678}
+  isArrays: 0
 --- !u!33 &3469287836958276104
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -5493,10 +5693,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6071cee7c7bb3eb4ba680d6481db4caf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cupState: 0
   boxGroup: {fileID: 1323024319}
   diceManager: {fileID: 3469287836695691729}
   wall: {fileID: 1993847558}
   initialForce: 10
+  animator: {fileID: 0}
 --- !u!114 &3469287836958276107
 MonoBehaviour:
   m_ObjectHideFlags: 0

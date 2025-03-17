@@ -56,7 +56,7 @@ public class Dice : MonoBehaviour
                 return triggerDice.diceValue;
             }
         }
-        return 0;
+        return 1;
     }
     void SetupDicePhysics(Rigidbody rb)
     {

@@ -42,7 +42,8 @@ public class DiceManager : Singleton<DiceManager>
     private int upperSectionScore = 0;
     private bool boonsGiven = false;
     public Button rollDice;
-    public bool isArray = false;
+    private bool isArray = false;
+    public bool isArrays = false;
     #endregion
 
     private void Update()
@@ -147,18 +148,22 @@ public class DiceManager : Singleton<DiceManager>
     }
     public void DiceArrays()
     {
-        isArray = false;
-        Dicearray();
+        if (isArrays) return;
+        isArrays = true;
+        dicelist.Sort((a, b) => a.GetDiceValue().CompareTo(b.GetDiceValue()));
+        StartCoroutine(MoveDiceToSortedPosition());
     }
     void Dicearray()
     {
-        if (isArray) return;
+        if (isArray || isArrays) return;
         isArray = true;
+        isArrays = true;
         Debug.Log("정렬 중");
 
         dicelist.Sort((a, b) => a.GetDiceValue().CompareTo(b.GetDiceValue()));
 
         StartCoroutine(MoveDiceToSortedPosition());
+        
     }
     private IEnumerator MoveDiceToSortedPosition()
     {
@@ -200,6 +205,7 @@ public class DiceManager : Singleton<DiceManager>
                 rb.isKinematic = true; // 완전히 멈추도록 설정
             }
         }
+        isArrays = false;
     }
     private Quaternion GetTargetRotation(int faceValue)
     {

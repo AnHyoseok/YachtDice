@@ -4,6 +4,7 @@ using UnityEngine;
 public class SelectDice : MonoBehaviour
 {
     #region Variables
+    public ShakeCup shakeCup;
     public Transform[] targetPositions;
     public float moveSpeed = 2f;
     public int turnLimit = 5;
@@ -21,7 +22,17 @@ public class SelectDice : MonoBehaviour
     }
     private void Update()
     {
-        if(Input.GetMouseButtonDown(0))
+        if (currentTargetIndex > 1)
+        {
+            if(Input.GetKey(KeyCode.Escape))
+            {
+                foreach (Dice dice in DiceManager.Instance.dicelist)
+                {
+                    dice.gameObject.SetActive(false);
+                }
+            }
+        }
+        if (Input.GetMouseButtonDown(0))
         {
             DiceSelect();
         }
@@ -34,7 +45,7 @@ public class SelectDice : MonoBehaviour
             OnTurnEnd();
             return;
         }
-        if (isGoMove && DiceManager.Instance.isArray) return;
+        if (isGoMove || DiceManager.Instance.isArrays) return;
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
         if(Physics.Raycast(ray,out hit))
