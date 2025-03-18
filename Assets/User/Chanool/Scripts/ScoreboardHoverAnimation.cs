@@ -1,28 +1,31 @@
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
 
 public class ScoreboardHoverAnimation : MonoBehaviour, IPointerEnterHandler //, IPointerExitHandler
 {
-    public GameObject hoverEffect; // Hover효과 오브젝트
+    public GameObject hoverEffect; // Hover효과
     public ScoreboardTurnActivator scoreboardTurnActivator; // ScoreboardTurnActivator.cs의 PlayerA, PlayerB 참조
-    public List<RectTransform> playerARectTransforms = new List<RectTransform>(); // 여러 개의 RectTransform을 저장해놓을 리스트
-    public List<RectTransform> playerBRectTransforms = new List<RectTransform>();
+    public List<RectTransform> playerARectTransforms = new List<RectTransform>(); // ARectTransform들을 저장해놓을 리스트
+    public List<RectTransform> playerBRectTransforms = new List<RectTransform>(); // BRectTransform들을 저장해놓을 리스트
 
     private bool isHovered = false;
 
+    public GameObject categories; // Select표시(주황색)할 카테고리
+    private List<Image> selectImages = new List<Image>(); // SelectImage들을 담을 리스트
+
     private void Start()
     {
-        scoreboardTurnActivator = GetComponent<ScoreboardTurnActivator>();
+        scoreboardTurnActivator = GetComponent<ScoreboardTurnActivator>(); // ScoreboardTurnActivator.cs 참조
 
         // Player_A와 Player_B 내부의 "Line_{i}"를 찾아 리스트에 저장
         FindRectTransforms(scoreboardTurnActivator.playerA, playerARectTransforms);
         FindRectTransforms(scoreboardTurnActivator.playerB, playerBRectTransforms);
+        // Categories 내부의 "SelectImage" 를 모두 찾아 리스트에 저장
+        FindSelectImage(categories, selectImages);
 
-        if (hoverEffect != null)
-        {
-            hoverEffect.SetActive(false); // 초기에는 비활성화
-        }
+        hoverEffect.SetActive(false); // 초기에는 애니메이션 비활성화
     }
 
     private void Update()
@@ -38,10 +41,39 @@ public class ScoreboardHoverAnimation : MonoBehaviour, IPointerEnterHandler //, 
 
         if (hoverEffect != null && isHovered)
         {
-            RectTransform hoveredRect = GetHoveredRectA();
+            int hoveredIndex;
+            RectTransform hoveredRect = GetHoveredRectA(out hoveredIndex);
+
+            // 모든 selectImages 비활성화 (초기화)
+            foreach (var img in selectImages)
+            {
+                img.gameObject.SetActive(false);
+            }
+
+            // hoveredIndex가 유효한 범위 내에 있을 때만 활성화
+            if (hoveredIndex >= 0 && hoveredIndex < selectImages.Count)
+            {
+                selectImages[hoveredIndex].gameObject.SetActive(true);
+            }
+
+
             if (hoveredRect != null)
             {
                 hoverEffect.transform.position = hoveredRect.position; // 빠르게 위치 이동
+            }
+        }
+    }
+
+    private void FindSelectImage(GameObject categories, List<Image> selectImages)
+    {
+        if (categories == null) return;
+
+        Image[] images = categories.GetComponentsInChildren<Image>(true);
+        foreach (Image img in images)
+        {
+            if (img.gameObject.name == "SelectImage")
+            {
+                selectImages.Add(img); // TurnImage를 리스트에 추가
             }
         }
     }
@@ -71,8 +103,10 @@ public class ScoreboardHoverAnimation : MonoBehaviour, IPointerEnterHandler //, 
     {
         isHovered = true; // 마우스가 들어왔다는 것을 표시
 
+        int hoveredIndex;
+
         // 마우스가 올라간 RectTransform을 찾아 그 위치를 hoverEffect에 적용
-        RectTransform hoveredRect = GetHoveredRectA();
+        RectTransform hoveredRect = GetHoveredRectA(out hoveredIndex);
         if (hoveredRect != null)
         {
             hoverEffect.transform.position = hoveredRect.position; // HoverEffect의 위치를 마우스가 올라간 RectTransform의 위치로 설정
@@ -93,18 +127,21 @@ public class ScoreboardHoverAnimation : MonoBehaviour, IPointerEnterHandler //, 
     }*/
 
     // GetHoveredRect는 현재 마우스가 위치한 RectTransform을 찾는 메서드
-    private RectTransform GetHoveredRectA()
+    private RectTransform GetHoveredRectA(out int index)
     {
-        // playerARectTransforms 리스트에서 마우스가 포함된 RectTransform을 찾기
-        foreach (RectTransform rect in playerARectTransforms)
+        index = -1; // 기본적으로 인덱스를 -1로 설정 (못 찾았을 경우)
+
+        for (int i = 0; i < playerARectTransforms.Count; i++)
         {
-            // RectTransform이 마우스 커서와 겹치는지 확인
-            if (RectTransformUtility.RectangleContainsScreenPoint(rect, Input.mousePosition, null))
+            // 마우스 커서가 해당 RectTransform 영역 안에 있는지 확인
+            if (RectTransformUtility.RectangleContainsScreenPoint(playerARectTransforms[i], Input.mousePosition, null))
             {
-                return rect; // 겹친 RectTransform을 반환
+                index = i; // 인덱스 저장
+                return playerARectTransforms[i]; // 해당 RectTransform 반환
             }
         }
-        return null; // 해당하는 RectTransform이 없으면 null 반환
+
+        return null; // 마우스가 겹치는 RectTransform이 없으면 null 반환
     }
 
     private RectTransform GetHoveredRectB()

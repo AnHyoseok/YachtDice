@@ -9,14 +9,15 @@ public class ScoreboardTurnActivator : MonoBehaviour
     public GameObject playerB; // PlayerList[1]
     public bool isPlayerATurn = false; // 시작할 때 아무도 턴이 아님
     public bool isPlayerBTurn = false;
-    private List<Image> playerATurnImages = new List<Image>(); // 여러 개의 TurnImage를 담을 리스트
+    private List<Image> playerATurnImages = new List<Image>(); // TurnImage들을 담을 리스트
     private List<Image> playerBTurnImages = new List<Image>();
+    
 
     void Start()
     {
         // 자식중에 Player를 모두찾아 저장하기
         FindPlayersWithTag();
-        // Player_A와 Player_B 내부의 "TurnImage"를 모두 찾아 리스트에 저장
+        // Player 내부의 "TurnImage"를 모두 찾아 리스트에 저장
         FindTurnImages(playerA, playerATurnImages);
         FindTurnImages(playerB, playerBTurnImages);
     }

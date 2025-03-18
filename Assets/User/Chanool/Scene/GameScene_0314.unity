@@ -1340,11 +1340,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hoverEffect: {fileID: 8422706254157054985}
-  playerA: {fileID: 333739059139009450}
-  playerB: {fileID: 7451821534932077080}
+  scoreboardTurnActivator: {fileID: 0}
   playerARectTransforms: []
   playerBRectTransforms: []
-  scoreboardTurnActivator: {fileID: 0}
+  categories: {fileID: 0}
 --- !u!1001 &1912297990
 PrefabInstance:
   m_ObjectHideFlags: 0
