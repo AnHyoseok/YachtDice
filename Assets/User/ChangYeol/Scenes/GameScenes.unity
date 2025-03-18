@@ -1784,6 +1784,7 @@ MonoBehaviour:
   - {fileID: 1604612840}
   moveSpeed: 10
   turnLimit: 5
+  isPut: 0
 --- !u!1 &734511946
 GameObject:
   m_ObjectHideFlags: 0
@@ -5662,7 +5663,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dicetrans: {fileID: 1129088134}
   spacing: 0.8
-  moveSpeed: 3
+  moveSpeed: 5
   cup: {fileID: 3469287836958276106}
   dice: {fileID: 384049437191513344, guid: ede434e11494c344ba953343b8e37c8a, type: 3}
   dicelist: []
@@ -5698,6 +5699,7 @@ MonoBehaviour:
   diceManager: {fileID: 3469287836695691729}
   wall: {fileID: 1993847558}
   initialForce: 10
+  selectDice: {fileID: 733545515}
   animator: {fileID: 0}
 --- !u!114 &3469287836958276107
 MonoBehaviour:

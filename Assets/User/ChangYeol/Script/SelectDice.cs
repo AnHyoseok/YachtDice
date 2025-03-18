@@ -11,9 +11,11 @@ public class SelectDice : MonoBehaviour
 
     private Camera mainCamera;
     private GameObject selectDice = null;
+    private Transform originalPosition; // 원래 위치 저장
     private int currentTargetIndex = 0;
-    private static int movesThisTurn = 0;
+    public static int movesThisTurn = 0;
     private bool isGoMove = false;
+    public bool isPut = false;
     #endregion
 
     private void Start()
@@ -24,11 +26,22 @@ public class SelectDice : MonoBehaviour
     {
         if (currentTargetIndex > 1)
         {
-            if(Input.GetKey(KeyCode.Escape))
+            isPut = Input.GetKey(KeyCode.Escape);
+            if (isPut)
             {
-                foreach (Dice dice in DiceManager.Instance.dicelist)
+                foreach (Dice dice in DiceManager.Instance.dices)
                 {
-                    dice.gameObject.SetActive(false);
+                    if(dice != null)
+                    {
+                        Destroy(dice.gameObject);
+                    }
+                }
+                for (int i = 0; i < DiceManager.Instance.dices.Length; i++)
+                {
+                    if (DiceManager.Instance.dices[i] != null)
+                    {
+                        DiceManager.Instance.dices[i] = null;
+                    }
                 }
             }
         }
@@ -54,28 +67,47 @@ public class SelectDice : MonoBehaviour
             if(hit.collider.CompareTag("Dice") && rb.isKinematic && rb.useGravity)
             {
                 selectDice = hit.collider.gameObject;
-                DiceManager.Instance.dicelist.Remove(selectDice.GetComponent<Dice>());
-                DiceManager.Instance.newdicelist.Add(selectDice.GetComponent<Dice>());
-                StartCoroutine(MoveDiceToNextTartget());
+                Dice selectedDice = selectDice.GetComponent<Dice>();
+
+                Dice[] diceArray = DiceManager.Instance.dices;
+                int index = System.Array.FindIndex(diceArray, d => d == selectedDice);
+                if(index != -1)
+                {
+                    Dice[] newArray = new Dice[diceArray.Length - 1];
+                    for (int i = 0,j =0; i < diceArray.Length; i++)
+                    {
+                        if(i != index)
+                        {
+                            newArray[j++] = diceArray[i];
+                        }
+                    }
+                    DiceManager.Instance.dices = newArray;
+                }
+                Dice[] newDiceArray = DiceManager.Instance.newdicelist;
+                System.Array.Resize(ref newDiceArray, newDiceArray.Length + 1);
+                newDiceArray[newDiceArray.Length - 1] = selectedDice;
+                DiceManager.Instance.newdicelist = newDiceArray;
+
+                StartCoroutine(MoveDiceToNextTartget(selectDice, targetPositions[currentTargetIndex]));
                 DiceManager.Instance.DiceArrays();
             }
         }
     }
-    IEnumerator MoveDiceToNextTartget()
+    IEnumerator MoveDiceToNextTartget(GameObject dice, Transform destination)
     {
         if (selectDice == null || targetPositions.Length == 0) yield break;
         isGoMove = true;
-        Transform targetPosition = targetPositions[currentTargetIndex];
+
         float elapsedTime = 0f;
-        Vector3 initialPosition = selectDice.transform.position;
+        Vector3 initialPosition = dice.transform.position;
 
         while (elapsedTime < 1f)
         {
-            selectDice.transform.position = Vector3.Lerp(initialPosition, targetPosition.position, elapsedTime);
+            dice.transform.position = Vector3.Lerp(initialPosition, destination.position, elapsedTime);
             elapsedTime += Time.deltaTime * moveSpeed;
             yield return null;
         }
-        selectDice.transform.position = targetPosition.position;
+        dice.transform.position = destination.position;
         Debug.Log($"{selectDice.name}이 도착");
 
         movesThisTurn++;

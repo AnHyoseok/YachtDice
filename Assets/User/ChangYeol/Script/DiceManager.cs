@@ -30,8 +30,8 @@ public class DiceManager : Singleton<DiceManager>
     private Dice gameDice;
     public ShakeCup cup;
     public Dice dice;
-    public List<Dice> dicelist;
-    public List<Dice> newdicelist;
+    public Dice[] dices = new Dice[5];
+    public Dice[] newdicelist;
     public float minRange = -0.5f;
     public float maxRange = 0.5f;
     public float minRangeY = 1f;
@@ -42,7 +42,7 @@ public class DiceManager : Singleton<DiceManager>
     private int upperSectionScore = 0;
     private bool boonsGiven = false;
     public Button rollDice;
-    private bool isArray = false;
+    public bool isArray = false;
     public bool isArrays = false;
     #endregion
 
@@ -68,10 +68,10 @@ public class DiceManager : Singleton<DiceManager>
     }
     public int[] GetDiceValues()
     {
-        int[] values = new int[dicelist.Count];
-        for (int i = 0; i < dicelist.Count; i++)
+        int[] values = new int[dices.Length];
+        for (int i = 0; i < dices.Length; i++)
         {
-            values[i] = dicelist[i].GetDiceValue();
+            values[i] = dices[i].GetDiceValue();
         }
         return values;
     }
@@ -135,14 +135,17 @@ public class DiceManager : Singleton<DiceManager>
     }
     void CheckDiceStopped()
     {
-        if (!isArray)
+        for(int i = 0; i < dices.Length;i++)
         {
-            bool allStopped = dicelist.All(dice => dice.GetComponent<Rigidbody>().linearVelocity.magnitude < 0.1f
-            && dice.GetComponent<Rigidbody>().angularVelocity.magnitude < 0.1f);
-
-            if(allStopped && dicelist.Count > 0)
+            if (!isArray && dices[i] != null)
             {
-                Dicearray();
+                bool allStopped = System.Array.TrueForAll(dices, dice => dice.GetComponent<Rigidbody>().linearVelocity.magnitude < 0.1f
+                && dice.GetComponent<Rigidbody>().angularVelocity.magnitude < 0.1f);
+
+                if (allStopped && dices.Length > 0)
+                {
+                    Dicearray();
+                }
             }
         }
     }
@@ -150,7 +153,7 @@ public class DiceManager : Singleton<DiceManager>
     {
         if (isArrays) return;
         isArrays = true;
-        dicelist.Sort((a, b) => a.GetDiceValue().CompareTo(b.GetDiceValue()));
+        System.Array.Sort(dices,(a, b) => a.GetDiceValue().CompareTo(b.GetDiceValue()));
         StartCoroutine(MoveDiceToSortedPosition());
     }
     void Dicearray()
@@ -160,14 +163,14 @@ public class DiceManager : Singleton<DiceManager>
         isArrays = true;
         Debug.Log("정렬 중");
 
-        dicelist.Sort((a, b) => a.GetDiceValue().CompareTo(b.GetDiceValue()));
+        System.Array.Sort(dices,(a, b) => a.GetDiceValue().CompareTo(b.GetDiceValue()));
 
         StartCoroutine(MoveDiceToSortedPosition());
         
     }
     private IEnumerator MoveDiceToSortedPosition()
     {
-        int diceCount = dicelist.Count;
+        int diceCount = dices.Length;
         if (diceCount == 0) yield break;
 
         float totalWidth = (diceCount - 1) * spacing;
@@ -175,7 +178,7 @@ public class DiceManager : Singleton<DiceManager>
 
         for (int i = 0; i < diceCount; i++)
         {
-            GameObject dice = dicelist[i].gameObject;
+            GameObject dice = dices[i].gameObject;
             Rigidbody rb = dice.GetComponent<Rigidbody>(); // Rigidbody 가져오기
 
             int faceValue = dice.GetComponent<Dice>().GetDiceValue();
