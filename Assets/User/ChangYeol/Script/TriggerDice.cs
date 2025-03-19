@@ -33,7 +33,7 @@ public class TriggerDice : MonoBehaviour
             }
 
             diceValue = bestFace;
-            //Debug.Log($"주사위 면 {faceNumber}가 {faceArea}의 면적으로 닿음");
+            Debug.Log($"{faceNumber}");
         }
     }
     private void OnTriggerExit(Collider other)
