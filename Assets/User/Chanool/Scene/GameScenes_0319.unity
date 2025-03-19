@@ -24003,7 +24003,7 @@ GameObject:
   - component: {fileID: 1994307053}
   - component: {fileID: 1994307052}
   m_Layer: 5
-  m_Name: 1vs1ScoreboardCanvas
+  m_Name: ScoreboardCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
