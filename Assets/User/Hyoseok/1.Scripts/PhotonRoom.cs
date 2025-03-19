@@ -12,7 +12,7 @@ using System.Collections.Generic;
 
 public class PhotonRoom : MonoBehaviourPunCallbacks
 {
-    
+
     public Transform redTeamPanel;
     public Transform blueTeamPanel;
     public RectTransform teamPanel;
@@ -27,9 +27,10 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
     "Celestia", "Morgana", "Artemis", "Elysia", "Nova",
     "Sigrid", "Astra", "Xanthe", "Zafira", "Draven"
 };
-    [SerializeField] private int aiProfileCount=2;
+    [SerializeField] private int aiProfileCount = 2;
 
     private bool isReady = false;
+
     private List<int> usedProfileIndices = new List<int>(); //중복프로필확인용
     public static PhotonRoom instance;
     void Awake()
@@ -56,7 +57,7 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
             switchTeamButton.onClick.AddListener(SwitchTeam);
             startGameButton.gameObject.SetActive(PhotonNetwork.IsMasterClient);
             startGameButton.onClick.AddListener(StartGame);
-           
+
         }
         else
         {
@@ -148,13 +149,45 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
                 : null;
         }
 
-        //  다른 방이면 새로운 팀 배정
+        // 🔹 최신 팀 정보 가져오기 (AI 포함)
+        int redTeamCount = 0;
+        int blueTeamCount = 0;
+
+        foreach (Player player in PhotonNetwork.PlayerList)
+        {
+            if (player.CustomProperties.ContainsKey("Team"))
+            {
+                string team = (string)player.CustomProperties["Team"];
+                if (team == "Red") redTeamCount++;
+                else if (team == "Blue") blueTeamCount++;
+            }
+        }
+
+        // 🔹 AI 포함하여 팀 인원 확인
+        if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("AIPlayers"))
+        {
+            string[] aiPlayers = (string[])PhotonNetwork.CurrentRoom.CustomProperties["AIPlayers"];
+            foreach (string aiName in aiPlayers)
+            {
+                if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(aiName))
+                {
+                    ExitGames.Client.Photon.Hashtable aiProperties =
+                        (ExitGames.Client.Photon.Hashtable)PhotonNetwork.CurrentRoom.CustomProperties[aiName];
+
+                    if (aiProperties.ContainsKey("Team"))
+                    {
+                        string aiTeam = (string)aiProperties["Team"];
+                        if (aiTeam == "Red") redTeamCount++;
+                        else if (aiTeam == "Blue") blueTeamCount++;
+                    }
+                }
+            }
+        }
+
+        // 🔹 다른 방이면 새로운 팀 배정 (AI 포함한 팀 균형 고려)
         if (assignedTeam == null)
         {
-            int redTeamCount = PhotonNetwork.PlayerList.Count(p => p.CustomProperties.ContainsKey("Team") && (string)p.CustomProperties["Team"] == "Red");
-            int blueTeamCount = PhotonNetwork.PlayerList.Count(p => p.CustomProperties.ContainsKey("Team") && (string)p.CustomProperties["Team"] == "Blue");
-
-            assignedTeam = (blueTeamCount < redTeamCount) ? "Blue" : "Red"; //  팀 균형 유지
+            assignedTeam = (blueTeamCount < redTeamCount) ? "Blue" : "Red"; // 팀 균형 유지
         }
 
         int assignedProfileIndex = GetUniqueProfileIndex(); //  중복 없는 프로필 선택
@@ -173,6 +206,9 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
         PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
 
         Debug.Log($" {PhotonNetwork.LocalPlayer.NickName}님이 {PhotonNetwork.CurrentRoom.Name} 방에서 {assignedTeam} 팀에 배정됨! (프로필: {assignedProfileIndex})");
+
+        // 🔹 AI를 포함한 최신 팀 데이터를 업데이트
+        UpdateTeamData();
 
         //  UI 즉시 업데이트
         UpdateTeamUI();
@@ -201,6 +237,8 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
 
         UpdateTeamUI();
     }
+
+  
     int GetUniqueProfileIndex()
     {
         PlayerPrefab.InitializeProfiles(); //  프로필 초기화 확인
@@ -413,9 +451,9 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
 
     public void StartGame()
     {
-        if (!PhotonNetwork.IsMasterClient) 
-        
-     
+        if (!PhotonNetwork.IsMasterClient)
+
+
             return;
         Debug.Log($" 현재 방의 플레이어 수: {PhotonNetwork.PlayerList.Length}");
         foreach (Player player in PhotonNetwork.PlayerList)
@@ -425,7 +463,13 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
 
         SavePlayerData(); //  씬 변경 전에 플레이어 정보 저장
         Debug.Log(" GameScene으로 씬 이동 중...");
+        //현재 방 로비에서 제거 
+        PhotonNetwork.CurrentRoom.IsVisible = false; // 방 목록에서 제거
+        PhotonNetwork.CurrentRoom.IsOpen = false; //  추가 입장 불가
         PhotonNetwork.LoadLevel("GameScene"); //  모든 플레이어가 동시에 이동
+
+
+
     }
 
     //유저정보 저장 (팀, 프로필 , 닉네임)
@@ -494,7 +538,7 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
     private IEnumerator DestroyRoomAndExit()
     {
         yield return new WaitForSeconds(0.5f); //  딜레이 후 퇴장 (Photon 네트워크 안정성 보장)
- ;
+        ;
         if (PhotonNetwork.InRoom)
         {
             PhotonNetwork.LeaveRoom(); //  방장이 방에서 나가기
@@ -564,6 +608,8 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
 
         //  UI 즉시 반영
         UpdateTeamUI();
+
+
     }
 
 
@@ -577,22 +623,43 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
     }
 
 
+
     // AI 추가
     public void AddAIPlayer()
     {
         if (!PhotonNetwork.IsMasterClient) return;
 
-        int currentPlayers = PhotonNetwork.PlayerList.Length;
         int maxPlayers = PhotonNetwork.CurrentRoom.MaxPlayers;
 
-        // 현재 AI 및 플레이어 수 확인
-        int redTeamCount = PhotonNetwork.PlayerList.Where(p => p.CustomProperties.ContainsKey("Team") && (string)p.CustomProperties["Team"] == "Red").Count();
-        int blueTeamCount = PhotonNetwork.PlayerList.Where(p => p.CustomProperties.ContainsKey("Team") && (string)p.CustomProperties["Team"] == "Blue").Count();
+        // 현재 플레이어 수
+        int currentPlayers = PhotonNetwork.PlayerList.Length;
+        int aiCount = 0;
+
+        // 🔹 현재 방에 있는 AI 수 계산
+        if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("AIPlayers"))
+        {
+            string[] aiPlayers = (string[])PhotonNetwork.CurrentRoom.CustomProperties["AIPlayers"];
+            aiCount = aiPlayers.Length;
+        }
+
+        int totalPlayers = currentPlayers + aiCount;
+
+        // 🔹 방 최대 인원 초과 방지
+        if (totalPlayers >= maxPlayers)
+        {
+            UIManager.ShowWarning("Room is full. Cannot add more AI.");
+            Debug.LogWarning("Room is full. Cannot add more AI.");
+            return;
+        }
+
+        // 팀 균형 확인
+        int redTeamCount = PhotonNetwork.PlayerList.Count(p => p.CustomProperties.ContainsKey("Team") && (string)p.CustomProperties["Team"] == "Red");
+        int blueTeamCount = PhotonNetwork.PlayerList.Count(p => p.CustomProperties.ContainsKey("Team") && (string)p.CustomProperties["Team"] == "Blue");
 
         if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("AIPlayers"))
         {
             string[] aiPlayers = (string[])PhotonNetwork.CurrentRoom.CustomProperties["AIPlayers"];
-            foreach (string existingAI in aiPlayers) // 기존 AI 목록 확인
+            foreach (string existingAI in aiPlayers)
             {
                 ExitGames.Client.Photon.Hashtable aiProperties = (ExitGames.Client.Photon.Hashtable)PhotonNetwork.CurrentRoom.CustomProperties[existingAI];
                 string aiTeam = aiProperties.ContainsKey("Team") ? (string)aiProperties["Team"] : "Red";
@@ -602,68 +669,58 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
             }
         }
 
-        // 게임 모드 가져오기 (1:1 or 2:2)
-        int gameMode = (int)PhotonNetwork.CurrentRoom.CustomProperties["GameMode"]; // 1이면 1:1, 2이면 2:2
+        // 게임 모드 확인
+        int gameMode = (int)PhotonNetwork.CurrentRoom.CustomProperties["GameMode"];
 
-        // AI 추가 제한 검사
         if (gameMode == 1 && (redTeamCount >= 1 && blueTeamCount >= 1))
         {
             UIManager.ShowWarning("In 1:1 mode, only 1 AI can be added to each team.");
-            //Debug.LogWarning("In 1:1 mode, only 1 AI can be added to each team.");
             return;
         }
         if (gameMode == 2 && (redTeamCount >= 2 && blueTeamCount >= 2))
         {
             UIManager.ShowWarning("In 2:2 mode, only 2 AI can be added to each team.");
-            //Debug.LogWarning("In 2:2 mode, only 2 AI can be added to each team.");
             return;
         }
 
-        // 🔹 지역 변수 'aiName'을 상단에서 선언하여 범위 문제 해결
+        // 🔹 AI 이름, 팀 배정
         string newAIName = aiNames[Random.Range(0, aiNames.Length)];
-
-        // 균형 맞추기: 적은 팀에 배정
         string assignedTeam = (redTeamCount <= blueTeamCount) ? "Red" : "Blue";
-
-        // 랜덤 프로필 인덱스 설정
         int profileIndex = Random.Range(0, aiProfileCount);
 
-        // 기존 AI 목록 가져오기
+        // AI 목록 업데이트
         ExitGames.Client.Photon.Hashtable roomProperties = PhotonNetwork.CurrentRoom.CustomProperties;
-        if (!roomProperties.ContainsKey("AIPlayers"))
-        {
-            roomProperties["AIPlayers"] = new string[] { };
-        }
+        List<string> aiList = roomProperties.ContainsKey("AIPlayers") ? ((string[])roomProperties["AIPlayers"]).ToList() : new List<string>();
+        aiList.Add(newAIName);
 
-        List<string> aiList = ((string[])roomProperties["AIPlayers"]).ToList();
-        aiList.Add(newAIName); // 수정된 AI 이름 사용
-
-        // AI 속성 추가
         ExitGames.Client.Photon.Hashtable newAIProperties = new ExitGames.Client.Photon.Hashtable
     {
         { "Team", assignedTeam },
-        { "Ready", true },  // AI 자동 Ready 설정
+        { "Ready", true },
         { "IsAI", true },
         { "ProfileIndex", profileIndex }
     };
 
-        // 방 속성 업데이트
         ExitGames.Client.Photon.Hashtable newProperties = new ExitGames.Client.Photon.Hashtable
     {
         { "AIPlayers", aiList.ToArray() },
-        { newAIName, newAIProperties } // 수정된 AI 이름 사용
+        { newAIName, newAIProperties }
     };
 
         PhotonNetwork.CurrentRoom.SetCustomProperties(newProperties);
-        Debug.Log($"{newAIName} AI가 {assignedTeam} 팀에 추가됨. 프로필 인덱스: {profileIndex}, Ready: true");
+        Debug.Log($"{newAIName} AI added to {assignedTeam} team. Profile Index: {profileIndex}");
 
-        // UI 즉시 업데이트
+        // 🔹 AI 추가 후 플레이어가 더 이상 입장하지 못하도록 설정
+        if (totalPlayers + 1 >= maxPlayers)
+        {
+            PhotonNetwork.CurrentRoom.IsOpen = false;  // 추가 입장 차단
+            Debug.Log("Room is now full. New players cannot join.");
+        }
+
+        
+        // UI 업데이트
         UpdateTeamUI();
     }
-
-
-
-
     public void RemoveSpecificAI(string aiName)
     {
         if (!PhotonNetwork.IsMasterClient) return;
@@ -678,20 +735,77 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
             return;
         }
 
+        // 🔹 AI 목록에서 제거
         aiList.Remove(aiName);
         roomProperties.Remove(aiName); // AI 속성 제거
 
-        // 방 속성 업데이트
+        // 🔹 방 속성 업데이트 (AI 목록을 최신 상태로 유지)
         ExitGames.Client.Photon.Hashtable newProperties = new ExitGames.Client.Photon.Hashtable
     {
         { "AIPlayers", aiList.ToArray() }
     };
-
         PhotonNetwork.CurrentRoom.SetCustomProperties(newProperties);
 
         Debug.Log($"{aiName} AI가 삭제되었습니다.");
+
+        // 🔹 AI 삭제 후 팀 인원 재확인 및 UI 업데이트
+        UpdateTeamData();
+        UpdateTeamUI();
+
+        // 🔹 AI가 삭제된 후 남은 유저와 AI 수 확인
+        int currentPlayers = PhotonNetwork.PlayerList.Length;
+        int remainingAI = aiList.Count;
+        int totalPlayers = currentPlayers + remainingAI;
+        int maxPlayers = PhotonNetwork.CurrentRoom.MaxPlayers;
+
+        // 🔹 남은 인원이 `MaxPlayers`보다 적다면 새로운 유저 입장 허용
+        if (totalPlayers < maxPlayers)
+        {
+            PhotonNetwork.CurrentRoom.IsOpen = true;
+            Debug.Log("AI가 삭제되어 방이 다시 열렸습니다. 새로운 플레이어가 입장할 수 있습니다.");
+        }
     }
 
+    // 🔹 AI 삭제 후 팀 인원 데이터를 정확하게 업데이트하는 함수
+    private void UpdateTeamData()
+    {
+        int redTeamCount = 0;
+        int blueTeamCount = 0;
+
+        // 현재 방의 실제 플레이어들 팀 체크
+        foreach (Player player in PhotonNetwork.PlayerList)
+        {
+            if (player.CustomProperties.ContainsKey("Team"))
+            {
+                string team = (string)player.CustomProperties["Team"];
+                if (team == "Red") redTeamCount++;
+                else if (team == "Blue") blueTeamCount++;
+            }
+        }
+
+        // AIPlayers 목록을 최신 상태로 가져와서 AI의 팀도 반영
+        if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("AIPlayers"))
+        {
+            string[] aiPlayers = (string[])PhotonNetwork.CurrentRoom.CustomProperties["AIPlayers"];
+            foreach (string aiName in aiPlayers)
+            {
+                if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(aiName))
+                {
+                    ExitGames.Client.Photon.Hashtable aiProperties =
+                        (ExitGames.Client.Photon.Hashtable)PhotonNetwork.CurrentRoom.CustomProperties[aiName];
+
+                    if (aiProperties.ContainsKey("Team"))
+                    {
+                        string aiTeam = (string)aiProperties["Team"];
+                        if (aiTeam == "Red") redTeamCount++;
+                        else if (aiTeam == "Blue") blueTeamCount++;
+                    }
+                }
+            }
+        }
+
+        Debug.Log($"팀 인원 업데이트 완료 - Red: {redTeamCount}, Blue: {blueTeamCount}");
+    }
 
 
 

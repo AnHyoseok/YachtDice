@@ -22,7 +22,7 @@ public class DiceScore
 public class DiceManager : Singleton<DiceManager>
 {
     #region Vaiables
-    private ScoreboardEntry scoreboardEntry;
+    [HideInInspector]public ScoreboardEntry scoreboardEntry;
 
     public Transform dicetrans;
     public float spacing = 0.8f;
