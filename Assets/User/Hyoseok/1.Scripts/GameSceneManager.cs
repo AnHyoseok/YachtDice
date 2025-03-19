@@ -1,41 +1,37 @@
 using UnityEngine;
+using TMPro;
 using Photon.Pun;
 using Photon.Realtime;
-using TMPro;
-
+using System.Collections.Generic;
+using ExitGames.Client.Photon;
 public class GameSceneManager : MonoBehaviourPunCallbacks
 {
-    public Transform scoreboardPanel; //  점수판 UI 부모
-    public GameObject scoreboardPrefab; //  점수판 프리팹
+    public Transform scoreboardPanel;
+    public GameObject scoreboardPrefab;
+
+    private Dictionary<int, ScoreboardEntry> scoreboardEntries = new Dictionary<int, ScoreboardEntry>();
 
     void Start()
     {
         if (PhotonNetwork.InRoom)
         {
-            Debug.Log($" 현재 방의 총 플레이어 수: {PhotonNetwork.PlayerList.Length}");
-
-            foreach (Player player in PhotonNetwork.PlayerList)
-            {
-                Debug.Log($" 플레이어 확인 - 닉네임: {player.NickName}, ID: {player.ActorNumber}, 방장 여부: {player.IsMasterClient}");
-            }
-
             InitializeScoreboard();
         }
         else
         {
-            Debug.LogError(" PhotonNetwork.InRoom이 false입니다. 방에 입장한 상태인지 확인하세요.");
+            Debug.LogError("PhotonNetwork.InRoom이 false입니다. 방에 입장한 상태인지 확인하세요.");
         }
     }
 
     void InitializeScoreboard()
     {
-        // 네트워크 플레이어 추가
+        scoreboardEntries.Clear();
+
         foreach (Player player in PhotonNetwork.PlayerList)
         {
-            AddPlayerToScoreboard(player.NickName, player);
+            AddPlayerToScoreboard(player);
         }
 
-        // AI 플레이어 추가
         if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("AIPlayers"))
         {
             string[] aiPlayers = (string[])PhotonNetwork.CurrentRoom.CustomProperties["AIPlayers"];
@@ -43,36 +39,70 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
             {
                 if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(aiName))
                 {
-                    ExitGames.Client.Photon.Hashtable aiProperties =
-                        (ExitGames.Client.Photon.Hashtable)PhotonNetwork.CurrentRoom.CustomProperties[aiName];
-
-                    AddAIToScoreboard(aiName, aiProperties);
+                    AddAIToScoreboard(aiName, (Hashtable)PhotonNetwork.CurrentRoom.CustomProperties[aiName]);
                 }
             }
         }
     }
-    // 플레이어 추가 함수 (실제 네트워크 유저)
-    void AddPlayerToScoreboard(string name, Player player)
+
+    void AddPlayerToScoreboard(Player player)
+    {
+        ScoreboardEntry entry = CreateScoreboardEntry();
+        entry.SetPlayerData(player);
+        scoreboardEntries[player.ActorNumber] = entry;
+    }
+
+    void AddAIToScoreboard(string aiName, Hashtable properties)
+    {
+        ScoreboardEntry entry = CreateScoreboardEntry();
+        entry.SetAIData(aiName, properties);
+        scoreboardEntries[aiName.GetHashCode()] = entry;
+    }
+
+    private ScoreboardEntry CreateScoreboardEntry()
     {
         GameObject scoreboardEntry = Instantiate(scoreboardPrefab, scoreboardPanel);
-        ScoreboardEntry entryScript = scoreboardEntry.GetComponent<ScoreboardEntry>();
+        return scoreboardEntry.GetComponent<ScoreboardEntry>();
+    }
 
-        if (entryScript != null)
+    public void UpdatePlayerScore(Player player, int[] newScores)
+    {
+        if (!scoreboardEntries.ContainsKey(player.ActorNumber)) return;
+
+        Hashtable playerProperties = new Hashtable { { "Score", newScores } };
+        player.SetCustomProperties(playerProperties);
+        scoreboardEntries[player.ActorNumber].UpdateScoreData(playerProperties);
+    }
+
+    public void UpdateAIScore(string aiName, int[] newScores)
+    {
+        if (!scoreboardEntries.ContainsKey(aiName.GetHashCode())) return;
+
+        Hashtable aiProperties = new Hashtable { { "Score", newScores } };
+        PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable { { aiName, aiProperties } });
+
+        scoreboardEntries[aiName.GetHashCode()].UpdateAIScore(aiProperties);
+    }
+
+    public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+    {
+        if (changedProps.ContainsKey("Score") && scoreboardEntries.ContainsKey(targetPlayer.ActorNumber))
         {
-            entryScript.SetPlayerData(player);
-            Debug.Log($" ScoreboardEntry 생성 완료: {name}");
+            scoreboardEntries[targetPlayer.ActorNumber].UpdateScoreData(changedProps);
         }
     }
-    // AI 추가 함수
-    void AddAIToScoreboard(string aiName, ExitGames.Client.Photon.Hashtable properties)
-    {
-        GameObject scoreboardEntry = Instantiate(scoreboardPrefab, scoreboardPanel);
-        ScoreboardEntry entryScript = scoreboardEntry.GetComponent<ScoreboardEntry>();
 
-        if (entryScript != null)
+    public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
+    {
+        foreach (var key in propertiesThatChanged.Keys)
         {
-            entryScript.SetAIData(aiName, properties);
-            Debug.Log($" AI ScoreboardEntry 생성 완료: {aiName}");
+            if (key is string aiName && propertiesThatChanged[key] is Hashtable aiProperties)
+            {
+                if (scoreboardEntries.ContainsKey(aiName.GetHashCode()))
+                {
+                    scoreboardEntries[aiName.GetHashCode()].UpdateAIScore(aiProperties);
+                }
+            }
         }
     }
 }

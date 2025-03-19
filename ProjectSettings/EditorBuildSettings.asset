@@ -13,7 +13,7 @@ EditorBuildSettings:
     guid: d8ef873f6db0364488c1085e8ee3315a
   - enabled: 1
     path: Assets/User/Hyoseok/6.Scenes/GameScene.unity
-    guid: 1583e687dfe2d174fa467cefd9e16cc5
+    guid: 3b4b4904567b0a14090dd13b87e8244b
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

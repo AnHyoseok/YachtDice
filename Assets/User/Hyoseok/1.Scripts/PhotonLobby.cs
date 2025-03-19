@@ -59,16 +59,23 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
             }
 
             GameObject roomButton = Instantiate(roomPrefab, roomListParent);
-            roomButton.GetComponentInChildren<TextMeshProUGUI>().text = $"{room.Name} ({room.PlayerCount}/{room.MaxPlayers})";
-            roomButton.GetComponent<Button>().onClick.AddListener(() => JoinRoom(room.Name));
-            roomButtons.Add(roomButton);
+            RoomButton roomButtonScript = roomButton.GetComponent<RoomButton>();
 
+            if (roomButtonScript != null)
+            {
+                roomButtonScript.Setup(room);
+            }
+            else
+            {
+                Debug.LogError("RoomButton 스크립트가 RoomButtonPrefab에 추가되지 않았습니다!");
+            }
+
+            roomButtons.Add(roomButton);
             Debug.Log($"새로 추가된 방: {room.Name}");
         }
 
         Debug.Log($"현재 UI에 표시된 방 개수: {roomButtons.Count}");
     }
-
 
     //  CreateRoom 버튼 클릭 시 모드 선택 UI 열기
     public void OnCreateRoomButtonClick()
@@ -100,14 +107,21 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
         }
 
         string roomName = "Room_" + Random.Range(1000, 9999);
-        Debug.Log($"방 생성 시도: {roomName} (GameMode: {gameMode})");
+        Debug.Log($" 방 생성 시도: {roomName} (GameMode: {gameMode})");
 
         RoomOptions options = new RoomOptions()
         {
             MaxPlayers = (byte)(gameMode * 2),
-            CustomRoomProperties = new ExitGames.Client.Photon.Hashtable() { { "GameMode", gameMode } },
-            CustomRoomPropertiesForLobby = new string[] { "GameMode" }
+            CustomRoomProperties = new ExitGames.Client.Photon.Hashtable()
+        {
+            { "GameMode", gameMode },
+            { "HostName", PhotonNetwork.NickName } //  방장 닉네임 저장
+        },
+            CustomRoomPropertiesForLobby = new string[] { "GameMode", "HostName" } // 로비에서 표시할 정보
         };
+
+        Debug.Log($"방 생성 데이터: RoomName={roomName}, HostName={PhotonNetwork.NickName}, GameMode={gameMode}");
+
         PhotonNetwork.CreateRoom(roomName, options);
     }
 

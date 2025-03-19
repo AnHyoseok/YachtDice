@@ -22,6 +22,8 @@ public class DiceScore
 public class DiceManager : Singleton<DiceManager>
 {
     #region Vaiables
+    private ScoreboardEntry scoreboardEntry;
+
     public Transform dicetrans;
     public float spacing = 0.8f;
     public float moveSpeed = 2f;
@@ -45,6 +47,10 @@ public class DiceManager : Singleton<DiceManager>
     public bool isDiceArray = false;
     #endregion
 
+    private void Start()
+    {
+        scoreboardEntry = FindAnyObjectByType<ScoreboardEntry>();
+    }
     private void Update()
     {
         CheckDiceStopped();
@@ -114,6 +120,7 @@ public class DiceManager : Singleton<DiceManager>
             upperSectionScore += score;
             CheckForBoonus();
         }
+        UpdateScoreboard(category, score);
         return score;
     }
     private void CheckForBoonus()
@@ -123,6 +130,13 @@ public class DiceManager : Singleton<DiceManager>
             Debug.Log("보너스 점수 획득");
             upperSectionScore += 35;
             boonsGiven = true;
+        }
+    }
+    private void UpdateScoreboard(string category, int score)
+    {
+        if (scoreboardEntry != null)
+        {
+            scoreboardEntry.UpdateScore(category, score);
         }
     }
     public int GetUpperSectionScore()
@@ -159,7 +173,8 @@ public class DiceManager : Singleton<DiceManager>
         isArrays = true;
         System.Array.Sort(dices,(a, b) => a.GetDiceValue().CompareTo(b.GetDiceValue()));
         StartCoroutine(MoveDiceToSortedPosition());
-        
+        //점수 보이게 하기
+
     }
     private IEnumerator MoveDiceToSortedPosition()
     {
@@ -207,6 +222,7 @@ public class DiceManager : Singleton<DiceManager>
         }
         isArrays = false;
         isDiceArray = true;
+
     }
     private Quaternion GetTargetRotation(int faceValue)
     {

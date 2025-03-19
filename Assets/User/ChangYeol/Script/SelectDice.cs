@@ -28,6 +28,8 @@ public class SelectDice : MonoBehaviour
             isPut = Input.GetKey(KeyCode.Escape);
             if (isPut)
             {
+                //점수가려야됌 
+
                 foreach (Dice dice in DiceManager.Instance.dices)
                 {
                     if(dice != null)

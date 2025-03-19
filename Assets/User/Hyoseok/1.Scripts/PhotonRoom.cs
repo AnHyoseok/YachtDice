@@ -104,17 +104,21 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
         UIManager.instance.ShowTeamUI();
     }
 
+    //모드 패널 크리 조절
     void SetTeamPanelSize(int gameMode)
     {
         if (teamPanel != null)
         {
-            //패널 크기 값
-            int leftRightValue = (gameMode == 1) ? 411 : 158; //  1:1 → 411, 2:2 → 158
-            teamPanel.offsetMin = new Vector2(leftRightValue, teamPanel.offsetMin.y); 
-            teamPanel.offsetMax = new Vector2(-leftRightValue, teamPanel.offsetMax.y); 
-            Debug.Log($" TeamPanel 크기 조정됨: Left={leftRightValue}, Right={leftRightValue}");
+            //  1:1 모드 → Left: 411, Right: 0
+            //  2:2 모드 → Left: 158, Right: -158
+            int leftValue = (gameMode == 1) ? 411 : 158;
+            int rightValue = (gameMode == 1) ? 0 : -158;
+
+            teamPanel.offsetMin = new Vector2(leftValue, teamPanel.offsetMin.y);
+            teamPanel.offsetMax = new Vector2(rightValue, teamPanel.offsetMax.y);
+
+            Debug.Log($" TeamPanel 크기 조정됨: Left={leftValue}, Right={rightValue}");
         }
-      
     }
 
 
@@ -416,7 +420,7 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
         Debug.Log($" 현재 방의 플레이어 수: {PhotonNetwork.PlayerList.Length}");
         foreach (Player player in PhotonNetwork.PlayerList)
         {
-            Debug.Log($"👤 씬 이동 전 플레이어 - 닉네임: {player.NickName}, ID: {player.ActorNumber}, 방장 여부: {player.IsMasterClient}");
+            Debug.Log($"씬 이동 전 플레이어 - 닉네임: {player.NickName}, ID: {player.ActorNumber}, 방장 여부: {player.IsMasterClient}");
         }
 
         SavePlayerData(); //  씬 변경 전에 플레이어 정보 저장

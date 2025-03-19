@@ -2,75 +2,47 @@ using UnityEngine;
 using UnityEngine.UI;
 using Photon.Realtime;
 using TMPro;
+using ExitGames.Client.Photon;
 
 public class ScoreboardEntry : MonoBehaviour
 {
-    public TextMeshProUGUI playerNameText; //  닉네임 표시
-    public Image profileImage; //  프로필 이미지
-    public Image teamColor; //  팀 색상
-    public Sprite[] profileSprites; //  프로필 이미지 배열
+    public TextMeshProUGUI playerNameText;
+    public Image profileImage;
+    public Image teamColor;
+
+    public TextMeshProUGUI[] upperSectionTexts;
+    public TextMeshProUGUI[] lowerSectionTexts;
+    public TextMeshProUGUI totalScoreText;
+
+    private int[] scores = new int[14]; // 점수 저장 배열
+    private Player player;
+    private bool isAI = false;
+    private string aiName;
 
     public void SetPlayerData(Player player)
     {
-        if (playerNameText != null)
-        {
-            bool isMaster = player.IsMasterClient; //  방장 여부 확인
-            string displayName = isMaster ?   player.NickName+ "[M]" : player.NickName;
-            playerNameText.text = displayName;
-        }
+        this.player = player;
+        isAI = false;
+        playerNameText.text = player.NickName;
 
-        //  프로필 인덱스 예외 처리 추가
-        int profileIndex = 0;
-        if (player.CustomProperties.ContainsKey("ProfileImageIndex"))
-        {
-            profileIndex = (int)player.CustomProperties["ProfileImageIndex"];
-        }
-
-        if (profileSprites != null && profileSprites.Length > 0)
-        {
-            if (profileIndex >= profileSprites.Length)
-            {
-                Debug.LogWarning($" 프로필 인덱스 {profileIndex}가 범위를 초과했습니다. 기본 프로필(0번) 사용.");
-                profileIndex = 0; //  범위 초과 시 기본값 사용
-            }
-
-            profileImage.sprite = profileSprites[profileIndex];
-        }
-        else
-        {
-            Debug.LogWarning(" profileSprites 배열이 비어 있습니다. 기본 이미지 사용.");
-        }
-
-        if (player.CustomProperties.ContainsKey("Team"))
-        {
-            string team = (string)player.CustomProperties["Team"];
-            teamColor.color = (team == "Red") ? Color.red : Color.blue; //  팀 색상 적용
-        }
+        SetTeamColor(player.CustomProperties);
+        SetProfileImage(player.CustomProperties, false);
+        UpdateScoreData(player.CustomProperties);
     }
-    public void SetAIData(string aiName, ExitGames.Client.Photon.Hashtable properties)
+
+    public void SetAIData(string aiName, Hashtable properties)
     {
-        if (playerNameText != null)
-        {
-            playerNameText.text =  aiName+ "[AI]"; // AI 이름 표시
-        }
+        this.aiName = aiName;
+        isAI = true;
+        playerNameText.text = aiName + " [AI]";
 
-        int profileIndex = properties.ContainsKey("ProfileIndex") ? (int)properties["ProfileIndex"] : 0;
+        SetTeamColor(properties);
+        SetProfileImage(properties, true);
+        UpdateScoreData(properties);
+    }
 
-        if (profileSprites != null && profileSprites.Length > 0)
-        {
-            if (profileIndex >= profileSprites.Length)
-            {
-                Debug.LogWarning($" AI 프로필 인덱스 {profileIndex}가 범위를 초과했습니다. 기본 프로필(0번) 사용.");
-                profileIndex = 0;
-            }
-
-            profileImage.sprite = profileSprites[profileIndex];
-        }
-        else
-        {
-            Debug.LogWarning(" profileSprites 배열이 비어 있습니다. 기본 이미지 사용.");
-        }
-
+    private void SetTeamColor(Hashtable properties)
+    {
         if (properties.ContainsKey("Team"))
         {
             string team = (string)properties["Team"];
@@ -78,4 +50,84 @@ public class ScoreboardEntry : MonoBehaviour
         }
     }
 
+    private void SetProfileImage(Hashtable properties, bool isAI)
+    {
+        if (properties.ContainsKey(isAI ? "ProfileIndex" : "ProfileImageIndex"))
+        {
+            int profileIndex = (int)properties[isAI ? "ProfileIndex" : "ProfileImageIndex"];
+            profileImage.sprite = GetProfileSprite(profileIndex, isAI);
+        }
+    }
+
+    public void UpdateScore(string category, int score)
+    {
+        int index = GetCategoryIndex(category);
+        if (index != -1)
+        {
+            scores[index] = score;
+            UpdateScoreUI();
+        }
+    }
+
+    public void UpdateAIScore(Hashtable properties)
+    {
+        if (isAI)
+        {
+            UpdateScoreData(properties);
+        }
+    }
+
+    public void UpdateScoreData(Hashtable properties)
+    {
+        if (properties.ContainsKey("Score"))
+        {
+            scores = (int[])properties["Score"];
+            UpdateScoreUI();
+        }
+    }
+
+    private void UpdateScoreUI()
+    {
+        for (int i = 0; i < upperSectionTexts.Length; i++)
+            upperSectionTexts[i].text = scores[i].ToString();
+
+        for (int i = 0; i < lowerSectionTexts.Length; i++)
+            lowerSectionTexts[i].text = scores[i + 8].ToString();
+
+        int total = 0;
+        foreach (int score in scores) total += score;
+        totalScoreText.text = total.ToString();
+    }
+
+    private int GetCategoryIndex(string category)
+    {
+        switch (category)
+        {
+            case "ONES": return 0;
+            case "TWOS": return 1;
+            case "THREES": return 2;
+            case "FOURS": return 3;
+            case "FIVES": return 4;
+            case "SIXES": return 5;
+            case "Subtotal": return 6;
+            case "Bonus": return 7;
+            case "Choice": return 8;
+            case "4 of a Kind": return 9;
+            case "Full House": return 10;
+            case "S. Straight": return 11;
+            case "L. Straight": return 12;
+            case "Yacht": return 13;
+            default: return -1;
+        }
+    }
+
+    private Sprite GetProfileSprite(int index, bool isAI)
+    {
+        Sprite[] spriteArray = isAI ? PlayerPrefab.AIProfileSprites : PlayerPrefab.ProfileSprites;
+        if (spriteArray != null && index >= 0 && index < spriteArray.Length)
+        {
+            return spriteArray[index];
+        }
+        return (spriteArray != null && spriteArray.Length > 0) ? spriteArray[0] : null;
+    }
 }
