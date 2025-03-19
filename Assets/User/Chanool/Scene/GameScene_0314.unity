@@ -1317,7 +1317,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1899388996}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 53b03f01137455244aca7e8020f8c189, type: 3}
   m_Name: 
@@ -1334,16 +1334,17 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1899388996}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d9fc5d35d0109e14e9f34035a5cee023, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hoverEffect: {fileID: 8422706254157054985}
+  hoverAnimation: {fileID: 0}
   scoreboardTurnActivator: {fileID: 0}
   playerARectTransforms: []
   playerBRectTransforms: []
-  categories: {fileID: 0}
+  categories: {fileID: 8748744953330403939}
+  isPlayerTurn: 0
 --- !u!1001 &1912297990
 PrefabInstance:
   m_ObjectHideFlags: 0
