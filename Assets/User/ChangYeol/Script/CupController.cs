@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,20 +7,22 @@ public enum CupState
     Shake,
     PourOut
 }
-public class ShakeCup : MonoBehaviour
+public class CupController : MonoBehaviour
 {
     #region Variables
     public CupState cupState = CupState.Idle;
     public GameObject boxGroup;
-    public DiceManager diceManager;
     public Transform wall;
     public float initialForce = 10f;
     public SelectDice selectDice;
 
+    private DiceManager diceManager;
     private List<GameObject> falseDices = new List<GameObject>();
     private GameObject Dice;
     [HideInInspector]public Animator animator;
     private bool isShake = false;
+    private float timer;
+    public float pourOutTime = 5;
 
     private const string DiceCount = "DiceCount";
     private const string IsShake = "IsShake";
@@ -29,10 +30,22 @@ public class ShakeCup : MonoBehaviour
     private void Start()
     {
         animator = GetComponent<Animator>();
+        diceManager = DiceManager.Instance;
+        //diceManager.rollDice.onClick.AddListener(() => );
     }
     private void Update()
     {
+        if (diceManager.isDiceArray || diceManager.rollsLeft == 0 || diceManager.isArrays) return;
         isShake = !Input.GetKey(KeyCode.LeftShift);
+        if(!isShake)
+        {
+            timer += Time.deltaTime;
+            if(timer >= pourOutTime)
+            {
+                isShake = true;
+                timer = 0;
+            }
+        }
         UpdateCupState();
     }
     void UpdateCupState()
@@ -52,7 +65,7 @@ public class ShakeCup : MonoBehaviour
     }
     void IdleState()
     {
-        int ani = diceManager.dices.Length <= 0 ? selectDice.turnLimit : diceManager.dices.Length;
+        int ani = selectDice.turnLimit - SelectDice.movesThisTurn;
         animator.SetInteger(DiceCount, ani);
         animator.SetBool(IsShake, isShake);
     }
@@ -65,25 +78,25 @@ public class ShakeCup : MonoBehaviour
     }
     void PourOutState()
     {
-
+        diceManager.rollsLeft--;
     }
     public void ObjectInstantiate()
     {
         for(int i = 0; i < selectDice.turnLimit - SelectDice.movesThisTurn; i++)
         {
-            Debug.Log(i);
             Destroy(falseDices[i]);
         }
         for (int i = 0; i < selectDice.turnLimit - SelectDice.movesThisTurn; i++)
         {
             falseDices.RemoveAll(x => x != null);
             RandomPoition();
-            DiceManager.Instance.dices[i] = Dice.GetComponent<Dice>();
+            diceManager.dices[i] = Dice.GetComponent<Dice>();
             Dice.name = $"Dice{i}";
         }
         if(selectDice.turnLimit - SelectDice.movesThisTurn != 5)
         {
-            DiceManager.Instance.isArray = false;
+            diceManager.isArray = false;
+            diceManager.isRotat = false;
         }
     }
     void RandomPoition()

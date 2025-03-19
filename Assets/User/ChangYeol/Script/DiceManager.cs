@@ -12,7 +12,6 @@ public class DiceScore
     public const string FOURS = "FOURS";
     public const string FIVES = "FIVES";
     public const string SIXES = "SIXES";
-    public const string THREE_KIND = "THREE_KIND";
     public const string FOUR_KIND = "FOUR_KIND";
     public const string FULL_HOUSE = "FULL_HOUSE";
     public const string SMALL_STRAIGHT = "SMALL_STRAIGHT";
@@ -27,8 +26,6 @@ public class DiceManager : Singleton<DiceManager>
     public float spacing = 0.8f;
     public float moveSpeed = 2f;
 
-    private Dice gameDice;
-    public ShakeCup cup;
     public Dice dice;
     public Dice[] dices = new Dice[5];
     public Dice[] newdicelist;
@@ -36,14 +33,16 @@ public class DiceManager : Singleton<DiceManager>
     public float maxRange = 0.5f;
     public float minRangeY = 1f;
     public float maxRangeY = 2f;
-    //private int rollsLeft = 3;  //최대 3번 굴릴 수 있음
+    public int rollsLeft = 3;  //최대 3번 굴릴 수 있음
 
     private HashSet<float> usedYValues = new HashSet<float>(); // 중복 방지용 Y값 저장
     private int upperSectionScore = 0;
     private bool boonsGiven = false;
     public Button rollDice;
-    public bool isArray = false;
-    public bool isArrays = false;
+    [HideInInspector] public bool isArray = false;
+    [HideInInspector] public bool isArrays = false;
+    [HideInInspector] public bool isRotat = false;
+    public bool isDiceArray = false;
     #endregion
 
     private void Update()
@@ -53,7 +52,6 @@ public class DiceManager : Singleton<DiceManager>
 
     public Vector3 GetUniqueRandomPosition(float minRangeX, float maxRangeX)
     {
-
         float y = Random.Range(minRangeY, maxRangeY);
         float z = Random.Range(minRange, maxRange);
         float x;
@@ -68,10 +66,10 @@ public class DiceManager : Singleton<DiceManager>
     }
     public int[] GetDiceValues()
     {
-        int[] values = new int[dices.Length];
-        for (int i = 0; i < dices.Length; i++)
+        int[] values = new int[newdicelist.Length];
+        for (int i = 0; i < newdicelist.Length; i++)
         {
-            values[i] = dices[i].GetDiceValue();
+            values[i] = newdicelist[i].GetDiceValue();
         }
         return values;
     }
@@ -96,8 +94,6 @@ public class DiceManager : Singleton<DiceManager>
             case "FIVES": score = values.Count(v => v == 5) * 5;
                 break;
             case "SIXES": score = values.Count(v => v == 6) * 6;
-                break;
-            case "THREE_KIND": score = values.GroupBy(v => v).Any(g => g.Count() >= 3) ? values.Sum() : 0;
                 break;
             case "FOUR_KIND": score = values.GroupBy(v => v).Any(g => g.Count() >= 4) ? values.Sum() : 0;
                 break;
@@ -161,10 +157,7 @@ public class DiceManager : Singleton<DiceManager>
         if (isArray || isArrays) return;
         isArray = true;
         isArrays = true;
-        Debug.Log("정렬 중");
-
         System.Array.Sort(dices,(a, b) => a.GetDiceValue().CompareTo(b.GetDiceValue()));
-
         StartCoroutine(MoveDiceToSortedPosition());
         
     }
@@ -185,13 +178,17 @@ public class DiceManager : Singleton<DiceManager>
             Quaternion targetRotation = GetTargetRotation(faceValue);
 
             Vector3 targetPosition = startPosition + new Vector3(i * spacing, 0, 0);
-            float elapsedTime = 0f;
             Vector3 initaialPosition = dice.transform.position;
             Quaternion initialRotation = dice.transform.rotation;
+            float elapsedTime = 0f;
             while (elapsedTime < 1f)
             {
                 dice.transform.position = Vector3.Lerp(initaialPosition, targetPosition, elapsedTime);
-                dice.transform.rotation = Quaternion.Lerp(initialRotation, targetRotation, elapsedTime);
+                if(!isRotat)
+                {
+                    dice.transform.rotation = Quaternion.Lerp(initialRotation, targetRotation, elapsedTime);
+                    isRotat = true;
+                }
                 elapsedTime += Time.deltaTime * moveSpeed;
 
                 yield return null;
@@ -209,6 +206,7 @@ public class DiceManager : Singleton<DiceManager>
             }
         }
         isArrays = false;
+        isDiceArray = true;
     }
     private Quaternion GetTargetRotation(int faceValue)
     {

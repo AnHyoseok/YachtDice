@@ -35,14 +35,12 @@ public class Dice : MonoBehaviour
             if(rb.linearVelocity.magnitude < 0.2f && rb.linearVelocity.magnitude > stopThreshld)
             {
                 rb.AddForce(Random.onUnitSphere * nudgeForce, ForceMode.Impulse);
-                //Debug.Log("³Ê¹« ´À¸®°Ô ¸ØÃß´Â Áß ¡æ »ìÂ¦ ¹Ð¾îÁÜ");
             }
             if(rb.linearVelocity.magnitude < stopThreshld)
             {
                 rb.linearVelocity = Vector3.zero;
                 rb.angularVelocity = Vector3.zero;
                 isSliding = false;
-                Debug.Log("ÁÖ»çÀ§ ¸ØÃã");
             }
         }
         NudgeDice();

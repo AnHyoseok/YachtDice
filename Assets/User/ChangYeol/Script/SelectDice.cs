@@ -4,14 +4,13 @@ using UnityEngine;
 public class SelectDice : MonoBehaviour
 {
     #region Variables
-    public ShakeCup shakeCup;
     public Transform[] targetPositions;
     public float moveSpeed = 2f;
     public int turnLimit = 5;
 
     private Camera mainCamera;
     private GameObject selectDice = null;
-    private Transform originalPosition; // 원래 위치 저장
+    private Vector3 originalPosition; // 원래 위치 저장
     private int currentTargetIndex = 0;
     public static int movesThisTurn = 0;
     private bool isGoMove = false;
@@ -43,6 +42,7 @@ public class SelectDice : MonoBehaviour
                         DiceManager.Instance.dices[i] = null;
                     }
                 }
+                DiceManager.Instance.isDiceArray = false;
             }
         }
         if (Input.GetMouseButtonDown(0))
@@ -68,26 +68,7 @@ public class SelectDice : MonoBehaviour
             {
                 selectDice = hit.collider.gameObject;
                 Dice selectedDice = selectDice.GetComponent<Dice>();
-
-                Dice[] diceArray = DiceManager.Instance.dices;
-                int index = System.Array.FindIndex(diceArray, d => d == selectedDice);
-                if(index != -1)
-                {
-                    Dice[] newArray = new Dice[diceArray.Length - 1];
-                    for (int i = 0,j =0; i < diceArray.Length; i++)
-                    {
-                        if(i != index)
-                        {
-                            newArray[j++] = diceArray[i];
-                        }
-                    }
-                    DiceManager.Instance.dices = newArray;
-                }
-                Dice[] newDiceArray = DiceManager.Instance.newdicelist;
-                System.Array.Resize(ref newDiceArray, newDiceArray.Length + 1);
-                newDiceArray[newDiceArray.Length - 1] = selectedDice;
-                DiceManager.Instance.newdicelist = newDiceArray;
-
+                MoveDiceBetweenArrays(selectedDice);
                 StartCoroutine(MoveDiceToNextTartget(selectDice, targetPositions[currentTargetIndex]));
                 DiceManager.Instance.DiceArrays();
             }
@@ -108,13 +89,11 @@ public class SelectDice : MonoBehaviour
             yield return null;
         }
         dice.transform.position = destination.position;
-        Debug.Log($"{selectDice.name}이 도착");
 
         movesThisTurn++;
 
         if(movesThisTurn >= turnLimit)
         {
-            Debug.Log("턴 종료");
             OnTurnEnd();
             yield break;
         }
@@ -122,12 +101,57 @@ public class SelectDice : MonoBehaviour
         isGoMove = false;
     }
 
+    void MoveDiceBetweenArrays(Dice selectedDice)
+    {
+        Dice[] diceArray = DiceManager.Instance.dices;
+        int index = System.Array.FindIndex(diceArray, d => d == selectedDice);
+        if (index != -1)
+        {
+            Dice[] newArray = new Dice[diceArray.Length - 1];
+            for (int i = 0, j = 0; i < diceArray.Length; i++)
+            {
+                if (i != index)
+                {
+                    newArray[j++] = diceArray[i];
+                }
+            }
+            DiceManager.Instance.dices = newArray;
+        }
+        Dice[] newDiceArray = DiceManager.Instance.newdicelist;
+        System.Array.Resize(ref newDiceArray, newDiceArray.Length + 1);
+        newDiceArray[newDiceArray.Length - 1] = selectedDice;
+        DiceManager.Instance.newdicelist = newDiceArray;
+    }
+
+    void ReturnDiceToOriginalList(Dice selectedDice)
+    {
+        Dice[] newDiceArray = DiceManager.Instance.newdicelist;
+        int index = System.Array.FindIndex(newDiceArray, d => d == selectedDice);
+
+        if (index != -1)
+        {
+            Dice[] newArray = new Dice[newDiceArray.Length - 1];
+            for (int i = 0, j = 0; i < newDiceArray.Length; i++)
+            {
+                if (i != index)
+                {
+                    newArray[j++] = newDiceArray[i];
+                }
+            }
+            DiceManager.Instance.newdicelist = newArray;
+        }
+
+        Dice[] diceArray = DiceManager.Instance.dices;
+        System.Array.Resize(ref diceArray, diceArray.Length + 1);
+        diceArray[diceArray.Length - 1] = selectedDice;
+        DiceManager.Instance.dices = diceArray;
+    }
+
     private void OnTurnEnd()
     {
-        Debug.Log("플레이어 턴 종료");
         movesThisTurn = 0;
         currentTargetIndex = 0;
-
+        DiceManager.Instance.rollsLeft = 3;
         //추가 기능: 다음 플레이어 턴으로 넘어가는 로직을 여기에 추가 가능
     }
 }
