@@ -40,7 +40,6 @@ public class DiceManager : Singleton<DiceManager>
     private HashSet<float> usedYValues = new HashSet<float>(); // 중복 방지용 Y값 저장
     private int upperSectionScore = 0;
     private bool boonsGiven = false;
-    public Button rollDice;
     [HideInInspector] public bool isArray = false;
     [HideInInspector] public bool isArrays = false;
     [HideInInspector] public bool isRotat = false;
@@ -161,6 +160,7 @@ public class DiceManager : Singleton<DiceManager>
     }
     public void DiceArrays()
     {
+        //SelectUI가 보이게 하기
         if (isArrays) return;
         isArrays = true;
         System.Array.Sort(dices,(a, b) => a.GetDiceValue().CompareTo(b.GetDiceValue()));
@@ -174,7 +174,7 @@ public class DiceManager : Singleton<DiceManager>
         System.Array.Sort(dices,(a, b) => a.GetDiceValue().CompareTo(b.GetDiceValue()));
         StartCoroutine(MoveDiceToSortedPosition());
         //점수 보이게 하기
-
+        //SelectUI가 보이게 하기
     }
     private IEnumerator MoveDiceToSortedPosition()
     {
@@ -222,7 +222,6 @@ public class DiceManager : Singleton<DiceManager>
         }
         isArrays = false;
         isDiceArray = true;
-
     }
     private Quaternion GetTargetRotation(int faceValue)
     {

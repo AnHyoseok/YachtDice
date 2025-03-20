@@ -1,9 +1,11 @@
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class SelectDice : MonoBehaviour
 {
     #region Variables
+    public RectTransform SelectUI;
     public Transform[] targetPositions;
     public float moveSpeed = 2f;
     public int turnLimit = 5;
@@ -51,6 +53,10 @@ public class SelectDice : MonoBehaviour
         {
             DiceSelect();
         }
+        if(DiceManager.Instance.isDiceArray)
+        {
+            MoveUItoMousePosition();
+        }
     }
     void DiceSelect()
     {
@@ -66,13 +72,16 @@ public class SelectDice : MonoBehaviour
         if(Physics.Raycast(ray,out hit))
         {
             Rigidbody rb = hit.collider.gameObject.GetComponent<Rigidbody>();
-            if(hit.collider.CompareTag("Dice") && rb.isKinematic && rb.useGravity)
+            if (hit.collider.CompareTag("Dice"))
             {
-                selectDice = hit.collider.gameObject;
-                Dice selectedDice = selectDice.GetComponent<Dice>();
-                MoveDiceBetweenArrays(selectedDice);
-                StartCoroutine(MoveDiceToNextTartget(selectDice, targetPositions[currentTargetIndex]));
-                DiceManager.Instance.DiceArrays();
+                if (rb.isKinematic && rb.useGravity)
+                {
+                    selectDice = hit.collider.gameObject;
+                    Dice selectedDice = selectDice.GetComponent<Dice>();
+                    MoveDiceBetweenArrays(selectedDice);
+                    StartCoroutine(MoveDiceToNextTartget(selectDice, targetPositions[currentTargetIndex]));
+                    DiceManager.Instance.DiceArrays();
+                }
             }
         }
     }
@@ -148,7 +157,55 @@ public class SelectDice : MonoBehaviour
         diceArray[diceArray.Length - 1] = selectedDice;
         DiceManager.Instance.dices = diceArray;
     }
+    void MoveUItoMousePosition()
+    {
+        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+        if(Physics.Raycast(ray ,out hit , 5))
+        {
+            if(hit.collider.CompareTag("Dice") && DiceManager.Instance.isDiceArray)
+            {
 
+                Vector3 worldPosition = hit.collider.gameObject.transform.position;
+                Vector3 screenPosition = mainCamera.WorldToScreenPoint(worldPosition); //화면 좌표 변환
+
+                // 카메라의 뷰포트 안에 있는지 확인하여 UI 표시 여부 결정
+                if (IsInCameraView(mainCamera, hit.collider.bounds))
+                {
+                    //Debug.Log("d44e");
+                    if (screenPosition.z > 0) // z값이 양수일 때만 UI 표시
+                    {
+                        //Debug.Log("d33e");
+                        SelectUI.position = screenPosition; //UI 이동
+                        SelectUI.gameObject.SetActive(true); //UI 활성화
+                    }
+                    else
+                    {
+                        //Debug.Log("d22e");
+                        SelectUI.gameObject.SetActive(false); // 카메라 뒤쪽이면 숨김
+                    }
+                }
+                else
+                {
+                    //Debug.Log("d11e");
+                    SelectUI.gameObject.SetActive(false); // 카메라 뷰포트 밖이면 숨김
+                }
+                return;
+            }
+            else
+            {
+                //Debug.Log("ddee");
+                SelectUI.gameObject.SetActive(false);
+            }
+        }
+        SelectUI.gameObject.SetActive(false); // 주사위가 없거나 너무 멀면 UI 숨김
+    }
+
+    bool IsInCameraView(Camera camera, Bounds bounds)
+    {
+        Plane[] planes = GeometryUtility.CalculateFrustumPlanes(camera);
+        return GeometryUtility.TestPlanesAABB(planes, bounds);
+    }
     private void OnTurnEnd()
     {
         movesThisTurn = 0;

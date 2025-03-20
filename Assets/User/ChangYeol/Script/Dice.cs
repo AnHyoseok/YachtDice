@@ -41,6 +41,7 @@ public class Dice : MonoBehaviour
                 rb.linearVelocity = Vector3.zero;
                 rb.angularVelocity = Vector3.zero;
                 isSliding = false;
+                Debug.Log(GetDiceValue());
             }
         }
         NudgeDice();

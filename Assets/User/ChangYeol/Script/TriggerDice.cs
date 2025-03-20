@@ -33,7 +33,6 @@ public class TriggerDice : MonoBehaviour
             }
 
             diceValue = bestFace;
-            Debug.Log($"{faceNumber}");
         }
     }
     private void OnTriggerExit(Collider other)

@@ -1,16 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum CupState
-{
-    Idle,
-    Shake,
-    PourOut
-}
 public class CupController : MonoBehaviour
 {
     #region Variables
-    public CupState cupState = CupState.Idle;
+    public ButtonController button;
     public GameObject boxGroup;
     public Transform wall;
     public float initialForce = 10f;
@@ -26,23 +20,35 @@ public class CupController : MonoBehaviour
 
     private const string DiceCount = "DiceCount";
     private const string IsShake = "IsShake";
+    private const string IsButton = "IsButton";
     #endregion
     private void Start()
     {
         animator = GetComponent<Animator>();
         diceManager = DiceManager.Instance;
-        //diceManager.rollDice.onClick.AddListener(() => );
     }
     private void Update()
     {
-        if (diceManager.isDiceArray || diceManager.rollsLeft == 0 || diceManager.isArrays) return;
+        if (diceManager.isDiceArray || diceManager.rollsLeft == 0 || diceManager.isArrays)
+        {
+            return;
+        }
         isShake = !Input.GetKey(KeyCode.LeftShift);
-        if(!isShake)
+        if (!isShake )
         {
             timer += Time.deltaTime;
-            if(timer >= pourOutTime)
+            if (timer >= pourOutTime)
             {
                 isShake = true;
+                timer = 0;
+            }
+        }
+        else if (!button.isButton)
+        {
+            timer += Time.deltaTime;
+            if (timer >= pourOutTime)
+            {
+                button.isButton = true;
                 timer = 0;
             }
         }
@@ -50,35 +56,10 @@ public class CupController : MonoBehaviour
     }
     void UpdateCupState()
     {
-        switch(cupState)
-        {
-            case CupState.Idle :
-                IdleState();
-                break;
-            case CupState.Shake :
-                ShakeState();
-                break;
-            case CupState.PourOut :
-                PourOutState();
-                break;
-        }
-    }
-    void IdleState()
-    {
         int ani = selectDice.turnLimit - SelectDice.movesThisTurn;
         animator.SetInteger(DiceCount, ani);
         animator.SetBool(IsShake, isShake);
-    }
-    void ShakeState()
-    {
-        if(isShake)
-        {
-            cupState = CupState.PourOut;
-        }
-    }
-    void PourOutState()
-    {
-        diceManager.rollsLeft--;
+        animator.SetBool(IsButton, button.isButton);
     }
     public void ObjectInstantiate()
     {
@@ -98,6 +79,7 @@ public class CupController : MonoBehaviour
             diceManager.isArray = false;
             diceManager.isRotat = false;
         }
+        diceManager.rollsLeft--;
     }
     void RandomPoition()
     {
@@ -113,7 +95,6 @@ public class CupController : MonoBehaviour
             dicerb.AddForce(forceDirection * initialForce, ForceMode.Impulse);
         }
         animator.SetInteger(DiceCount, 0);
-        cupState = CupState.Idle;
     }
     public void RandomDice()
     {
