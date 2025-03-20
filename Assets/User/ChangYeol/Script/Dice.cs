@@ -1,14 +1,11 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.Rendering;
-using static UnityEditor.PlayerSettings;
 
 public class Dice : MonoBehaviour
 {
     #region Variables
     private Rigidbody rb;
+    public GameObject[] SelectUICavas;
     public float shakeForce = 2f;
 
     public float friction = 0.98f;

@@ -11,7 +11,9 @@ public class SelectDice : MonoBehaviour
     public int turnLimit = 5;
 
     private Camera mainCamera;
-    private GameObject selectDice = null;
+    private GameObject currentActiveUI = null;
+    private Animator currentAnimator = null;
+    private GameObject selectDiceObject = null;
     private Vector3 originalPosition; // 원래 위치 저장
     private int currentTargetIndex = 0;
     public static int movesThisTurn = 0;
@@ -25,7 +27,7 @@ public class SelectDice : MonoBehaviour
     }
     private void Update()
     {
-        if (currentTargetIndex > 1)
+        if (currentTargetIndex >= 0)
         {
             isPut = Input.GetKey(KeyCode.Escape);
             if (isPut)
@@ -76,10 +78,10 @@ public class SelectDice : MonoBehaviour
             {
                 if (rb.isKinematic && rb.useGravity)
                 {
-                    selectDice = hit.collider.gameObject;
-                    Dice selectedDice = selectDice.GetComponent<Dice>();
+                    selectDiceObject = hit.collider.gameObject;
+                    Dice selectedDice = selectDiceObject.GetComponent<Dice>();
                     MoveDiceBetweenArrays(selectedDice);
-                    StartCoroutine(MoveDiceToNextTartget(selectDice, targetPositions[currentTargetIndex]));
+                    StartCoroutine(MoveDiceToNextTartget(selectDiceObject, targetPositions[currentTargetIndex]));
                     DiceManager.Instance.DiceArrays();
                 }
             }
@@ -87,7 +89,7 @@ public class SelectDice : MonoBehaviour
     }
     IEnumerator MoveDiceToNextTartget(GameObject dice, Transform destination)
     {
-        if (selectDice == null || targetPositions.Length == 0) yield break;
+        if (selectDiceObject == null || targetPositions.Length == 0) yield break;
         isGoMove = true;
 
         float elapsedTime = 0f;
@@ -161,50 +163,81 @@ public class SelectDice : MonoBehaviour
     {
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
-        if(Physics.Raycast(ray ,out hit , 5))
+        if (Physics.Raycast(ray, out hit))
         {
-            if(hit.collider.CompareTag("Dice") && DiceManager.Instance.isDiceArray)
+            if (hit.collider.CompareTag("Dice") && DiceManager.Instance.isDiceArray)
             {
-
-                Vector3 worldPosition = hit.collider.gameObject.transform.position;
-                Vector3 screenPosition = mainCamera.WorldToScreenPoint(worldPosition); //화면 좌표 변환
-
-                // 카메라의 뷰포트 안에 있는지 확인하여 UI 표시 여부 결정
-                if (IsInCameraView(mainCamera, hit.collider.bounds))
-                {
-                    //Debug.Log("d44e");
-                    if (screenPosition.z > 0) // z값이 양수일 때만 UI 표시
-                    {
-                        //Debug.Log("d33e");
-                        SelectUI.position = screenPosition; //UI 이동
-                        SelectUI.gameObject.SetActive(true); //UI 활성화
-                    }
-                    else
-                    {
-                        //Debug.Log("d22e");
-                        SelectUI.gameObject.SetActive(false); // 카메라 뒤쪽이면 숨김
-                    }
-                }
-                else
-                {
-                    //Debug.Log("d11e");
-                    SelectUI.gameObject.SetActive(false); // 카메라 뷰포트 밖이면 숨김
-                }
+                Dice dice = hit.collider.gameObject.GetComponent<Dice>();
+                SelectDiceUISwich(dice);
+                playDiceAnime();
                 return;
             }
-            else
-            {
-                //Debug.Log("ddee");
-                SelectUI.gameObject.SetActive(false);
-            }
         }
-        SelectUI.gameObject.SetActive(false); // 주사위가 없거나 너무 멀면 UI 숨김
+        if (currentActiveUI != null && currentAnimator != null)
+        {
+            currentActiveUI.SetActive(false);
+            currentAnimator.SetBool("IsSelect", false);
+            currentAnimator = null;
+            currentActiveUI = null;
+        }
     }
 
-    bool IsInCameraView(Camera camera, Bounds bounds)
+    void SelectDiceUISwich(Dice dice)
     {
-        Plane[] planes = GeometryUtility.CalculateFrustumPlanes(camera);
-        return GeometryUtility.TestPlanesAABB(planes, bounds);
+        if(dice != null)
+        {
+            if (currentActiveUI != null)
+            {
+                currentActiveUI.SetActive(false);
+            }
+            switch (dice.GetDiceValue())
+            {
+                case 1:
+                    currentActiveUI = dice.SelectUICavas[0];
+                    currentAnimator = currentActiveUI.GetComponent<Animator>();
+                    break;
+                case 2:
+                    currentActiveUI = dice.SelectUICavas[1];
+                    currentAnimator = currentActiveUI.GetComponent<Animator>();
+                    break;
+                case 3:
+                    currentActiveUI = dice.SelectUICavas[2];
+                    currentAnimator = currentActiveUI.GetComponent<Animator>();
+                    break;
+                case 4:
+                    currentActiveUI = dice.SelectUICavas[1];
+                    currentAnimator = currentActiveUI.GetComponent<Animator>();
+                    break;
+                case 5:
+                    currentActiveUI = dice.SelectUICavas[2];
+                    currentAnimator = currentActiveUI.GetComponent<Animator>();
+                    break;
+                case 6:
+                    currentActiveUI = dice.SelectUICavas[0];
+                    currentAnimator = currentActiveUI.GetComponent<Animator>();
+                    break;
+            }
+            if (currentActiveUI != null)
+            {
+                currentActiveUI.SetActive(true);
+            }
+        }
+    }
+    void playDiceAnime()
+    {
+        if (currentActiveUI != null)
+        {
+            Animator diceAnimator = currentActiveUI.GetComponent<Animator>();
+            if(diceAnimator != null)
+            {
+                if(currentAnimator != null && currentAnimator != diceAnimator)
+                {
+                    currentAnimator.SetBool("IsSelect", false);
+                }
+                diceAnimator.SetBool("IsSelect", true);
+                currentAnimator = diceAnimator;
+            }
+        }
     }
     private void OnTurnEnd()
     {

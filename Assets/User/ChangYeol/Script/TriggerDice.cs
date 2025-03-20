@@ -4,30 +4,41 @@ using UnityEngine;
 public class TriggerDice : MonoBehaviour
 {
     public int diceValue = 0;
-    private Dictionary<int, float> faceAreas = new Dictionary<int, float>();
+    private Dictionary<int, float> faceTimers = new Dictionary<int, float>(); // ✅ 각 면의 접촉 시간 저장
+
     void OnTriggerEnter(Collider other)
     {
-        if(other.tag == ("Ground"))
+        if (other.CompareTag("Ground"))
         {
             int faceNumber = GetFaceNumberFromName(gameObject.name);
-            float faceArea = other.bounds.size.x * other.bounds.size.z;
 
-            if(!faceAreas.ContainsKey(faceNumber))
+            if (!faceTimers.ContainsKey(faceNumber))
             {
-                faceAreas.Add(faceNumber, faceArea);
+                faceTimers[faceNumber] = 0f; // ✅ 처음 닿은 면은 시간 초기화
             }
-            else
+        }
+    }
+
+    void OnTriggerStay(Collider other)
+    {
+        if (other.CompareTag("Ground"))
+        {
+            int faceNumber = GetFaceNumberFromName(gameObject.name);
+
+            if (faceTimers.ContainsKey(faceNumber))
             {
-                faceAreas[faceNumber] += faceArea;
+                faceTimers[faceNumber] += Time.deltaTime; // ✅ 닿아 있는 시간 증가
             }
+
+            // ✅ 가장 오래 닿아 있는 면 찾기
             int bestFace = diceValue;
-            float maxArea = faceAreas.ContainsKey(diceValue) ? faceAreas[diceValue] : 0;
+            float maxTime = faceTimers.ContainsKey(diceValue) ? faceTimers[diceValue] : 0;
 
-            foreach (var face in faceAreas)
+            foreach (var face in faceTimers)
             {
-                if (face.Value > maxArea)
+                if (face.Value > maxTime)
                 {
-                    maxArea = face.Value;
+                    maxTime = face.Value;
                     bestFace = face.Key;
                 }
             }
@@ -35,15 +46,36 @@ public class TriggerDice : MonoBehaviour
             diceValue = bestFace;
         }
     }
+
     private void OnTriggerExit(Collider other)
     {
-        if (other.tag == ("Ground"))
+        if (other.CompareTag("Ground"))
         {
-            diceValue = 0;
+            int faceNumber = GetFaceNumberFromName(gameObject.name);
+            if (faceTimers.ContainsKey(faceNumber))
+            {
+                faceTimers.Remove(faceNumber); // 바닥에서 떨어지면 해당 면 제거
+            }
+
+            // ✅ 다른 면들의 시간이 적어지면 diceValue 초기화
+            if (faceTimers.Count == 0)
+            {
+                diceValue = 0;
+            }
         }
     }
-    private int GetFaceNumberFromName(string faceName)
+
+    private int GetFaceNumberFromName(string name)
     {
-        return int.Parse(faceName.Replace("DiceFace_", ""));
+        // ✅ "DiceFace_1" 같은 이름에서 숫자 부분만 추출
+        if (name.StartsWith("DiceFace_"))
+        {
+            string number = name.Replace("DiceFace_", "");
+            if (int.TryParse(number, out int result))
+            {
+                return result;
+            }
+        }
+        return 0;
     }
 }
