@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using Photon.Realtime;
 using TMPro;
 using ExitGames.Client.Photon;
+using System.Collections.Generic;
 
 public class ScoreboardEntry : MonoBehaviour
 {
@@ -66,6 +67,14 @@ public class ScoreboardEntry : MonoBehaviour
         {
             scores[index] = score;
             UpdateScoreUI();
+
+            // 모든 플레이어에게 점수 동기화
+            if (player != null)
+            {
+                Hashtable hash = new Hashtable();
+                hash["Score"] = scores;
+                player.SetCustomProperties(hash);
+            }
         }
     }
 
@@ -99,6 +108,38 @@ public class ScoreboardEntry : MonoBehaviour
         totalScoreText.text = total.ToString();
     }
 
+    public void ShowPreview(Dictionary<string, int> previewScores)
+    {
+        Debug.Log(" 점수 미리보기 업데이트 실행됨!");
+
+        foreach (var scoreEntry in previewScores)
+        {
+            int index = GetCategoryIndex(scoreEntry.Key);
+            if (index != -1)
+            {
+                if (index < upperSectionTexts.Length)
+                {
+                    upperSectionTexts[index].text = scoreEntry.Value.ToString();
+                    Debug.Log($" {scoreEntry.Key} UI 업데이트됨: {scoreEntry.Value}");
+                }
+                else if (index - 8 < lowerSectionTexts.Length)
+                {
+                    lowerSectionTexts[index - 8].text = scoreEntry.Value.ToString();
+                    Debug.Log($" {scoreEntry.Key} UI 업데이트됨: {scoreEntry.Value}");
+                }
+                else
+                {
+                    Debug.LogWarning($" {scoreEntry.Key} UI 업데이트 실패 - 인덱스 범위 초과");
+                }
+            }
+            else
+            {
+                Debug.LogWarning($" {scoreEntry.Key}의 인덱스를 찾을 수 없음!");
+            }
+        }
+    }
+
+
     private int GetCategoryIndex(string category)
     {
         switch (category)
@@ -117,6 +158,7 @@ public class ScoreboardEntry : MonoBehaviour
             case "S. Straight": return 11;
             case "L. Straight": return 12;
             case "Yacht": return 13;
+            case "Total": return 14;
             default: return -1;
         }
     }

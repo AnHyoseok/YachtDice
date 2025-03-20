@@ -6,11 +6,23 @@ using System.Collections.Generic;
 using ExitGames.Client.Photon;
 public class GameSceneManager : MonoBehaviourPunCallbacks
 {
+    public static GameSceneManager Instance;
+
     public Transform scoreboardPanel;
     public GameObject scoreboardPrefab;
 
-    private Dictionary<int, ScoreboardEntry> scoreboardEntries = new Dictionary<int, ScoreboardEntry>();
-
+    public Dictionary<int, ScoreboardEntry> scoreboardEntries = new Dictionary<int, ScoreboardEntry>();
+    void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
     void Start()
     {
         if (PhotonNetwork.InRoom)
@@ -21,6 +33,11 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
         {
             Debug.LogError("PhotonNetwork.InRoom이 false입니다. 방에 입장한 상태인지 확인하세요.");
         }
+    }
+
+    private void Update()
+    {
+        DiceManager.Instance.ShowPreviewScore();
     }
 
     void InitializeScoreboard()
@@ -84,13 +101,21 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
         scoreboardEntries[aiName.GetHashCode()].UpdateAIScore(aiProperties);
     }
 
-    public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+    public override void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
     {
-        if (changedProps.ContainsKey("Score") && scoreboardEntries.ContainsKey(targetPlayer.ActorNumber))
+        if (changedProps.ContainsKey("PreviewScore"))
         {
-            scoreboardEntries[targetPlayer.ActorNumber].UpdateScoreData(changedProps);
+            Dictionary<string, int> previewScores = (Dictionary<string, int>)changedProps["PreviewScore"];
+            Debug.Log($" {targetPlayer.NickName}의 점수 업데이트 감지!");
+
+            if (GameSceneManager.Instance != null && GameSceneManager.Instance.scoreboardEntries.ContainsKey(targetPlayer.ActorNumber))
+            {
+                GameSceneManager.Instance.scoreboardEntries[targetPlayer.ActorNumber].ShowPreview(previewScores);
+            }
         }
     }
+
+
 
     public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
     {

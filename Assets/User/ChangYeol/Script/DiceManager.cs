@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -71,57 +72,150 @@ public class DiceManager : Singleton<DiceManager>
     }
     public int[] GetDiceValues()
     {
+        if (newdicelist == null || newdicelist.Length == 0)
+        {
+            Debug.LogError(" GetDiceValues() - newdicelist가 비어 있음! 주사위가 추가되지 않음.");
+            return new int[0];  // 빈 배열 반환 (오류 방지)
+        }
+
         int[] values = new int[newdicelist.Length];
         for (int i = 0; i < newdicelist.Length; i++)
         {
             values[i] = newdicelist[i].GetDiceValue();
         }
+
+        Debug.Log(" 주사위 값 리스트: " + string.Join(", ", values));
+        return values;
+    }
+    public int[] GetDiceValue()
+    {
+        if (dices == null || dices.Length == 0)
+        {
+            Debug.LogError(" GetDiceValues() - newdicelist가 비어 있음! 주사위가 추가되지 않음.");
+            return new int[0];  // 빈 배열 반환 (오류 방지)
+        }
+
+        int[] values = new int[dices.Length];
+        for (int i = 0; i < dices.Length; i++)
+        {
+            if (dices[i] == null) 
+            {
+              
+                values[i] = 0; 
+                continue;
+            }
+
+            values[i] = dices[i].GetDiceValue();
+        }
+
+        Debug.Log(" 주사위 값 리스트: " + string.Join(", ", values));
         return values;
     }
     public int CalculateScore(string category)
     {
-        int[] values = GetDiceValues();
-        Debug.Log(GetDiceValues());
+        int[] values = GetDiceValues().Concat(GetDiceValue()).ToArray();
         values = values.OrderBy(v => v).ToArray();
 
-        int score = 0;
+        Debug.Log($" 주사위 값: {string.Join(", ", values)}");
 
-        switch(category)
+        int score = 0;
+        HashSet<int> uniqueValues = new HashSet<int>(values); // 중복 제거하여 활용
+
+        switch (category)
         {
-            case "ONES": score = values.Count(v => v == 1) * 1;
+            case "ONES": score = values.Count(v => v == 1) * 1; break;
+            case "TWOS": score = values.Count(v => v == 2) * 2; break;
+            case "THREES": score = values.Count(v => v == 3) * 3; break;
+            case "FOURS": score = values.Count(v => v == 4) * 4; break;
+            case "FIVES": score = values.Count(v => v == 5) * 5; break;
+            case "SIXES": score = values.Count(v => v == 6) * 6; break;
+            case "Choice": score = values.Sum(); break;
+
+            case "4 of a Kind":
+                var fourKindGroup = values.GroupBy(v => v).FirstOrDefault(g => g.Count() >= 4);
+                score = (fourKindGroup != null) ? values.Sum() : 0;
                 break;
-            case "TWOS": score = values.Count(v => v == 2) * 2;
+
+            case "Full House":
+                var grouped = values.GroupBy(v => v).ToList();
+                score = (grouped.Count == 2 && (grouped[0].Count() == 3 || grouped[1].Count() == 3)) ? 25 : 0;
                 break;
-            case "THREES":score = values.Count(v => v == 3) * 3;
+
+            case "S. Straight":
+                score = (uniqueValues.IsSupersetOf(new[] { 1, 2, 3, 4 }) ||
+                         uniqueValues.IsSupersetOf(new[] { 2, 3, 4, 5 }) ||
+                         uniqueValues.IsSupersetOf(new[] { 3, 4, 5, 6 }))
+                        ? 15 : 0;
                 break;
-            case "FOURS": score = values.Count(v => v == 4) * 4;
+
+            case "L. Straight":
+                score = (uniqueValues.IsSupersetOf(new[] { 1, 2, 3, 4, 5 }) ||
+                         uniqueValues.IsSupersetOf(new[] { 2, 3, 4, 5, 6 }))
+                        ? 40 : 0;
                 break;
-            case "FIVES": score = values.Count(v => v == 5) * 5;
-                break;
-            case "SIXES": score = values.Count(v => v == 6) * 6;
-                break;
-            case "FOUR_KIND": score = values.GroupBy(v => v).Any(g => g.Count() >= 4) ? values.Sum() : 0;
-                break;
-            case "FULL_HOUSE": score = (values.Distinct().Count() == 2 && values.GroupBy(v => v).Any(g => g.Count() == 3)) ? 25 : 0;
-                break;
-            case "SMALL_STRAIGHT": score = values.Distinct().SequenceEqual(new int[] { 1, 2, 3, 4 }) || values.Distinct().SequenceEqual(new int[] { 1, 2, 3, 4, 5 }) || values.Distinct().SequenceEqual(new int[] { 3, 4, 5, 6 }) ? 30 : 0;
-                break;
-            case "LARGE_STRAIGHT": score = values.Distinct().SequenceEqual(new int[] { 1, 2, 3, 4, 5 }) || values.Distinct().SequenceEqual(new int[] { 2, 3, 4, 5, 6 }) ? 40 : 0;
-                break;
-            case "YAHTZEE": score = values.Distinct().Count() == 1 ? 50 : 0;
-                break;
-            case "CHANCE": score = values.Sum();
+
+            case "Yacht":
+                score = (uniqueValues.Count == 1) ? 50 : 0;
                 break;
         }
+
+        //  상단 점수 섹션 누적 및 보너스 체크
         if (category == DiceScore.ONES || category == DiceScore.TWOS || category == DiceScore.THREES
             || category == DiceScore.FOURS || category == DiceScore.FIVES || category == DiceScore.SIXES)
         {
             upperSectionScore += score;
             CheckForBoonus();
         }
+
         UpdateScoreboard(category, score);
         return score;
     }
+
+    //점수 미리보여주기
+    public void ShowPreviewScore()
+    {
+        if (!isDiceArray) return;
+        int[] values = GetDiceValues().Concat(GetDiceValue()).ToArray();
+        values = values.OrderBy(v => v).ToArray();
+
+        Dictionary<string, int> previewScores = new Dictionary<string, int>();
+
+        previewScores["ONES"] = values.Count(v => v == 1) * 1;
+        previewScores["TWOS"] = values.Count(v => v == 2) * 2;
+        previewScores["THREES"] = values.Count(v => v == 3) * 3;
+        previewScores["FOURS"] = values.Count(v => v == 4) * 4;
+        previewScores["FIVES"] = values.Count(v => v == 5) * 5;
+        previewScores["SIXES"] = values.Count(v => v == 6) * 6;
+        previewScores["Choice"] = values.Sum();
+        previewScores["4 of a Kind"] = values.GroupBy(v => v).Any(g => g.Count() >= 4) ? values.Sum() : 0;
+        previewScores["Full House"] = (values.Distinct().Count() == 2 && values.GroupBy(v => v).Any(g => g.Count() == 3)) ? 25 : 0;
+        HashSet<int> uniqueValues = new HashSet<int>(values);
+
+        previewScores["S. Straight"] = (uniqueValues.Contains(1) && uniqueValues.Contains(2) && uniqueValues.Contains(3) && uniqueValues.Contains(4)) ||
+                                       (uniqueValues.Contains(2) && uniqueValues.Contains(3) && uniqueValues.Contains(4) && uniqueValues.Contains(5)) ||
+                                       (uniqueValues.Contains(3) && uniqueValues.Contains(4) && uniqueValues.Contains(5) && uniqueValues.Contains(6))
+                                       ? 15 : 0;
+
+        previewScores["L. Straight"] = (uniqueValues.Contains(1) && uniqueValues.Contains(2) && uniqueValues.Contains(3) && uniqueValues.Contains(4) && uniqueValues.Contains(5)) ||
+                                       (uniqueValues.Contains(2) && uniqueValues.Contains(3) && uniqueValues.Contains(4) && uniqueValues.Contains(5) && uniqueValues.Contains(6))
+                                       ? 40 : 0;
+        previewScores["Yacht"] = values.Distinct().Count() == 1 ? 50 : 0;
+
+        Debug.Log($" 본인({PhotonNetwork.LocalPlayer.NickName}) 점수 업데이트: {string.Join(", ", previewScores.Select(kv => $"{kv.Key}: {kv.Value}"))}");
+
+        if (GameSceneManager.Instance != null && GameSceneManager.Instance.scoreboardEntries.ContainsKey(PhotonNetwork.LocalPlayer.ActorNumber))
+        {
+            GameSceneManager.Instance.scoreboardEntries[PhotonNetwork.LocalPlayer.ActorNumber].ShowPreview(previewScores);
+        }
+
+        if (PhotonNetwork.LocalPlayer != null)
+        {
+            ExitGames.Client.Photon.Hashtable playerScores = new ExitGames.Client.Photon.Hashtable { { "PreviewScore", previewScores } };
+            PhotonNetwork.LocalPlayer.SetCustomProperties(playerScores);
+        }
+    }
+
+
     private void CheckForBoonus()
     {
         if (! boonsGiven && upperSectionScore >= 63)
@@ -153,7 +247,9 @@ public class DiceManager : Singleton<DiceManager>
 
                 if (allStopped && dices.Length > 0)
                 {
+                    Debug.Log(" 모든 주사위 멈춤 - Dicearray() 실행");
                     Dicearray();
+                    DiceManager.Instance.ShowPreviewScore();
                 }
             }
         }
@@ -165,15 +261,18 @@ public class DiceManager : Singleton<DiceManager>
         isArrays = true;
         System.Array.Sort(dices,(a, b) => a.GetDiceValue().CompareTo(b.GetDiceValue()));
         StartCoroutine(MoveDiceToSortedPosition());
+
     }
     void Dicearray()
     {
+
         if (isArray || isArrays) return;
         isArray = true;
         isArrays = true;
         System.Array.Sort(dices,(a, b) => a.GetDiceValue().CompareTo(b.GetDiceValue()));
         StartCoroutine(MoveDiceToSortedPosition());
         //점수 보이게 하기
+        
         //SelectUI가 보이게 하기
     }
     private IEnumerator MoveDiceToSortedPosition()
