@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
+//using Photon.Pun;
 
 public class CupController : MonoBehaviour
 {
     #region Variables
+    //private PhotonView photonView;
     public ButtonController button;
     public GameObject boxGroup;
     public Transform wall;
@@ -24,6 +26,7 @@ public class CupController : MonoBehaviour
     #endregion
     private void Start()
     {
+        //photonView = GetComponent<PhotonView>();
         animator = GetComponent<Animator>();
         diceManager = DiceManager.Instance;
     }
@@ -56,29 +59,34 @@ public class CupController : MonoBehaviour
     }
     void UpdateCupState()
     {
-        int ani = selectDice.turnLimit - SelectDice.movesThisTurn;
+        AnimeCup();
+        //photonView.RPC("AnimeCup", RpcTarget.All);
+    }
+    //[PunRPC]
+    void AnimeCup()
+    {
+        int ani = selectDice.turnLimit - selectDice.movesThisTurn;
         animator.SetInteger(DiceCount, ani);
         animator.SetBool(IsShake, isShake);
         animator.SetBool(IsButton, button.isButton);
     }
+    //[PunRPC]
     public void ObjectInstantiate()
     {
-        for(int i = 0; i < selectDice.turnLimit - SelectDice.movesThisTurn; i++)
+        for(int i = 0; i < selectDice.turnLimit - selectDice.movesThisTurn; i++)
         {
             Destroy(falseDices[i]);
         }
-        for (int i = 0; i < selectDice.turnLimit - SelectDice.movesThisTurn; i++)
+        for (int i = 0; i < selectDice.turnLimit - selectDice.movesThisTurn; i++)
         {
             falseDices.RemoveAll(x => x != null);
             RandomPoition();
             diceManager.dices[i] = Dice.GetComponent<Dice>();
             Dice.name = $"Dice{i}";
         }
-        if(selectDice.turnLimit - SelectDice.movesThisTurn != 5)
-        {
-            diceManager.isArray = false;
-            diceManager.isRotat = false;
-        }
+        diceManager.isArray = false;
+        diceManager.isRotat = false;
+
         diceManager.rollsLeft--;
     }
     void RandomPoition()
@@ -96,11 +104,12 @@ public class CupController : MonoBehaviour
         }
         animator.SetInteger(DiceCount, 0);
     }
+    //[PunRPC]
     public void RandomDice()
     {
         boxGroup.SetActive(true);
         GetComponent<BoxCollider>().enabled = true;
-        for(int i = 0; i < selectDice.turnLimit - SelectDice.movesThisTurn; i++)
+        for(int i = 0; i < selectDice.turnLimit - selectDice.movesThisTurn; i++)
         {
             Vector3 offset = diceManager.GetUniqueRandomPosition(transform.position.x, transform.position.x + 0.01f);
             Quaternion randomRot = Quaternion.Euler(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));

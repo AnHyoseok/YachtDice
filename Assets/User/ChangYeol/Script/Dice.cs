@@ -1,13 +1,17 @@
 using System.Collections.Generic;
 using UnityEngine;
+//using Photon.Pun;
 
 public class Dice : MonoBehaviour
 {
     #region Variables
+    //private PhotonView photonView;
     private Rigidbody rb;
     public GameObject[] SelectUICavas;
     public float shakeForce = 2f;
 
+    public Vector3 originPos;
+    public bool isSelected = false;
     public float friction = 0.98f;
     public float stopThreshld = 0.05f;
     public float nudgeForce = 0.5f; // 모서리 닿았을 때 약한 힘 추가
@@ -20,12 +24,14 @@ public class Dice : MonoBehaviour
 
     private void Awake()
     {
+        //photonView = GetComponent<PhotonView>();
         rb = GetComponent<Rigidbody>();
         SetupDicePhysics(rb);
     }
     private void FixedUpdate()
     {
-        if(isSliding && !rb.isKinematic)
+        //photonView.RPC("SyncDice", RpcTarget.All, transform.position, transform.rotation);
+        if (isSliding && !rb.isKinematic)
         {
             rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, Vector3.zero, (1 - friction) * Time.deltaTime);
             rb.angularVelocity = Vector3.Lerp(rb.angularVelocity, Vector3.zero, (1 - friction) * Time.deltaTime);
@@ -89,6 +95,12 @@ public class Dice : MonoBehaviour
         Vector3 smallForce = new Vector3(Random.Range(-0.2f, 0.2f), 0, Random.Range(-0.2f, 0.2f));
         rb.AddForce(smallForce, ForceMode.Impulse);
     }
+    /*[PunRPC]
+    void SyncDice(Vector3 position, Quaternion rotation)
+    {
+        transform.position = position;
+        transform.rotation = rotation;
+    }*/
     private void OnCollisionEnter(Collision collision)
     {
         if(collision.gameObject.CompareTag("Ground"))

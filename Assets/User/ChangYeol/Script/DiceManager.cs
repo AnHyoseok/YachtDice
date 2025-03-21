@@ -309,6 +309,8 @@ public class DiceManager : Singleton<DiceManager>
             }
             dice.transform.position = targetPosition;
             dice.transform.rotation = targetRotation;
+            dice.GetComponent<Dice>().originPos = dice.transform.position;
+            //Debug.Log(dice.GetComponent<Dice>().originPos);
             for(int j= 0;j < dice.GetComponent<Dice>().diceList.Count; j++)
             {
                 BoxCollider box = dice.GetComponent<Dice>().diceList[j].GetComponent<BoxCollider>();

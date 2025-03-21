@@ -1,3 +1,4 @@
+using NUnit.Framework;
 using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -14,9 +15,9 @@ public class SelectDice : MonoBehaviour
     private GameObject currentActiveUI = null;
     private Animator currentAnimator = null;
     private GameObject selectDiceObject = null;
-    private Vector3 originalPosition; // ¿ø·¡ À§Ä¡ ÀúÀå
+    private Vector3 originalPosition; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½ï¿½
     private int currentTargetIndex = 0;
-    public static int movesThisTurn = 0;
+    public int movesThisTurn = 0;
     private bool isGoMove = false;
     public bool isPut = false;
     #endregion
@@ -32,7 +33,7 @@ public class SelectDice : MonoBehaviour
             isPut = Input.GetKey(KeyCode.Escape);
             if (isPut)
             {
-                //Á¡¼ö°¡·Á¾ß‰Î 
+                //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß‰ï¿½ 
 
                 foreach (Dice dice in DiceManager.Instance.dices)
                 {
@@ -64,7 +65,7 @@ public class SelectDice : MonoBehaviour
     {
         if(movesThisTurn >= turnLimit)
         {
-            Debug.Log("ÀÌµ¿ È½¼ö ÃÊ°ú");
+            Debug.Log("ï¿½Ìµï¿½ È½ï¿½ï¿½ ï¿½Ê°ï¿½");
             OnTurnEnd();
             return;
         }
@@ -76,20 +77,34 @@ public class SelectDice : MonoBehaviour
             Rigidbody rb = hit.collider.gameObject.GetComponent<Rigidbody>();
             if (hit.collider.CompareTag("Dice"))
             {
-                if (rb.isKinematic && rb.useGravity)
+                if (rb.isKinematic)
                 {
                     selectDiceObject = hit.collider.gameObject;
                     Dice selectedDice = selectDiceObject.GetComponent<Dice>();
-                    MoveDiceBetweenArrays(selectedDice);
-                    StartCoroutine(MoveDiceToNextTartget(selectDiceObject, targetPositions[currentTargetIndex]));
+                    if(!selectedDice.isSelected)
+                    {
+                        StartCoroutine(MoveDiceToNextTartget(selectDiceObject, targetPositions[currentTargetIndex].position));
+                        MoveDiceBetweenArrays(selectedDice,DiceManager.Instance.dices,DiceManager.Instance.newdicelist);
+                        currentTargetIndex = (currentTargetIndex + 1) % targetPositions.Length;
+                        movesThisTurn++;
+                        selectedDice.isSelected = true;
+                    }
+                    else if(selectedDice.isSelected)
+                    {
+                        StartCoroutine(MoveDiceToNextTartget(selectDiceObject, selectedDice.originPos));
+                        MoveDiceBetweenArrays(selectedDice, DiceManager.Instance.newdicelist, DiceManager.Instance.dices);
+                        currentTargetIndex = Mathf.Max(0,currentTargetIndex - 1);
+                        movesThisTurn--;
+                        selectedDice.isSelected = false;
+                    }
                     DiceManager.Instance.DiceArrays();
                 }
             }
         }
     }
-    IEnumerator MoveDiceToNextTartget(GameObject dice, Transform destination)
+    IEnumerator MoveDiceToNextTartget(GameObject dice, Vector3 destination)
     {
-        if (selectDiceObject == null || targetPositions.Length == 0) yield break;
+        if (dice == null || targetPositions.Length == 0) yield break;
         isGoMove = true;
 
         float elapsedTime = 0f;
@@ -97,67 +112,47 @@ public class SelectDice : MonoBehaviour
 
         while (elapsedTime < 1f)
         {
-            dice.transform.position = Vector3.Lerp(initialPosition, destination.position, elapsedTime);
+            dice.transform.position = Vector3.Lerp(initialPosition, destination, elapsedTime);
             elapsedTime += Time.deltaTime * moveSpeed;
             yield return null;
         }
-        dice.transform.position = destination.position;
-
-        movesThisTurn++;
+        dice.transform.position = destination;
 
         if(movesThisTurn >= turnLimit)
         {
             OnTurnEnd();
             yield break;
         }
-        currentTargetIndex = (currentTargetIndex + 1) % targetPositions.Length;
         isGoMove = false;
     }
 
-    void MoveDiceBetweenArrays(Dice selectedDice)
+    void MoveDiceBetweenArrays(Dice selectedDice,Dice[] dices, Dice[] newdicelist)
     {
-        Dice[] diceArray = DiceManager.Instance.dices;
-        int index = System.Array.FindIndex(diceArray, d => d == selectedDice);
+        int index = System.Array.FindIndex(dices, d => d == selectedDice);
         if (index != -1)
         {
-            Dice[] newArray = new Dice[diceArray.Length - 1];
-            for (int i = 0, j = 0; i < diceArray.Length; i++)
+            Dice[] newArray = new Dice[dices.Length - 1];
+            for (int i = 0, j = 0; i < dices.Length; i++)
             {
                 if (i != index)
                 {
-                    newArray[j++] = diceArray[i];
-                }
+                    newArray[j++] = dices[i];
+                }   
             }
-            DiceManager.Instance.dices = newArray;
-        }
-        Dice[] newDiceArray = DiceManager.Instance.newdicelist;
-        System.Array.Resize(ref newDiceArray, newDiceArray.Length + 1);
-        newDiceArray[newDiceArray.Length - 1] = selectedDice;
-        DiceManager.Instance.newdicelist = newDiceArray;
-    }
-
-    void ReturnDiceToOriginalList(Dice selectedDice)
-    {
-        Dice[] newDiceArray = DiceManager.Instance.newdicelist;
-        int index = System.Array.FindIndex(newDiceArray, d => d == selectedDice);
-
-        if (index != -1)
-        {
-            Dice[] newArray = new Dice[newDiceArray.Length - 1];
-            for (int i = 0, j = 0; i < newDiceArray.Length; i++)
+            Dice[] newTargetArray = new Dice[newdicelist.Length + 1];
+            System.Array.Copy(newdicelist, newTargetArray, newdicelist.Length);
+            newTargetArray[newdicelist.Length] = selectedDice;
+            if (dices == DiceManager.Instance.dices)
             {
-                if (i != index)
-                {
-                    newArray[j++] = newDiceArray[i];
-                }
+                DiceManager.Instance.dices = newArray;
+                DiceManager.Instance.newdicelist = newTargetArray;
             }
-            DiceManager.Instance.newdicelist = newArray;
+            else
+            {
+                DiceManager.Instance.newdicelist = newArray;
+                DiceManager.Instance.dices = newTargetArray;
+            }
         }
-
-        Dice[] diceArray = DiceManager.Instance.dices;
-        System.Array.Resize(ref diceArray, diceArray.Length + 1);
-        diceArray[diceArray.Length - 1] = selectedDice;
-        DiceManager.Instance.dices = diceArray;
     }
     void MoveUItoMousePosition()
     {
@@ -190,7 +185,11 @@ public class SelectDice : MonoBehaviour
             {
                 currentActiveUI.SetActive(false);
             }
-            switch (dice.GetDiceValue())
+
+            // ì£¼ì‚¬ìœ„ì˜ ìœ—ë©´ ê°’ì„ ê°€ì ¸ì˜µë‹ˆë‹¤
+            int diceValue = GetDiceTopValue(dice.gameObject);
+            
+            switch (diceValue)
             {
                 case 1:
                     currentActiveUI = dice.SelectUICavas[0];
@@ -223,6 +222,25 @@ public class SelectDice : MonoBehaviour
             }
         }
     }
+
+    // ì£¼ì‚¬ìœ„ì˜ ìœ—ë©´ ê°’ì„ ê°€ì ¸ì˜¤ëŠ” í•¨ìˆ˜
+    private int GetDiceTopValue(GameObject diceObject)
+    {
+        // ì£¼ì‚¬ìœ„ì˜ ëª¨ë“  TriggerDice ì»´í¬ë„ŒíŠ¸ë¥¼ ê°€ì ¸ì˜µë‹ˆë‹¤
+        TriggerDice[] triggerDices = diceObject.GetComponentsInChildren<TriggerDice>();
+        
+        // ê° ë©´ì„ í™•ì¸í•˜ì—¬ í˜„ìž¬ ìœ„ë¥¼ í–¥í•˜ê³  ìžˆëŠ” ë©´ì˜ ê°’ì„ ì°¾ìŠµë‹ˆë‹¤
+        foreach (TriggerDice trigger in triggerDices)
+        {
+            if (trigger.diceValue > 0)
+            {
+                return trigger.diceValue;
+            }
+        }
+        
+        return 1; // ê¸°ë³¸ê°’ ë°˜í™˜
+    }
+
     void playDiceAnime()
     {
         if (currentActiveUI != null)
@@ -244,6 +262,6 @@ public class SelectDice : MonoBehaviour
         movesThisTurn = 0;
         currentTargetIndex = 0;
         DiceManager.Instance.rollsLeft = 3;
-        //Ãß°¡ ±â´É: ´ÙÀ½ ÇÃ·¹ÀÌ¾î ÅÏÀ¸·Î ³Ñ¾î°¡´Â ·ÎÁ÷À» ¿©±â¿¡ Ãß°¡ °¡´É
+        //ï¿½ß°ï¿½ ï¿½ï¿½ï¿½: ï¿½ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ñ¾î°¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½â¿¡ ï¿½ß°ï¿½ ï¿½ï¿½ï¿½ï¿½
     }
 }
