@@ -25,9 +25,13 @@ public class ScoreboardHoverAnimation : MonoBehaviour
         // Categories 내부의 "SelectImage" 를 모두 찾아 리스트에 저장
         FindSelectImage(categories, selectImages);
         // Player_A,B,C,D 내부의 "Line_{i}"를 찾아 리스트에 저장
+        if (scoreboardTurnActivator.playerA == null) return;
         FindRectTransforms(scoreboardTurnActivator.playerA, playerARectTransforms);
+        if (scoreboardTurnActivator.playerB == null) return;
         FindRectTransforms(scoreboardTurnActivator.playerB, playerBRectTransforms);
+        if (scoreboardTurnActivator.playerC == null) return;
         FindRectTransforms(scoreboardTurnActivator.playerC, playerCRectTransforms);
+        if (scoreboardTurnActivator.playerD == null) return;
         FindRectTransforms(scoreboardTurnActivator.playerD, playerDRectTransforms);
     }
 
@@ -60,20 +64,24 @@ public class ScoreboardHoverAnimation : MonoBehaviour
 
     private void FindRectTransforms(GameObject player, List<RectTransform> rectTransforms)
     {
-        if (player == null) return;
-
         RectTransform[] rects = player.GetComponentsInChildren<RectTransform>(true);
+        int upperCount = 0; // "Upper Section" 태그의 개수를 추적
+        int lowerCount = 0; // "Lower Section" 태그의 개수를 추적
+
         foreach (RectTransform rect in rects)
         {
-            for (int i = 1; i <= 15; i++)
-            {
-                if (i == 7 || i == 8 || i == 15) continue;
+            if (upperCount >= 6 && lowerCount >= 6) break; // "Upper Section"과 "Lower Section" 각각 6개까지만 추가
 
-                if (rect.gameObject.name == $"Line_{i}")
-                {
-                    rectTransforms.Add(rect);
-                    break;
-                }
+            if (rect.CompareTag("Upper Section") && upperCount < 6)
+            {
+                rectTransforms.Add(rect);
+                upperCount++; // "Upper Section" 태그 추가
+            }
+
+            if (rect.CompareTag("Lower Section") && lowerCount < 6)
+            {
+                rectTransforms.Add(rect);
+                lowerCount++; // "Lower Section" 태그 추가
             }
         }
     }
