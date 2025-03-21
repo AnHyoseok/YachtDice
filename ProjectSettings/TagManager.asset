@@ -7,6 +7,8 @@ TagManager:
   - Dice
   - Ground
   - Wall
+  - Upper Section
+  - Lower Section
   layers:
   - Default
   - TransparentFX

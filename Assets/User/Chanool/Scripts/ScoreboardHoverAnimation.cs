@@ -6,11 +6,14 @@ using System.Collections.Generic;
 public class ScoreboardHoverAnimation : MonoBehaviour
 {
     public GameObject hoverAnimation; // Hover 애니메이션 효과
-    public ScoreboardTurnActivator scoreboardTurnActivator; // ScoreboardTurnActivator.cs의 PlayerA, PlayerB 참조
-    public List<RectTransform> playerARectTransforms = new List<RectTransform>(); // ARectTransform(HoverAnimation위치)들을 저장해놓을 리스트
-    public List<RectTransform> playerBRectTransforms = new List<RectTransform>(); // BRectTransform(HoverAnimation위치)들을 저장해놓을 리스트
     public GameObject categories; // Select표시(주황색)할 카테고리
     public List<Image> selectImages = new List<Image>(); // SelectImage들을 담을 리스트
+
+    public ScoreboardTurnActivator scoreboardTurnActivator; // ScoreboardTurnActivator.cs의 PlayerA,B,C,D 참조
+    public List<RectTransform> playerARectTransforms = new List<RectTransform>(); // ARectTransform(HoverAnimation위치)들을 저장해놓을 리스트
+    public List<RectTransform> playerBRectTransforms = new List<RectTransform>(); // BRectTransform(HoverAnimation위치)들을 저장해놓을 리스트
+    public List<RectTransform> playerCRectTransforms = new List<RectTransform>(); // CRectTransform(HoverAnimation위치)들을 저장해놓을 리스트
+    public List<RectTransform> playerDRectTransforms = new List<RectTransform>(); // DRectTransform(HoverAnimation위치)들을 저장해놓을 리스트
     
     public bool isPlayerTurn = true;
 
@@ -19,12 +22,13 @@ public class ScoreboardHoverAnimation : MonoBehaviour
     private void Start()
     {
         scoreboardTurnActivator = GetComponent<ScoreboardTurnActivator>(); // ScoreboardTurnActivator.cs 참조
-        // Player_A와 Player_B 내부의 "Line_{i}"를 찾아 리스트에 저장
-        FindRectTransforms(scoreboardTurnActivator.playerA, playerARectTransforms);
-        FindRectTransforms(scoreboardTurnActivator.playerB, playerBRectTransforms);
         // Categories 내부의 "SelectImage" 를 모두 찾아 리스트에 저장
         FindSelectImage(categories, selectImages);
-        // 버튼들 가져오기
+        // Player_A,B,C,D 내부의 "Line_{i}"를 찾아 리스트에 저장
+        FindRectTransforms(scoreboardTurnActivator.playerA, playerARectTransforms);
+        FindRectTransforms(scoreboardTurnActivator.playerB, playerBRectTransforms);
+        FindRectTransforms(scoreboardTurnActivator.playerC, playerCRectTransforms);
+        FindRectTransforms(scoreboardTurnActivator.playerD, playerDRectTransforms);
     }
 
     private void Update()

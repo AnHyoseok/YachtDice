@@ -1,46 +1,64 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic; // List¸¦ »ç¿ëÇÏ·Á¸é Ãß°¡
+using System.Collections.Generic; // Listë¥¼ ì‚¬ìš©í•˜ë ¤ë©´ ì¶”ê°€
 
 public class ScoreboardTurnActivator : MonoBehaviour
 {
-    public List<GameObject> playerList = new List<GameObject>(); // ÀÚ½Ä ¿ÀºêÁ§Æ®ÀÎ Player¸¦ ´ãÀ» ¸®½ºÆ®
+    public List<GameObject> playerList = new List<GameObject>(); // ìì‹ ì˜¤ë¸Œì íŠ¸ì¸ Playerë“¤ì„ ë‹´ì„ ë¦¬ìŠ¤íŠ¸
     public GameObject playerA; // PlayerList[0]
     public GameObject playerB; // PlayerList[1]
-    public bool isPlayerATurn = false; // ½ÃÀÛÇÒ ¶§ ¾Æ¹«µµ ÅÏÀÌ ¾Æ´Ô
-    public bool isPlayerBTurn = false;
-    private List<Image> playerATurnImages = new List<Image>(); // TurnImageµéÀ» ´ãÀ» ¸®½ºÆ®
+    public GameObject playerC; // PlayerList[2]
+    public GameObject playerD; // PlayerList[3]
+
+    private List<Image> playerATurnImages = new List<Image>(); // TurnImageë“¤ì„ ë‹´ì„ ë¦¬ìŠ¤íŠ¸
     private List<Image> playerBTurnImages = new List<Image>();
-    
+    private List<Image> playerCTurnImages = new List<Image>();
+    private List<Image> playerDTurnImages = new List<Image>();
+    public List<List<Image>> playerTurnImages = new List<List<Image>>(); // í”Œë ˆì´ì–´ë³„ TurnImageë¦¬ìŠ¤íŠ¸ ì €ì¥
+
+    private bool isPlayerATurn = false;
+    private bool isPlayerBTurn = false;
+    private bool isPlayerCTurn = false;
+    private bool isPlayerDTurn = false;
+
+    private int currentTurnIndex = 0; // í˜„ì¬ í„´ì¸ í”Œë ˆì´ì–´ì˜ ì¸ë±ìŠ¤
+
 
     void Start()
     {
-        // ÀÚ½ÄÁß¿¡ Player¸¦ ¸ğµÎÃ£¾Æ ÀúÀåÇÏ±â
+        // ìì‹ì¤‘ì— Playerë¥¼ ëª¨ë‘ì°¾ì•„ ì €ì¥í•˜ê¸°
         FindPlayersWithTag();
-        // Player ³»ºÎÀÇ "TurnImage"¸¦ ¸ğµÎ Ã£¾Æ ¸®½ºÆ®¿¡ ÀúÀå
+        // Player ë‚´ë¶€ì˜ "TurnImage"ë¥¼ ëª¨ë‘ ì°¾ì•„ ë¦¬ìŠ¤íŠ¸ì— ì €ì¥
+        if (playerA == null) return;
         FindTurnImages(playerA, playerATurnImages);
+        if (playerB == null) return;
         FindTurnImages(playerB, playerBTurnImages);
+        if (playerC == null) return;
+        FindTurnImages(playerC, playerCTurnImages);
+        if (playerD == null) return;
+        FindTurnImages(playerD, playerDTurnImages);
     }
 
-    // "Player" ÅÂ±×¸¦ °¡Áø ÀÚ½Ä ¿ÀºêÁ§Æ®µéÀ» ¸®½ºÆ®¿¡ ÀúÀåÇÏ´Â ¸Ş¼­µå
+    // "Player" íƒœê·¸ë¥¼ ê°€ì§„ ìì‹ ì˜¤ë¸Œì íŠ¸ë“¤ì„ ë¦¬ìŠ¤íŠ¸ì— ì €ì¥í•˜ëŠ” ë©”ì„œë“œ
     void FindPlayersWithTag()
     {
-        // GetComponentsInChildren<Transform>À» »ç¿ëÇØ ¸ğµç ÀÚ½Ä ¿ÀºêÁ§Æ®¸¦ °Ë»ö
+        // GetComponentsInChildren<Transform>ì„ ì‚¬ìš©í•´ ëª¨ë“  ìì‹ ì˜¤ë¸Œì íŠ¸ë¥¼ ê²€ìƒ‰
         foreach (Transform child in transform)
         {
-            // ÀÚ½Ä ¿ÀºêÁ§Æ®°¡ "Player" ÅÂ±×¸¦ °¡Á³´Ù¸é playerList¿¡ Ãß°¡
+            // ìì‹ ì˜¤ë¸Œì íŠ¸ê°€ "Player" íƒœê·¸ë¥¼ ê°€ì¡Œë‹¤ë©´ playerListì— ì¶”ê°€
             if (child.CompareTag("Player"))
             {
                 playerList.Add(child.gameObject);
             }
         }
-        if (playerList[0] == null )return;
-        playerA = playerList[0];
-        if (playerList[1] == null) return;
-        playerB = playerList[1];
+        // ë¦¬ìŠ¤íŠ¸ í¬ê¸°ë¥¼ ë¨¼ì € í™•ì¸í•œ í›„ í• ë‹¹
+        if (playerList.Count > 0) playerA = playerList[0];
+        if (playerList.Count > 1) playerB = playerList[1];
+        if (playerList.Count > 2) playerC = playerList[2];
+        if (playerList.Count > 3) playerD = playerList[3];
     }
 
-    // "TurnImage" ÀÌ¸§¸¦ °¡Áø ÀÚ½Ä ¿ÀºêÁ§Æ®µéÀ» ¸®½ºÆ®¿¡ ÀúÀåÇÏ´Â ¸Ş¼­µå
+    // "TurnImage" ì´ë¦„ë¥¼ ê°€ì§„ ìì‹ ì˜¤ë¸Œì íŠ¸ë“¤ì„ ë¦¬ìŠ¤íŠ¸ì— ì €ì¥í•˜ëŠ” ë©”ì„œë“œ
     private void FindTurnImages(GameObject player, List<Image> turnImages)
     {
         if (player == null) return;
@@ -50,42 +68,43 @@ public class ScoreboardTurnActivator : MonoBehaviour
         {
             if (img.gameObject.name == "TurnImage")
             {
-                turnImages.Add(img); // TurnImage¸¦ ¸®½ºÆ®¿¡ Ãß°¡
+                turnImages.Add(img); // TurnImageë¥¼ ë¦¬ìŠ¤íŠ¸ì— ì¶”ê°€
             }
         }
     }
 
+    // í˜„ì¬ Update()ì•ˆ ë‚´ìš©ì€ í…ŒìŠ¤íŠ¸ìš© 03/21(ê¸ˆ)
     void Update()
     {
-        // Player_AÀÇ TurnImage È°¼ºÈ­/ºñÈ°¼ºÈ­
+        // Player_Aì˜ TurnImage í™œì„±í™”/ë¹„í™œì„±í™”
         foreach (var img in playerATurnImages)
         {
-            img.gameObject.SetActive(isPlayerATurn); // °¢ TurnImage¸¦ isPlayerATurn¿¡ ¸Â°Ô È°¼ºÈ­/ºñÈ°¼ºÈ­
+            img.gameObject.SetActive(isPlayerATurn); // ê° TurnImageë¥¼ isPlayerATurnì— ë§ê²Œ í™œì„±í™”/ë¹„í™œì„±í™”
         }
 
-        // Player_BÀÇ TurnImage È°¼ºÈ­/ºñÈ°¼ºÈ­
+        // Player_Bì˜ TurnImage í™œì„±í™”/ë¹„í™œì„±í™”
         foreach (var img in playerBTurnImages)
         {
-            img.gameObject.SetActive(isPlayerBTurn); // °¢ TurnImage¸¦ isPlayerBTurn¿¡ ¸Â°Ô È°¼ºÈ­/ºñÈ°¼ºÈ­
+            img.gameObject.SetActive(isPlayerBTurn); // ê° TurnImageë¥¼ isPlayerBTurnì— ë§ê²Œ í™œì„±í™”/ë¹„í™œì„±í™”
         }
 
-        // Å° ÀÔ·ÂÀ» ÅëÇØ Player_A ÅÏÀ» Åä±Û
-        if (Input.GetKeyDown(KeyCode.Alpha1))  // ¼ıÀÚ 1À» ´­·¶À» ¶§
+        // í‚¤ ì…ë ¥ì„ í†µí•´ Player_A í„´ì„ í† ê¸€
+        if (Input.GetKeyDown(KeyCode.Alpha1))  // ìˆ«ì 1ì„ ëˆŒë €ì„ ë•Œ
         {
-            isPlayerATurn = !isPlayerATurn;  // isPlayerATurn °ªÀ» Åä±Û
-            if (isPlayerATurn)  // Player_AÀÇ ÅÏÀÌ ½ÃÀÛµÇ¸é
+            isPlayerATurn = !isPlayerATurn;  // isPlayerATurn ê°’ì„ í† ê¸€
+            if (isPlayerATurn)  // Player_Aì˜ í„´ì´ ì‹œì‘ë˜ë©´
             {
-                isPlayerBTurn = false;  // Player_BÀÇ ÅÏÀ» °­Á¦·Î false·Î ¼³Á¤
+                isPlayerBTurn = false;  // Player_Bì˜ í„´ì„ ê°•ì œë¡œ falseë¡œ ì„¤ì •
             }
         }
 
-        // Å° ÀÔ·ÂÀ» ÅëÇØ Player_B ÅÏÀ» Åä±Û
-        if (Input.GetKeyDown(KeyCode.Alpha2))  // ¼ıÀÚ 2¸¦ ´­·¶À» ¶§
+        // í‚¤ ì…ë ¥ì„ í†µí•´ Player_B í„´ì„ í† ê¸€
+        if (Input.GetKeyDown(KeyCode.Alpha2))  // ìˆ«ì 2ë¥¼ ëˆŒë €ì„ ë•Œ
         {
-            isPlayerBTurn = !isPlayerBTurn;  // isPlayerBTurn °ªÀ» Åä±Û
-            if (isPlayerBTurn)  // Player_BÀÇ ÅÏÀÌ ½ÃÀÛµÇ¸é
+            isPlayerBTurn = !isPlayerBTurn;  // isPlayerBTurn ê°’ì„ í† ê¸€
+            if (isPlayerBTurn)  // Player_Bì˜ í„´ì´ ì‹œì‘ë˜ë©´
             {
-                isPlayerATurn = false;  // Player_AÀÇ ÅÏÀ» °­Á¦·Î false·Î ¼³Á¤
+                isPlayerATurn = false;  // Player_Aì˜ í„´ì„ ê°•ì œë¡œ falseë¡œ ì„¤ì •
             }
         }
     }
