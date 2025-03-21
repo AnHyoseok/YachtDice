@@ -513,7 +513,7 @@ GameObject:
   - component: {fileID: 4273852960919832730}
   - component: {fileID: 6136139748988295480}
   - component: {fileID: 8344263653376756048}
-  - component: {fileID: 581605751978742666}
+  - component: {fileID: -1479015747183741595}
   m_Layer: 0
   m_Name: Dice
   m_TagString: Dice
@@ -710,11 +710,11 @@ MonoBehaviour:
   observableSearch: 2
   ObservedComponents:
   - {fileID: 6136139748988295480}
-  - {fileID: 581605751978742666}
+  - {fileID: -1479015747183741595}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
---- !u!114 &581605751978742666
+--- !u!114 &-1479015747183741595
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -727,8 +727,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SynchronizeVelocity: 1
-  m_SynchronizeAngularVelocity: 0
-  m_TeleportEnabled: 0
+  m_SynchronizeAngularVelocity: 1
+  m_TeleportEnabled: 1
   m_TeleportIfDistanceGreaterThan: 3
 --- !u!1 &2530853596432772595
 GameObject:

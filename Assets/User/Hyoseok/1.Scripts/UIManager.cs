@@ -18,7 +18,7 @@ public class UIManager : MonoBehaviour
     public TMP_InputField nameInputField;  // 플레이어 이름 입력 필드
     public TextMeshProUGUI warningText; // 경고 메시지 UI
     public GameObject warningPanel; // 경고 패널 
-
+    public GameObject namePanel;
     public Button addAIButton;
 
 
@@ -96,6 +96,12 @@ public class UIManager : MonoBehaviour
     public void HideModeSelection()
     {
         modeSelectionPanel.SetActive(false);
+    }
+
+    // 이름 변경 ui 닫기
+    public void HidenamePanel()
+    {
+        namePanel.SetActive(false);
     }
 
     // 플레이어 이름 입력 UI 표시

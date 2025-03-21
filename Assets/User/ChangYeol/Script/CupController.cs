@@ -16,6 +16,7 @@ public class CupController : MonoBehaviour
     private DiceManager diceManager;
     private List<GameObject> falseDices = new List<GameObject>();
     private GameObject Dice;
+    GameObject Forcedice;
     [HideInInspector] public Animator animator;
     private bool isShake = false;
     private float timer;
@@ -91,13 +92,12 @@ public class CupController : MonoBehaviour
             ObjectInstantiate();
         }
     }
-
-
-    //[PunRPC]
-    public void ObjectInstantiate()
+    [PunRPC]
+    public void DesDiceList()
     {
         for (int i = 0; i < selectDice.turnLimit - selectDice.movesThisTurn; i++)
         {
+            Debug.Log("dddd");
             Destroy(falseDices[i]);
         }
         for (int i = 0; i < selectDice.turnLimit - selectDice.movesThisTurn; i++)
@@ -105,12 +105,19 @@ public class CupController : MonoBehaviour
             falseDices.RemoveAll(x => x != null);
 
             RandomPoition();
+            Debug.Log("123132");
 
-          
-                diceManager.dices[i] = Dice.GetComponent<Dice>();
-                Dice.name = $"Dice{i}";
-            
+            diceManager.dices[i] = Dice.GetComponent<Dice>();
+            Dice.name = $"Dice{i}";
+
         }
+    }
+    //[PunRPC]
+    public void ObjectInstantiate()
+    {
+        photonView.RPC("DesDiceList", RpcTarget.MasterClient);
+        
+      
         diceManager.isArray = false;
         diceManager.isRotat = false;
 
@@ -124,7 +131,6 @@ public class CupController : MonoBehaviour
         GetComponent<BoxCollider>().enabled = false;
         Vector3 offset = diceManager.GetUniqueRandomPosition(transform.position.x, transform.position.x + 0.01f);
         Quaternion randomRot = Quaternion.Euler(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
-  
             Dice = PhotonNetwork.Instantiate("Dice", offset, randomRot);
         
         Rigidbody dicerb = Dice.GetComponent<Rigidbody>();
@@ -148,11 +154,17 @@ public class CupController : MonoBehaviour
             Quaternion randomRot = Quaternion.Euler(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
             if (PhotonNetwork.IsMasterClient)
             {
-                GameObject Forcedice = PhotonNetwork.Instantiate("Forcedice", offset, randomRot);
-                falseDices.Add(Forcedice);
+                Forcedice = PhotonNetwork.Instantiate("Forcedice", offset, randomRot);
             }
 
+            photonView.RPC("AddDiceList", RpcTarget.Others); 
         }
+    }
+
+    [PunRPC]
+    public void AddDiceList()
+    {
+        falseDices.Add(Forcedice);
     }
 }
 
