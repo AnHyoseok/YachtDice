@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
-//using Photon.Pun;
+using Photon.Pun;
 
 public class CupController : MonoBehaviour
 {
     #region Variables
-    //private PhotonView photonView;
+    private PhotonView photonView;
     public ButtonController button;
     public GameObject boxGroup;
     public Transform wall;
@@ -15,7 +15,7 @@ public class CupController : MonoBehaviour
     private DiceManager diceManager;
     private List<GameObject> falseDices = new List<GameObject>();
     private GameObject Dice;
-    [HideInInspector]public Animator animator;
+    [HideInInspector] public Animator animator;
     private bool isShake = false;
     private float timer;
     public float pourOutTime = 5;
@@ -26,7 +26,7 @@ public class CupController : MonoBehaviour
     #endregion
     private void Start()
     {
-        //photonView = GetComponent<PhotonView>();
+        photonView = GetComponent<PhotonView>();
         animator = GetComponent<Animator>();
         diceManager = DiceManager.Instance;
     }
@@ -37,7 +37,7 @@ public class CupController : MonoBehaviour
             return;
         }
         isShake = !Input.GetKey(KeyCode.LeftShift);
-        if (!isShake )
+        if (!isShake)
         {
             timer += Time.deltaTime;
             if (timer >= pourOutTime)
@@ -70,34 +70,62 @@ public class CupController : MonoBehaviour
         animator.SetBool(IsShake, isShake);
         animator.SetBool(IsButton, button.isButton);
     }
+    public void TryRollDice()
+    {
+
+        if (TurnManager.instance.IsMyTurn() && DiceManager.Instance.rollsLeft > 0)
+        {
+            photonView.RPC("RPC_RequestDiceSpawn", RpcTarget.MasterClient);
+        }
+    }
+
+
+    [PunRPC]
+    public void RPC_RequestDiceSpawn()
+    {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            ObjectInstantiate();
+        }
+    }
+
+
     //[PunRPC]
     public void ObjectInstantiate()
     {
-        for(int i = 0; i < selectDice.turnLimit - selectDice.movesThisTurn; i++)
+        for (int i = 0; i < selectDice.turnLimit - selectDice.movesThisTurn; i++)
         {
             Destroy(falseDices[i]);
         }
         for (int i = 0; i < selectDice.turnLimit - selectDice.movesThisTurn; i++)
         {
             falseDices.RemoveAll(x => x != null);
+
             RandomPoition();
-            diceManager.dices[i] = Dice.GetComponent<Dice>();
-            Dice.name = $"Dice{i}";
+
+          
+                diceManager.dices[i] = Dice.GetComponent<Dice>();
+                Dice.name = $"Dice{i}";
+            
         }
         diceManager.isArray = false;
         diceManager.isRotat = false;
 
         diceManager.rollsLeft--;
+
+      
     }
     void RandomPoition()
     {
         boxGroup.SetActive(false);
         GetComponent<BoxCollider>().enabled = false;
-        Vector3 offset = diceManager.GetUniqueRandomPosition(transform.position.x,transform.position.x + 0.01f);
-        Quaternion randomRot = Quaternion.Euler(Random.Range(0,360),Random.Range(0,360),Random.Range(0,360));
-        Dice = Instantiate(diceManager.dice.gameObject, offset, randomRot);
+        Vector3 offset = diceManager.GetUniqueRandomPosition(transform.position.x, transform.position.x + 0.01f);
+        Quaternion randomRot = Quaternion.Euler(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
+  
+            Dice = PhotonNetwork.Instantiate("Dice", offset, randomRot);
+        
         Rigidbody dicerb = Dice.GetComponent<Rigidbody>();
-        if(dicerb != null && wall != null)
+        if (dicerb != null && wall != null)
         {
             Vector3 forceDirection = (wall.position - offset).normalized;
             dicerb.AddForce(forceDirection * initialForce, ForceMode.Impulse);
@@ -107,14 +135,19 @@ public class CupController : MonoBehaviour
     //[PunRPC]
     public void RandomDice()
     {
+        if (!PhotonNetwork.IsMasterClient) return;
         boxGroup.SetActive(true);
         GetComponent<BoxCollider>().enabled = true;
-        for(int i = 0; i < selectDice.turnLimit - selectDice.movesThisTurn; i++)
+        for (int i = 0; i < selectDice.turnLimit - selectDice.movesThisTurn; i++)
         {
             Vector3 offset = diceManager.GetUniqueRandomPosition(transform.position.x, transform.position.x + 0.01f);
             Quaternion randomRot = Quaternion.Euler(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
-            GameObject Forcedice = Instantiate(diceManager.dice.gameObject, offset, randomRot);
-            falseDices.Add(Forcedice);
+            if (PhotonNetwork.IsMasterClient)
+            {
+                GameObject Forcedice = PhotonNetwork.Instantiate("Forcedice", offset, randomRot);
+                falseDices.Add(Forcedice);
+            }
+
         }
     }
 }

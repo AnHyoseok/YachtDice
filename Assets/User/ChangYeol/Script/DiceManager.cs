@@ -2,6 +2,7 @@ using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -37,6 +38,7 @@ public class DiceManager : Singleton<DiceManager>
     public float minRangeY = 1f;
     public float maxRangeY = 2f;
     public int rollsLeft = 3;  //최대 3번 굴릴 수 있음
+    public TextMeshProUGUI rollsLeftText;
 
     private HashSet<float> usedYValues = new HashSet<float>(); // 중복 방지용 Y값 저장
     private int upperSectionScore = 0;
@@ -54,6 +56,14 @@ public class DiceManager : Singleton<DiceManager>
     private void Update()
     {
         CheckDiceStopped();
+        //스코어 기록 
+        rollsLeftText.text = rollsLeft.ToString() + " left";
+        if (rollsLeft <= 0)
+        {
+            
+            TurnManager.instance.EndMyTurn();
+        }
+
     }
 
     public Vector3 GetUniqueRandomPosition(float minRangeX, float maxRangeX)
