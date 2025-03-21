@@ -1,84 +1,56 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
 
-public class ScoreboardHoverAnimation : MonoBehaviour, IPointerEnterHandler //, IPointerExitHandler
+public class ScoreboardHoverAnimation : MonoBehaviour
 {
-    public GameObject hoverAnimation; // Hover ¾Ö´Ï¸ŞÀÌ¼Ç È¿°ú
-    public ScoreboardTurnActivator scoreboardTurnActivator; // ScoreboardTurnActivator.csÀÇ PlayerA, PlayerB ÂüÁ¶
-    public List<RectTransform> playerARectTransforms = new List<RectTransform>(); // ARectTransform(HoverAnimationÀ§Ä¡)µéÀ» ÀúÀåÇØ³õÀ» ¸®½ºÆ®
-    public List<RectTransform> playerBRectTransforms = new List<RectTransform>(); // BRectTransform(HoverAnimationÀ§Ä¡)µéÀ» ÀúÀåÇØ³õÀ» ¸®½ºÆ®
-
-    public GameObject categories; // SelectÇ¥½Ã(ÁÖÈ²»ö)ÇÒ Ä«Å×°í¸®
-    private List<Image> selectImages = new List<Image>(); // SelectImageµéÀ» ´ãÀ» ¸®½ºÆ®
-
+    public GameObject hoverAnimation; // Hover ì• ë‹ˆë©”ì´ì…˜ íš¨ê³¼
+    public ScoreboardTurnActivator scoreboardTurnActivator; // ScoreboardTurnActivator.csì˜ PlayerA, PlayerB ì°¸ì¡°
+    public List<RectTransform> playerARectTransforms = new List<RectTransform>(); // ARectTransform(HoverAnimationìœ„ì¹˜)ë“¤ì„ ì €ì¥í•´ë†“ì„ ë¦¬ìŠ¤íŠ¸
+    public List<RectTransform> playerBRectTransforms = new List<RectTransform>(); // BRectTransform(HoverAnimationìœ„ì¹˜)ë“¤ì„ ì €ì¥í•´ë†“ì„ ë¦¬ìŠ¤íŠ¸
+    public GameObject categories; // Selectí‘œì‹œ(ì£¼í™©ìƒ‰)í•  ì¹´í…Œê³ ë¦¬
+    public List<Image> selectImages = new List<Image>(); // SelectImageë“¤ì„ ë‹´ì„ ë¦¬ìŠ¤íŠ¸
+    
     public bool isPlayerTurn = true;
+
+    private int previousHoveredIndex = -1;
 
     private void Start()
     {
-        scoreboardTurnActivator = GetComponent<ScoreboardTurnActivator>(); // ScoreboardTurnActivator.cs ÂüÁ¶
-        // Player_A¿Í Player_B ³»ºÎÀÇ "Line_{i}"¸¦ Ã£¾Æ ¸®½ºÆ®¿¡ ÀúÀå
+        scoreboardTurnActivator = GetComponent<ScoreboardTurnActivator>(); // ScoreboardTurnActivator.cs ì°¸ì¡°
+        // Player_Aì™€ Player_B ë‚´ë¶€ì˜ "Line_{i}"ë¥¼ ì°¾ì•„ ë¦¬ìŠ¤íŠ¸ì— ì €ì¥
         FindRectTransforms(scoreboardTurnActivator.playerA, playerARectTransforms);
         FindRectTransforms(scoreboardTurnActivator.playerB, playerBRectTransforms);
-        // Categories ³»ºÎÀÇ "SelectImage" ¸¦ ¸ğµÎ Ã£¾Æ ¸®½ºÆ®¿¡ ÀúÀå
+        // Categories ë‚´ë¶€ì˜ "SelectImage" ë¥¼ ëª¨ë‘ ì°¾ì•„ ë¦¬ìŠ¤íŠ¸ì— ì €ì¥
         FindSelectImage(categories, selectImages);
+        // ë²„íŠ¼ë“¤ ê°€ì ¸ì˜¤ê¸°
     }
 
     private void Update()
     {
-        // ÇÃ·¹ÀÌ¾î ÅÏÀÏ¶§
-        if (isPlayerTurn)
+        // í˜„ì¬ ë§ˆìš°ìŠ¤ê°€ ì˜¬ë¼ê°„ RectTransformê³¼ ì¸ë±ìŠ¤ ê°€ì ¸ì˜¤ê¸°
+        RectTransform hoveredRect = GetHoveredRect(playerARectTransforms);
+        int hoveredRectindex = GetHoveredRectIndex(playerARectTransforms);
+
+        // hoverAnimation ìœ„ì¹˜ ì„¤ì •
+        if (hoveredRect != null)
         {
-            hoverAnimation.SetActive(true); // ÇÃ·¹ÀÌ¾î ÅÏÀÏ¶§ ¾Ö´Ï¸ŞÀÌ¼Ç È¿°ú On
-
-            if (scoreboardTurnActivator.isPlayerATurn) // PlayerA ÅÏÀÌ¸é
-            {
-                RectTransform hoveredRect = GetHoveredRectA();
-                int hoveredIndex = GetHoveredRectAIndex();
-
-                // hoveredRect ¶Ç´Â hoveredIndex°¡ À¯È¿ÇÑÁö Ã¼Å©
-                if (hoveredRect != null && hoveredIndex != -1)
-                {
-                    // ºü¸£°Ô À§Ä¡ ÀÌµ¿
-                    hoverAnimation.transform.position = hoveredRect.position;
-
-                    // ¸ğµç selectImages¸¦ ºñÈ°¼ºÈ­
-                    for (int i = 0; i < selectImages.Count; i++)
-                    {
-                        if (i == hoveredIndex)
-                        {
-                            // ÇöÀç ¸¶¿ì½º°¡ À§Ä¡ÇÑ ÀÌ¹ÌÁö¸¸ È°¼ºÈ­
-                            selectImages[hoveredIndex].gameObject.SetActive(true);
-                            continue;
-                        }
-                        selectImages[i].gameObject.SetActive(false);
-                    }
-                }
-            }
-            else if (scoreboardTurnActivator.isPlayerBTurn) // PlayerB ÅÏÀÌ¸é
-            {
-
-            }
+            hoverAnimation.transform.position = hoveredRect.position;
+            hoverAnimation.SetActive(true);
         }
-        /*else
-        {
-            hoverAnimation.SetActive(false); // ÇÃ·¹ÀÌ¾î ÅÏÀÌ ¾Æ´Ï¸é ¾Ö´Ï¸ŞÀÌ¼Ç È¿°ú Off
-        }*/
-            
-    }
 
-    private void FindSelectImage(GameObject categories, List<Image> selectImages)
-    {
-        if (categories == null) return;
-
-        Image[] images = categories.GetComponentsInChildren<Image>(true);
-        foreach (Image img in images)
+        // ì´ì „ì— í™œì„±í™”ëœ selectImageë¥¼ ë¹„í™œì„±í™” (ë‹¨, hoveredRectindexê°€ -1ì¼ ë•ŒëŠ” ë¹„í™œì„±í™” ì•ˆ í•¨)
+        if (previousHoveredIndex != -1 && previousHoveredIndex != hoveredRectindex && hoveredRectindex != -1)
         {
-            if (img.gameObject.name == "SelectImage")
-            {
-                selectImages.Add(img); // TurnImage¸¦ ¸®½ºÆ®¿¡ Ãß°¡
-            }
+            selectImages[previousHoveredIndex].gameObject.SetActive(false);
+        }
+
+        // ìƒˆë¡œìš´ hoveredRectindexê°€ ìœ íš¨í•˜ë©´ í™œì„±í™”
+        if (hoveredRectindex > -1)
+        {
+            selectImages[hoveredRectindex].gameObject.SetActive(true);
+            previousHoveredIndex = hoveredRectindex; // âœ… ë§ˆìš°ìŠ¤ê°€ ë²—ì–´ë‚˜ë„ ë§ˆì§€ë§‰ ì¸ë±ìŠ¤ ê¸°ì–µ
         }
     }
 
@@ -102,67 +74,42 @@ public class ScoreboardHoverAnimation : MonoBehaviour, IPointerEnterHandler //, 
         }
     }
 
-    // OnPointerEnter´Â ¸¶¿ì½º°¡ RectTransform¿¡ µé¾î¿ÔÀ» ¶§ È£ÃâµÇ´Â ¸Ş¼­µå
-    public void OnPointerEnter(PointerEventData eventData)
+    private void FindSelectImage(GameObject categories, List<Image> selectImages)
     {
-        // ¸¶¿ì½º°¡ ¿Ã¶ó°£ RectTransformÀ» Ã£¾Æ ±× À§Ä¡¸¦ hoverEffect¿¡ Àû¿ë
-        RectTransform hoveredRect = GetHoveredRectA();
-        if (hoveredRect != null)
+        if (categories == null) return;
+
+        Image[] images = categories.GetComponentsInChildren<Image>(true);
+        foreach (Image img in images)
         {
-            hoverAnimation.transform.position = hoveredRect.position; // HoverEffectÀÇ À§Ä¡¸¦ ¸¶¿ì½º°¡ ¿Ã¶ó°£ RectTransformÀÇ À§Ä¡·Î ¼³Á¤
+            if (img.gameObject.name == "SelectImage")
+            {
+                selectImages.Add(img); // TurnImageë¥¼ ë¦¬ìŠ¤íŠ¸ì— ì¶”ê°€
+            }
         }
     }
 
-    /*// OnPointerExit´Â ¸¶¿ì½º°¡ RectTransformÀ» ¹ş¾î³µÀ» ¶§ È£ÃâµÇ´Â ¸Ş¼­µå
-    public void OnPointerExit(PointerEventData eventData)
+    private RectTransform GetHoveredRect(List<RectTransform> rectTransforms)
     {
-        isHovered = false; // ¸¶¿ì½º°¡ ¹ş¾î³µ´Ù´Â °ÍÀ» Ç¥½Ã
-
-        // HoverEffect ºñÈ°¼ºÈ­
-        if (hoverEffect != null)
+        // RectTransforms ë¦¬ìŠ¤íŠ¸ì—ì„œ ë§ˆìš°ìŠ¤ê°€ ì˜¬ë¼ê°„ RectTransformì„ ì°¾ê¸°
+        foreach (RectTransform rect in rectTransforms)
         {
-            hoverEffect.SetActive(false); // HoverEffect ºñÈ°¼ºÈ­
-        }
-    }*/
-
-    private RectTransform GetHoveredRectA()
-    {
-        // playerBRectTransforms ¸®½ºÆ®¿¡¼­ ¸¶¿ì½º°¡ Æ÷ÇÔµÈ RectTransformÀ» Ã£±â
-        foreach (RectTransform rect in playerARectTransforms)
-        {
-            // RectTransformÀÌ ¸¶¿ì½º Ä¿¼­¿Í °ãÄ¡´ÂÁö È®ÀÎ
             if (RectTransformUtility.RectangleContainsScreenPoint(rect, Input.mousePosition, null))
             {
-                return rect; // °ãÄ£ RectTransformÀ» ¹İÈ¯
+                return rect; // ë§ˆìš°ìŠ¤ê°€ ì˜¬ë¼ê°„ RectTransform ë°˜í™˜
             }
         }
-        return null; // ÇØ´çÇÏ´Â RectTransformÀÌ ¾øÀ¸¸é null ¹İÈ¯
+        return null; // ë§ˆìš°ìŠ¤ê°€ ì•„ë¬´ UIì—ë„ ì˜¬ë¼ê°€ì§€ ì•Šìœ¼ë©´ null ë°˜í™˜
     }
 
-    private RectTransform GetHoveredRectB()
+    private int GetHoveredRectIndex(List<RectTransform> rectTransforms)
     {
-        // playerBRectTransforms ¸®½ºÆ®¿¡¼­ ¸¶¿ì½º°¡ Æ÷ÇÔµÈ RectTransformÀ» Ã£±â
-        foreach (RectTransform rect in playerBRectTransforms)
+        for (int i = 0; i < rectTransforms.Count; i++)
         {
-            // RectTransformÀÌ ¸¶¿ì½º Ä¿¼­¿Í °ãÄ¡´ÂÁö È®ÀÎ
-            if (RectTransformUtility.RectangleContainsScreenPoint(rect, Input.mousePosition, null))
+            if (RectTransformUtility.RectangleContainsScreenPoint(rectTransforms[i], Input.mousePosition, null))
             {
-                return rect; // °ãÄ£ RectTransformÀ» ¹İÈ¯
+                return i; // í•´ë‹¹ RectTransformì˜ ì¸ë±ìŠ¤ ë°˜í™˜
             }
         }
-        return null; // ÇØ´çÇÏ´Â RectTransformÀÌ ¾øÀ¸¸é null ¹İÈ¯
+        return -1; // ì—†ì„ ê²½ìš° -1 ë°˜í™˜
     }
-
-    private int GetHoveredRectAIndex()
-    {
-        for (int i = 0; i < playerARectTransforms.Count; i++)
-        {
-            if (RectTransformUtility.RectangleContainsScreenPoint(playerARectTransforms[i], Input.mousePosition, null))
-            {
-                return i; // ÇØ´ç RectTransformÀÇ ÀÎµ¦½º ¹İÈ¯
-            }
-        }
-        return -1; // ¾øÀ» °æ¿ì -1 ¹İÈ¯
-    }
-
 }
