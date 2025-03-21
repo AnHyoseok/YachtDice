@@ -15,7 +15,6 @@ public class SelectDice : MonoBehaviour
     private GameObject currentActiveUI = null;
     private Animator currentAnimator = null;
     private GameObject selectDiceObject = null;
-    private Vector3 originalPosition; // ���� ��ġ ����
     private int currentTargetIndex = 0;
     public int movesThisTurn = 0;
     private bool isGoMove = false;
@@ -164,15 +163,19 @@ public class SelectDice : MonoBehaviour
             {
                 Dice dice = hit.collider.gameObject.GetComponent<Dice>();
                 SelectDiceUISwich(dice);
-                playDiceAnime();
                 return;
             }
         }
-        if (currentActiveUI != null && currentAnimator != null)
+        
+        // 마우스가 주사위를 벗어났을 때 UI 비활성화
+        if (currentActiveUI != null)
         {
             currentActiveUI.SetActive(false);
-            currentAnimator.SetBool("IsSelect", false);
-            currentAnimator = null;
+            if (currentAnimator != null)
+            {
+                currentAnimator.SetBool("IsSelect", false);
+                currentAnimator = null;
+            }
             currentActiveUI = null;
         }
     }
@@ -181,44 +184,43 @@ public class SelectDice : MonoBehaviour
     {
         if(dice != null)
         {
+            // 이전 UI 비활성화 및 애니메이션 리셋
             if (currentActiveUI != null)
             {
                 currentActiveUI.SetActive(false);
+                if (currentAnimator != null)
+                {
+                    currentAnimator.SetBool("IsSelect", false);
+                }
             }
 
-            // 주사위의 윗면 값을 가져옵니다
             int diceValue = GetDiceTopValue(dice.gameObject);
             
+            // UI 선택 및 애니메이터 설정
             switch (diceValue)
             {
                 case 1:
-                    currentActiveUI = dice.SelectUICavas[0];
-                    currentAnimator = currentActiveUI.GetComponent<Animator>();
-                    break;
-                case 2:
-                    currentActiveUI = dice.SelectUICavas[1];
-                    currentAnimator = currentActiveUI.GetComponent<Animator>();
-                    break;
-                case 3:
-                    currentActiveUI = dice.SelectUICavas[2];
-                    currentAnimator = currentActiveUI.GetComponent<Animator>();
-                    break;
-                case 4:
-                    currentActiveUI = dice.SelectUICavas[1];
-                    currentAnimator = currentActiveUI.GetComponent<Animator>();
-                    break;
-                case 5:
-                    currentActiveUI = dice.SelectUICavas[2];
-                    currentAnimator = currentActiveUI.GetComponent<Animator>();
-                    break;
                 case 6:
                     currentActiveUI = dice.SelectUICavas[0];
-                    currentAnimator = currentActiveUI.GetComponent<Animator>();
+                    break;
+                case 2:
+                case 4:
+                    currentActiveUI = dice.SelectUICavas[1];
+                    break;
+                case 3:
+                case 5:
+                    currentActiveUI = dice.SelectUICavas[2];
                     break;
             }
+
             if (currentActiveUI != null)
             {
                 currentActiveUI.SetActive(true);
+                currentAnimator = currentActiveUI.GetComponent<Animator>();
+                if (currentAnimator != null)
+                {
+                    currentAnimator.SetBool("IsSelect", true);
+                }
             }
         }
     }
@@ -241,27 +243,11 @@ public class SelectDice : MonoBehaviour
         return 1; // 기본값 반환
     }
 
-    void playDiceAnime()
-    {
-        if (currentActiveUI != null)
-        {
-            Animator diceAnimator = currentActiveUI.GetComponent<Animator>();
-            if(diceAnimator != null)
-            {
-                if(currentAnimator != null && currentAnimator != diceAnimator)
-                {
-                    currentAnimator.SetBool("IsSelect", false);
-                }
-                diceAnimator.SetBool("IsSelect", true);
-                currentAnimator = diceAnimator;
-            }
-        }
-    }
     private void OnTurnEnd()
     {
         movesThisTurn = 0;
         currentTargetIndex = 0;
         DiceManager.Instance.rollsLeft = 3;
-        //�߰� ���: ���� �÷��̾� ������ �Ѿ�� ������ ���⿡ �߰� ����
+        //߰ :  ÷̾  Ѿ  ⿡ ߰ 
     }
 }
