@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
+using System.Linq;
 
 public class CupController : MonoBehaviour
 {
@@ -65,6 +66,8 @@ public class CupController : MonoBehaviour
     //[PunRPC]
     void AnimeCup()
     {
+        
+
         int ani = selectDice.turnLimit - selectDice.movesThisTurn;
         animator.SetInteger(DiceCount, ani);
         animator.SetBool(IsShake, isShake);
@@ -135,6 +138,7 @@ public class CupController : MonoBehaviour
     //[PunRPC]
     public void RandomDice()
     {
+     
         if (!PhotonNetwork.IsMasterClient) return;
         boxGroup.SetActive(true);
         GetComponent<BoxCollider>().enabled = true;

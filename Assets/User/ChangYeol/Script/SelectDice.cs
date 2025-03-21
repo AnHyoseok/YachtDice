@@ -32,7 +32,8 @@ public class SelectDice : MonoBehaviour
             isPut = Input.GetKey(KeyCode.Escape);
             if (isPut)
             {
-                //���������߉� 
+                //점수판 ui 알파값 0 
+                ScoreboardManager.instance.HideLocalScore();
 
                 foreach (Dice dice in DiceManager.Instance.dices)
                 {
@@ -248,6 +249,7 @@ public class SelectDice : MonoBehaviour
         movesThisTurn = 0;
         currentTargetIndex = 0;
         DiceManager.Instance.rollsLeft = 3;
-        //߰ :  ÷̾  Ѿ  ⿡ ߰ 
+        //ScoreboardEntry.HighlightScore 호출
+        //ScoreboardManager.instance.HighlightLocalScore("고른카테고리"); 
     }
 }

@@ -20,12 +20,33 @@ public class ScoreboardEntry : MonoBehaviour
     private bool isAI = false;
     private string aiName;
 
+    //점수 이미지 
+    public Dictionary<string, TextMeshProUGUI> scoreTexts = new Dictionary<string, TextMeshProUGUI>();
+
+
+    void Awake()
+    {
+        string[] categories = {
+        "ONES", "TWOS", "THREES", "FOURS", "FIVES", "SIXES",
+        "Choice", "4 of a Kind", "Full House", "S. Straight", "L. Straight", "Yacht"
+    };
+
+        for (int i = 0; i < upperSectionTexts.Length && i < 6; i++)
+        {
+            scoreTexts[categories[i]] = upperSectionTexts[i];
+        }
+
+        for (int i = 0; i < lowerSectionTexts.Length && i + 6 < categories.Length; i++)
+        {
+            scoreTexts[categories[i + 6]] = lowerSectionTexts[i];
+        }
+    }
     public void SetPlayerData(Player player)
     {
         this.player = player;
         isAI = false;
         playerNameText.text = player.NickName;
-
+        ScoreboardManager.instance.Register(player, this);
         SetTeamColor(player.CustomProperties);
         SetProfileImage(player.CustomProperties, false);
         UpdateScoreData(player.CustomProperties);
@@ -98,15 +119,54 @@ public class ScoreboardEntry : MonoBehaviour
     private void UpdateScoreUI()
     {
         for (int i = 0; i < upperSectionTexts.Length; i++)
+        {
             upperSectionTexts[i].text = scores[i].ToString();
 
+            if (scoreTexts.TryGetValue(GetCategoryByIndex(i), out var text))
+            {
+                Color c = text.color;
+                c.a = (scores[i] != 0) ? 1f : c.a; // 이미 기록된 점수는 항상 a = 1
+                text.color = c;
+            }
+        }
+
         for (int i = 0; i < lowerSectionTexts.Length; i++)
-            lowerSectionTexts[i].text = scores[i + 8].ToString();
+        {
+            int index = i + 8;
+            lowerSectionTexts[i].text = scores[index].ToString();
+
+            if (scoreTexts.TryGetValue(GetCategoryByIndex(index), out var text))
+            {
+                Color c = text.color;
+                c.a = (scores[index] != 0) ? 1f : c.a;
+                text.color = c;
+            }
+        }
 
         int total = 0;
         foreach (int score in scores) total += score;
         totalScoreText.text = total.ToString();
     }
+    private string GetCategoryByIndex(int index)
+    {
+        switch (index)
+        {
+            case 0: return "ONES";
+            case 1: return "TWOS";
+            case 2: return "THREES";
+            case 3: return "FOURS";
+            case 4: return "FIVES";
+            case 5: return "SIXES";
+            case 8: return "Choice";
+            case 9: return "4 of a Kind";
+            case 10: return "Full House";
+            case 11: return "S. Straight";
+            case 12: return "L. Straight";
+            case 13: return "Yacht";
+            default: return "";
+        }
+    }
+
 
     public void ShowPreview(Dictionary<string, int> previewScores)
     {
@@ -171,5 +231,36 @@ public class ScoreboardEntry : MonoBehaviour
             return spriteArray[index];
         }
         return (spriteArray != null && spriteArray.Length > 0) ? spriteArray[0] : null;
+    }
+
+
+    public void HideAll()
+    {
+        SetAllTextAlpha(0f);
+    }
+
+    public void ShowAll()
+    {
+        SetAllTextAlpha(0.5f);
+    }
+
+    public void HighlightScore(string category)
+    {
+        foreach (var kvp in scoreTexts)
+        {
+            Color c = kvp.Value.color;
+            c.a = (kvp.Key == category) ? 1f : 0f;
+            kvp.Value.color = c;
+        }
+    }
+
+    private void SetAllTextAlpha(float alpha)
+    {
+        foreach (var text in scoreTexts.Values)
+        {
+            Color c = text.color;
+            c.a = alpha;
+            text.color = c;
+        }
     }
 }

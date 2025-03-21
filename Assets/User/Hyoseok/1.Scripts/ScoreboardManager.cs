@@ -1,13 +1,22 @@
 using UnityEngine;
 using Photon.Pun;
 using ExitGames.Client.Photon;
-
+using Photon.Realtime;
+using System.Collections.Generic;
 public class ScoreboardManager : MonoBehaviour
 {
     public RectTransform scoreboardBackground;  
     public RectTransform scoreboardOutline;   
 
-    private int gameMode; 
+    private int gameMode;
+    public static ScoreboardManager instance;
+
+    private Dictionary<Player, ScoreboardEntry> playerEntries = new Dictionary<Player, ScoreboardEntry>();
+    private void Awake()
+    {
+        if (instance == null) instance = this;
+        else Destroy(gameObject);
+    }
 
     void Start()
     {
@@ -38,5 +47,39 @@ public class ScoreboardManager : MonoBehaviour
             scoreboardOutline.anchoredPosition = new Vector2(123, scoreboardOutline.anchoredPosition.y);
             scoreboardOutline.sizeDelta = new Vector2(752, scoreboardOutline.sizeDelta.y);
         }
+    }
+    public void Register(Player player, ScoreboardEntry entry)
+    {
+        if (!playerEntries.ContainsKey(player))
+        {
+            playerEntries.Add(player, entry);
+        }
+    }
+
+    public ScoreboardEntry GetEntry(Player player)
+    {
+        if (playerEntries.ContainsKey(player))
+            return playerEntries[player];
+        return null;
+    }
+
+    public ScoreboardEntry GetLocalPlayerEntry()
+    {
+        return GetEntry(PhotonNetwork.LocalPlayer);
+    }
+
+    public void HideLocalScore()
+    {
+        GetLocalPlayerEntry()?.HideAll();
+    }
+
+    public void ShowLocalScore()
+    {
+        GetLocalPlayerEntry()?.ShowAll();
+    }
+
+    public void HighlightLocalScore(string category)
+    {
+        GetLocalPlayerEntry()?.HighlightScore(category);
     }
 }

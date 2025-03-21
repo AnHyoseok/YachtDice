@@ -185,6 +185,7 @@ public class DiceManager : Singleton<DiceManager>
     public void ShowPreviewScore()
     {
         if (!isDiceArray) return;
+      
         int[] values = GetDiceValues().Concat(GetDiceValue()).ToArray();
         values = values.OrderBy(v => v).ToArray();
 
@@ -333,6 +334,10 @@ public class DiceManager : Singleton<DiceManager>
         }
         isArrays = false;
         isDiceArray = true;
+
+        //점수 알파 0.5
+        ScoreboardManager.instance.ShowLocalScore();
+
     }
     private Quaternion GetTargetRotation(int faceValue)
     {
