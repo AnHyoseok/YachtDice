@@ -625,7 +625,7 @@ MonoBehaviour:
   - {fileID: 8891494349097388508}
   - {fileID: 6277716761266077492}
   - {fileID: 8000445327154374582}
-  isStopDice: 0
+  index: 0
 --- !u!65 &5304782083198269749
 BoxCollider:
   m_ObjectHideFlags: 0

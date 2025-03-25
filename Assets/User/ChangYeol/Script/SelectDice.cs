@@ -1,13 +1,13 @@
-using NUnit.Framework;
 using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
+using Photon.Pun;
 
 public class SelectDice : MonoBehaviour
 {
     #region Variables
     public RectTransform SelectUI;
     public Transform[] targetPositions;
+    public bool[] isTarget;
     public float moveSpeed = 2f;
     public int turnLimit = 5;
 
@@ -15,7 +15,7 @@ public class SelectDice : MonoBehaviour
     private GameObject currentActiveUI = null;
     private Animator currentAnimator = null;
     private GameObject selectDiceObject = null;
-    private int currentTargetIndex = 0;
+    [HideInInspector]public int currentTargetIndex = 0;
     public int movesThisTurn = 0;
     private bool isGoMove = false;
     public bool isPut = false;
@@ -39,7 +39,7 @@ public class SelectDice : MonoBehaviour
                 {
                     if(dice != null)
                     {
-                        Destroy(dice.gameObject);
+                        PhotonNetwork.Destroy(dice.gameObject);
                     }
                 }
                 for (int i = 0; i < DiceManager.Instance.dices.Length; i++)
@@ -65,7 +65,7 @@ public class SelectDice : MonoBehaviour
     {
         if(movesThisTurn >= turnLimit)
         {
-            Debug.Log("�̵� Ƚ�� �ʰ�");
+            Debug.Log("이동 횟수 초과");
             OnTurnEnd();
             return;
         }
@@ -81,21 +81,40 @@ public class SelectDice : MonoBehaviour
                 {
                     selectDiceObject = hit.collider.gameObject;
                     Dice selectedDice = selectDiceObject.GetComponent<Dice>();
-                    if(!selectedDice.isSelected)
+
+
+                    if (!selectedDice.isSelected)
                     {
-                        StartCoroutine(MoveDiceToNextTartget(selectDiceObject, targetPositions[currentTargetIndex].position));
-                        MoveDiceBetweenArrays(selectedDice,DiceManager.Instance.dices,DiceManager.Instance.newdicelist);
-                        currentTargetIndex = (currentTargetIndex + 1) % targetPositions.Length;
-                        movesThisTurn++;
-                        selectedDice.isSelected = true;
+                        // false인 위치 찾기
+                        bool foundEmptyPosition = false;
+                        for (int i = 0; i < isTarget.Length; i++)
+                        {
+                            if (!isTarget[i])
+                            {
+                                currentTargetIndex = i;
+                                foundEmptyPosition = true;
+                                break;
+                            }
+                        }
+
+                        // 빈 위치를 찾았을 때만 이동
+                        if (foundEmptyPosition)
+                        {
+                            StartCoroutine(MoveDiceToNextTartget(selectDiceObject, targetPositions[currentTargetIndex].position));
+                            MoveDiceBetweenArrays(selectedDice,DiceManager.Instance.dices,DiceManager.Instance.newdicelist);
+                            movesThisTurn++;
+                            selectedDice.isSelected = true;
+                            selectedDice.index = currentTargetIndex;
+                            isTarget[currentTargetIndex] = true;
+                        }
                     }
                     else if(selectedDice.isSelected)
                     {
                         StartCoroutine(MoveDiceToNextTartget(selectDiceObject, selectedDice.originPos));
                         MoveDiceBetweenArrays(selectedDice, DiceManager.Instance.newdicelist, DiceManager.Instance.dices);
-                        currentTargetIndex = Mathf.Max(0,currentTargetIndex - 1);
                         movesThisTurn--;
                         selectedDice.isSelected = false;
+                        isTarget[selectedDice.index] = false;
                     }
                     DiceManager.Instance.DiceArrays();
                 }

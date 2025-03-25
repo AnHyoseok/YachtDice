@@ -2161,6 +2161,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3652ea9db46cbe4b83ee6f48d5ad183, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  selectDice: {fileID: 733545515}
 --- !u!1 &703351790
 GameObject:
   m_ObjectHideFlags: 0
@@ -2372,8 +2373,10 @@ MonoBehaviour:
   - {fileID: 1248415626}
   - {fileID: 1601540889}
   - {fileID: 1604612840}
+  isTarget: 0000000000
   moveSpeed: 10
   turnLimit: 5
+  currentTargetIndex: 0
   movesThisTurn: 0
   isPut: 0
 --- !u!1 &734511946
@@ -3695,6 +3698,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3652ea9db46cbe4b83ee6f48d5ad183, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  selectDice: {fileID: 733545515}
 --- !u!1 &1281080300
 GameObject:
   m_ObjectHideFlags: 0
@@ -4458,6 +4462,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3652ea9db46cbe4b83ee6f48d5ad183, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  selectDice: {fileID: 733545515}
 --- !u!1 &1484296654
 GameObject:
   m_ObjectHideFlags: 0
@@ -5179,6 +5184,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3652ea9db46cbe4b83ee6f48d5ad183, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  selectDice: {fileID: 733545515}
 --- !u!1 &1603363135
 GameObject:
   m_ObjectHideFlags: 0
@@ -5277,6 +5283,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3652ea9db46cbe4b83ee6f48d5ad183, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  selectDice: {fileID: 733545515}
 --- !u!1 &1690679484
 GameObject:
   m_ObjectHideFlags: 0

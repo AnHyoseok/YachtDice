@@ -18,8 +18,7 @@ public class Dice : MonoBehaviour
 
     private bool isSliding = false;
     public List<TriggerDice> diceList;
-
-    public bool isStopDice;
+    public int index = 0;
     #endregion
 
     private void Awake()
@@ -46,6 +45,7 @@ public class Dice : MonoBehaviour
                 isSliding = false;
                 if(!photonView.IsMine)
                 {
+                    Debug.Log(123);
                     rb.isKinematic = true;
                 }
                 Debug.Log(GetDiceValue());
@@ -99,12 +99,6 @@ public class Dice : MonoBehaviour
         Vector3 smallForce = new Vector3(Random.Range(-0.2f, 0.2f), 0, Random.Range(-0.2f, 0.2f));
         rb.AddForce(smallForce, ForceMode.Impulse);
     }
-    /*[PunRPC]
-    void SyncDice(Vector3 position, Quaternion rotation)
-    {
-        transform.position = position;
-        transform.rotation = rotation;
-    }*/
     private void OnCollisionEnter(Collision collision)
     {
         if(collision.gameObject.CompareTag("Ground"))
