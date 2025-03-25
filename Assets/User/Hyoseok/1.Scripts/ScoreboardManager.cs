@@ -3,7 +3,7 @@ using Photon.Pun;
 using ExitGames.Client.Photon;
 using Photon.Realtime;
 using System.Collections.Generic;
-public class ScoreboardManager : MonoBehaviour
+public class ScoreboardManager : MonoBehaviourPunCallbacks
 {
     public RectTransform scoreboardBackground;  
     public RectTransform scoreboardOutline;   
@@ -81,5 +81,23 @@ public class ScoreboardManager : MonoBehaviour
     public void HighlightLocalScore(string category)
     {
         GetLocalPlayerEntry()?.HighlightScore(category);
+    }
+
+    //점수동기화
+    public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+    {
+        if (changedProps.ContainsKey("Score"))
+        {
+            ScoreboardEntry entry = GetEntry(targetPlayer);
+            if (entry != null)
+            {
+                entry.UpdateScoreData(targetPlayer.CustomProperties);
+                Debug.Log($"[동기화] {targetPlayer.NickName} 점수 업데이트됨!");
+            }
+            else
+            {
+                Debug.LogWarning($"[동기화 실패] {targetPlayer.NickName}의 ScoreboardEntry를 찾지 못함");
+            }
+        }
     }
 }

@@ -8,6 +8,7 @@ public class RoomButton : MonoBehaviour
     public TextMeshProUGUI roomNumberText;
     public TextMeshProUGUI hostNameText;
     public TextMeshProUGUI gameModeText;
+    public TextMeshProUGUI populationText;
     private string roomName;
 
     public void Setup(RoomInfo room)
@@ -24,10 +25,12 @@ public class RoomButton : MonoBehaviour
         //  예외 방지: 게임 모드 안전하게 가져오기
         string gameMode = room.CustomProperties.TryGetValue("GameMode", out object mode) ? $" {mode}v{mode}" : " 1v1";
 
+       
         // UI 업데이트
         roomNumberText.text = $"Room: {roomNumber}";
         hostNameText.text = $"{hostName} 's room";
         gameModeText.text = gameMode;
+        populationText.text = $"{room.PlayerCount} / {room.MaxPlayers}";
     }
 
     public void OnClick()

@@ -5,6 +5,7 @@ public class DiceTest : MonoBehaviour
 {
     private DiceManager diceManager;
     private ScoreboardEntry scoreboardEntry;
+    private bool testExecuted = false; // 딱 1번만 실행되도록 플래그
 
     void Start()
     {
@@ -16,27 +17,24 @@ public class DiceTest : MonoBehaviour
     {
         while (scoreboardEntry == null)
         {
-            scoreboardEntry = FindAnyObjectByType<ScoreboardEntry>(); 
+            scoreboardEntry = FindAnyObjectByType<ScoreboardEntry>();
             if (scoreboardEntry == null)
             {
                 Debug.LogWarning("ScoreboardEntry 찾는 중...");
-                yield return new WaitForSeconds(0.5f); // 0.5초 대기 후 다시 찾기
+                yield return new WaitForSeconds(0.5f);
             }
         }
 
-        if (diceManager == null)
-        {
-            Debug.LogError("DiceManagerTest가 설정되지 않았습니다.");
-            yield break;
-        }
-
-        Debug.Log("ScoreboardEntry 찾음! 점수 테스트 시작.");
-        TestCalculateScore();
+        Debug.Log(" ScoreboardEntry 찾음! 테스트 실행");
+        RunScoreTest(); // 자동 실행
     }
 
-    void TestCalculateScore()
+    void RunScoreTest()
     {
-        string[] testCategories = { "ONES", "TWOS", "THREES", "FOURS", "FIVES", "SIXES", "CHANCE" ,"FOUR_KIND", "FULL_HOUSE", "SMALL_STRAIGHT", "LARGE_STRAIGHT", "YAHTZEE" };
+        string[] testCategories = {
+            "ONES", "TWOS", "THREES", "FOURS", "FIVES", "SIXES", "SUBTOTAL", "BONUS",
+            "Choice", "4 of a Kind", "FULL_HOUSE", "SMALL_STRAIGHT", "LARGE_STRAIGHT", "YAHTZEE"
+        };
 
         foreach (string category in testCategories)
         {
@@ -44,5 +42,7 @@ public class DiceTest : MonoBehaviour
             Debug.Log($"{category}: {score}점");
             scoreboardEntry.UpdateScore(category, score);
         }
+
+        testExecuted = true; // 중복 방지
     }
 }

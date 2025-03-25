@@ -130,4 +130,22 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
             }
         }
     }
+
+    public List<Player> GetSortedPlayers()
+    {
+        Player[] players = PhotonNetwork.PlayerList;
+        System.Array.Sort(players, (a, b) => a.ActorNumber.CompareTo(b.ActorNumber));
+        return new List<Player>(players);
+    }
+
+    [PunRPC]
+    public void RPC_UpdateTurn(int playerIndex, int round)
+    {
+        TurnManager.instance.UpdateTurn(playerIndex, round);
+    }
+
+    public void BroadcastTurn(int playerIndex, int round)
+    {
+        photonView.RPC("RPC_UpdateTurn", RpcTarget.All, playerIndex, round);
+    }
 }

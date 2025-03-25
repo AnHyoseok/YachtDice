@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
 
 public class DiceScore
 {
@@ -13,12 +14,15 @@ public class DiceScore
     public const string FOURS = "FOURS";
     public const string FIVES = "FIVES";
     public const string SIXES = "SIXES";
-    public const string FOUR_KIND = "FOUR_KIND";
+    public const string SUBTOTAL = "SUBTOTAL";
+    public const string BONUS = "BONUS";
+    public const string Choice = "Choice";
+    public const string FOUR_KIND = "4 of a Kind";
     public const string FULL_HOUSE = "FULL_HOUSE";
     public const string SMALL_STRAIGHT = "SMALL_STRAIGHT";
     public const string LARGE_STRAIGHT = "LARGE_STRAIGHT";
     public const string YAHTZEE = "YAHTZEE";
-    public const string CHANCE = "CHANCE";
+   
 }
 public class DiceManager : Singleton<DiceManager>
 {
@@ -125,50 +129,67 @@ public class DiceManager : Singleton<DiceManager>
         int[] values = GetDiceValues().Concat(GetDiceValue()).ToArray();
         values = values.OrderBy(v => v).ToArray();
 
-        Debug.Log($" 주사위 값: {string.Join(", ", values)}");
+        Debug.Log($"주사위 값: {string.Join(", ", values)}");
 
         int score = 0;
-        HashSet<int> uniqueValues = new HashSet<int>(values); // 중복 제거하여 활용
+        int[] counts = new int[7];
+
+        foreach (int v in values)
+            counts[v]++;
 
         switch (category)
         {
-            case "ONES": score = values.Count(v => v == 1) * 1; break;
-            case "TWOS": score = values.Count(v => v == 2) * 2; break;
-            case "THREES": score = values.Count(v => v == 3) * 3; break;
-            case "FOURS": score = values.Count(v => v == 4) * 4; break;
-            case "FIVES": score = values.Count(v => v == 5) * 5; break;
-            case "SIXES": score = values.Count(v => v == 6) * 6; break;
-            case "Choice": score = values.Sum(); break;
+            case "ONES": score = counts[1] * 1; break;
+            case "TWOS": score = counts[2] * 2; break;
+            case "THREES": score = counts[3] * 3; break;
+            case "FOURS": score = counts[4] * 4; break;
+            case "FIVES": score = counts[5] * 5; break;
+            case "SIXES": score = counts[6] * 6; break;
+
+            case "SUBTOTAL":
+                for (int i = 1; i <= 6; i++)
+                    score += counts[i] * i;
+                break;
+
+            case "BONUS":
+                int subtotal = 0;
+                for (int i = 1; i <= 6; i++)
+                    subtotal += counts[i] * i;
+                score = subtotal >= 63 ? 35 : 0;
+                break;
+
+            case "Choice":
+                score = values.Sum();
+                break;
 
             case "4 of a Kind":
-                var fourKindGroup = values.GroupBy(v => v).FirstOrDefault(g => g.Count() >= 4);
-                score = (fourKindGroup != null) ? values.Sum() : 0;
+                if (counts.Any(c => c >= 4))
+                    score = values.Sum();
                 break;
 
-            case "Full House":
-                var grouped = values.GroupBy(v => v).ToList();
-                score = (grouped.Count == 2 && (grouped[0].Count() == 3 || grouped[1].Count() == 3)) ? 25 : 0;
+           
+            case "FULL_HOUSE":
+                bool hasThree = counts.Any(c => c == 3);
+                bool hasTwo = counts.Any(c => c == 2);
+                if (hasThree && hasTwo)
+                    score = values.Sum(); 
                 break;
 
-            case "S. Straight":
-                score = (uniqueValues.IsSupersetOf(new[] { 1, 2, 3, 4 }) ||
-                         uniqueValues.IsSupersetOf(new[] { 2, 3, 4, 5 }) ||
-                         uniqueValues.IsSupersetOf(new[] { 3, 4, 5, 6 }))
-                        ? 15 : 0;
+            case "SMALL_STRAIGHT":
+                if (HasStraight(4)) score = 15;
                 break;
 
-            case "L. Straight":
-                score = (uniqueValues.IsSupersetOf(new[] { 1, 2, 3, 4, 5 }) ||
-                         uniqueValues.IsSupersetOf(new[] { 2, 3, 4, 5, 6 }))
-                        ? 40 : 0;
+            case "LARGE_STRAIGHT":
+                if (HasStraight(5)) score = 30;
                 break;
 
             case "Yacht":
-                score = (uniqueValues.Count == 1) ? 50 : 0;
+                if (counts.Any(c => c == 5))
+                    score = 50;
                 break;
         }
 
-        //  상단 점수 섹션 누적 및 보너스 체크
+        // 상단 점수 보너스 누적
         if (category == DiceScore.ONES || category == DiceScore.TWOS || category == DiceScore.THREES
             || category == DiceScore.FOURS || category == DiceScore.FIVES || category == DiceScore.SIXES)
         {
@@ -180,51 +201,103 @@ public class DiceManager : Singleton<DiceManager>
         return score;
     }
 
+    private bool HasStraight(int requiredLength)
+    {
+        int[] allValues = GetDiceValues().Concat(GetDiceValue()).Distinct().OrderBy(v => v).ToArray();
+
+        int maxLength = 1;
+        int currentLength = 1;
+
+        for (int i = 1; i < allValues.Length; i++)
+        {
+            if (allValues[i] == allValues[i - 1] + 1)
+            {
+                currentLength++;
+                maxLength = Mathf.Max(maxLength, currentLength);
+            }
+            else
+            {
+                currentLength = 1;
+            }
+        }
+
+        return maxLength >= requiredLength;
+    }
+
     //점수 미리보여주기
     public void ShowPreviewScore()
     {
         if (!isDiceArray) return;
-      
+
         int[] values = GetDiceValues().Concat(GetDiceValue()).ToArray();
-        values = values.OrderBy(v => v).ToArray();
+        int[] counts = new int[7];
+        foreach (int v in values) counts[v]++;
+        HashSet<int> uniqueValues = new HashSet<int>(values);
 
         Dictionary<string, int> previewScores = new Dictionary<string, int>();
 
-        previewScores["ONES"] = values.Count(v => v == 1) * 1;
-        previewScores["TWOS"] = values.Count(v => v == 2) * 2;
-        previewScores["THREES"] = values.Count(v => v == 3) * 3;
-        previewScores["FOURS"] = values.Count(v => v == 4) * 4;
-        previewScores["FIVES"] = values.Count(v => v == 5) * 5;
-        previewScores["SIXES"] = values.Count(v => v == 6) * 6;
-        previewScores["Choice"] = values.Sum();
-        previewScores["4 of a Kind"] = values.GroupBy(v => v).Any(g => g.Count() >= 4) ? values.Sum() : 0;
-        previewScores["Full House"] = (values.Distinct().Count() == 2 && values.GroupBy(v => v).Any(g => g.Count() == 3)) ? 25 : 0;
-        HashSet<int> uniqueValues = new HashSet<int>(values);
+        previewScores[DiceScore.ONES] = counts[1] * 1;
+        previewScores[DiceScore.TWOS] = counts[2] * 2;
+        previewScores[DiceScore.THREES] = counts[3] * 3;
+        previewScores[DiceScore.FOURS] = counts[4] * 4;
+        previewScores[DiceScore.FIVES] = counts[5] * 5;
+        previewScores[DiceScore.SIXES] = counts[6] * 6;
 
-        previewScores["S. Straight"] = (uniqueValues.Contains(1) && uniqueValues.Contains(2) && uniqueValues.Contains(3) && uniqueValues.Contains(4)) ||
-                                       (uniqueValues.Contains(2) && uniqueValues.Contains(3) && uniqueValues.Contains(4) && uniqueValues.Contains(5)) ||
-                                       (uniqueValues.Contains(3) && uniqueValues.Contains(4) && uniqueValues.Contains(5) && uniqueValues.Contains(6))
-                                       ? 15 : 0;
+        // CHOICE
+        previewScores[DiceScore.Choice] = values.Sum();
 
-        previewScores["L. Straight"] = (uniqueValues.Contains(1) && uniqueValues.Contains(2) && uniqueValues.Contains(3) && uniqueValues.Contains(4) && uniqueValues.Contains(5)) ||
-                                       (uniqueValues.Contains(2) && uniqueValues.Contains(3) && uniqueValues.Contains(4) && uniqueValues.Contains(5) && uniqueValues.Contains(6))
-                                       ? 40 : 0;
-        previewScores["Yacht"] = values.Distinct().Count() == 1 ? 50 : 0;
+        // 4 of a Kind
+        previewScores[DiceScore.FOUR_KIND] = counts.Any(c => c >= 4) ? values.Sum() : 0;
 
-        Debug.Log($" 본인({PhotonNetwork.LocalPlayer.NickName}) 점수 업데이트: {string.Join(", ", previewScores.Select(kv => $"{kv.Key}: {kv.Value}"))}");
+        // Full House (정확히 3개 + 2개)
+        bool hasThree = counts.Any(c => c == 3);
+        bool hasTwo = counts.Any(c => c == 2);
+        previewScores[DiceScore.FULL_HOUSE] = (hasThree && hasTwo) ? values.Sum() : 0;
 
+        // Small Straight
+        previewScores[DiceScore.SMALL_STRAIGHT] = HasStraight(values, 4) ? 15 : 0;
+
+        // Large Straight
+        previewScores[DiceScore.LARGE_STRAIGHT] = HasStraight(values, 5) ? 30 : 0;
+
+        // Yacht (5 of a kind)
+        previewScores[DiceScore.YAHTZEE] = counts.Any(c => c == 5) ? 50 : 0;
+
+        // 디버그 로그
+        Debug.Log($"[Preview] {PhotonNetwork.LocalPlayer.NickName} → {string.Join(", ", previewScores.Select(kv => $"{kv.Key}: {kv.Value}"))}");
+
+        // 점수 반영
         if (GameSceneManager.Instance != null && GameSceneManager.Instance.scoreboardEntries.ContainsKey(PhotonNetwork.LocalPlayer.ActorNumber))
         {
             GameSceneManager.Instance.scoreboardEntries[PhotonNetwork.LocalPlayer.ActorNumber].ShowPreview(previewScores);
         }
 
-        if (PhotonNetwork.LocalPlayer != null)
-        {
-            ExitGames.Client.Photon.Hashtable playerScores = new ExitGames.Client.Photon.Hashtable { { "PreviewScore", previewScores } };
-            PhotonNetwork.LocalPlayer.SetCustomProperties(playerScores);
-        }
+        // 네트워크 전송
+        ExitGames.Client.Photon.Hashtable playerScores = new ExitGames.Client.Photon.Hashtable { { "PreviewScore", previewScores } };
+        PhotonNetwork.LocalPlayer.SetCustomProperties(playerScores);
     }
 
+    private bool HasStraight(int[] values, int requiredLength)
+    {
+        int[] sorted = values.Distinct().OrderBy(v => v).ToArray();
+        int currentLength = 1;
+        int maxLength = 1;
+
+        for (int i = 1; i < sorted.Length; i++)
+        {
+            if (sorted[i] == sorted[i - 1] + 1)
+            {
+                currentLength++;
+                maxLength = Mathf.Max(maxLength, currentLength);
+            }
+            else
+            {
+                currentLength = 1;
+            }
+        }
+
+        return maxLength >= requiredLength;
+    }
 
     private void CheckForBoonus()
     {

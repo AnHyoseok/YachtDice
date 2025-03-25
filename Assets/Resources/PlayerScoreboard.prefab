@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 3794359960934022526}
   - component: {fileID: 1114965235629047477}
   - component: {fileID: 34010499720305954}
+  - component: {fileID: 2822587802190799350}
   m_Layer: 5
   m_Name: Choice
   m_TagString: Lower Section
@@ -123,6 +124,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &2822587802190799350
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 181303386570621719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c52d21ca1dd0b3247bcc1aa383bc8ecd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  category: Choice
 --- !u!1 &191498571450409899
 GameObject:
   m_ObjectHideFlags: 0
@@ -1273,6 +1287,7 @@ GameObject:
   - component: {fileID: 2582748090516532645}
   - component: {fileID: 4242959662983129390}
   - component: {fileID: 5277104360829203891}
+  - component: {fileID: 4835592002041594881}
   - component: {fileID: 6882009267305070320}
   m_Layer: 5
   m_Name: Aces
@@ -1385,6 +1400,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &4835592002041594881
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1772931744564658164}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c52d21ca1dd0b3247bcc1aa383bc8ecd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  category: ONES
 --- !u!95 &6882009267305070320
 Animator:
   serializedVersion: 7
@@ -1692,6 +1720,7 @@ GameObject:
   - component: {fileID: 2731139072656055713}
   - component: {fileID: 3903946662432976623}
   - component: {fileID: 2752612189304101057}
+  - component: {fileID: 3894159897840608173}
   m_Layer: 5
   m_Name: Full House
   m_TagString: Lower Section
@@ -1803,6 +1832,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &3894159897840608173
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2308172355215992284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c52d21ca1dd0b3247bcc1aa383bc8ecd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  category: FULL_HOUSE
 --- !u!1 &2604818926989421088
 GameObject:
   m_ObjectHideFlags: 0
@@ -2483,6 +2525,7 @@ GameObject:
   - component: {fileID: 7679846606681694518}
   - component: {fileID: 5269795381849007506}
   - component: {fileID: 7392748632564979074}
+  - component: {fileID: 3199013938668192518}
   m_Layer: 5
   m_Name: Fives
   m_TagString: Upper Section
@@ -2594,6 +2637,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &3199013938668192518
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4251635423243917753}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c52d21ca1dd0b3247bcc1aa383bc8ecd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  category: FIVES
 --- !u!1 &4379261501041912690
 GameObject:
   m_ObjectHideFlags: 0
@@ -2606,6 +2662,7 @@ GameObject:
   - component: {fileID: 2028273356967680274}
   - component: {fileID: 7190833985809895217}
   - component: {fileID: 7055092955013645967}
+  - component: {fileID: 3551753318878333352}
   m_Layer: 5
   m_Name: Fours
   m_TagString: Upper Section
@@ -2717,6 +2774,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &3551753318878333352
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4379261501041912690}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c52d21ca1dd0b3247bcc1aa383bc8ecd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  category: FOURS
 --- !u!1 &4752843660373802020
 GameObject:
   m_ObjectHideFlags: 0
@@ -2865,6 +2935,7 @@ GameObject:
   - component: {fileID: 5768495811056105373}
   - component: {fileID: 3414715998693155381}
   - component: {fileID: 6936290389240859601}
+  - component: {fileID: 1867902979460733875}
   m_Layer: 5
   m_Name: Threes
   m_TagString: Upper Section
@@ -2976,6 +3047,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1867902979460733875
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4793604788130320709}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c52d21ca1dd0b3247bcc1aa383bc8ecd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  category: THREES
 --- !u!1 &4811585685213213244
 GameObject:
   m_ObjectHideFlags: 0
@@ -4652,6 +4736,7 @@ GameObject:
   - component: {fileID: 4401589968141179433}
   - component: {fileID: 3440532176614396678}
   - component: {fileID: 2365841664700650836}
+  - component: {fileID: 475173378856615257}
   m_Layer: 5
   m_Name: Sixes
   m_TagString: Upper Section
@@ -4763,6 +4848,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &475173378856615257
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6742910468244306082}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c52d21ca1dd0b3247bcc1aa383bc8ecd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  category: SIXES
 --- !u!1 &6883987344444154584
 GameObject:
   m_ObjectHideFlags: 0
@@ -4893,6 +4991,7 @@ GameObject:
   - component: {fileID: 6009310961605291238}
   - component: {fileID: 5185252349986975267}
   - component: {fileID: 6828767837706883081}
+  - component: {fileID: 5534635110885235309}
   m_Layer: 5
   m_Name: Yacht
   m_TagString: Lower Section
@@ -5004,6 +5103,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &5534635110885235309
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7133502779889217390}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c52d21ca1dd0b3247bcc1aa383bc8ecd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  category: Yacht
 --- !u!1 &7254641640702777584
 GameObject:
   m_ObjectHideFlags: 0
@@ -5321,6 +5433,7 @@ GameObject:
   - component: {fileID: 4071155684974471650}
   - component: {fileID: 1132380351153985772}
   - component: {fileID: 4621965736857422982}
+  - component: {fileID: 7234215503948884977}
   m_Layer: 5
   m_Name: Deuces
   m_TagString: Upper Section
@@ -5432,6 +5545,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &7234215503948884977
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7444600546295061647}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c52d21ca1dd0b3247bcc1aa383bc8ecd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  category: TWOS
 --- !u!1 &7483082384124499935
 GameObject:
   m_ObjectHideFlags: 0
@@ -5535,6 +5661,7 @@ GameObject:
   - component: {fileID: 873890102250209872}
   - component: {fileID: 1186941657157975514}
   - component: {fileID: 961818472977292087}
+  - component: {fileID: 3324407527136680566}
   m_Layer: 5
   m_Name: 4 of a Kind
   m_TagString: Lower Section
@@ -5646,6 +5773,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &3324407527136680566
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7776201679270798872}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c52d21ca1dd0b3247bcc1aa383bc8ecd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  category: 4 of a Kind
 --- !u!1 &7934829402468461287
 GameObject:
   m_ObjectHideFlags: 0
@@ -6067,6 +6207,7 @@ GameObject:
   - component: {fileID: 5395740191749736400}
   - component: {fileID: 6598513932619744321}
   - component: {fileID: 5857954794567502631}
+  - component: {fileID: 4223780951570956586}
   m_Layer: 5
   m_Name: S. Straight
   m_TagString: Lower Section
@@ -6178,6 +6319,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &4223780951570956586
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8350538514828075006}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c52d21ca1dd0b3247bcc1aa383bc8ecd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  category: SMALL_STRAIGHT
 --- !u!1 &8365760040174406782
 GameObject:
   m_ObjectHideFlags: 0
@@ -6553,6 +6707,7 @@ GameObject:
   - component: {fileID: 8106735770659037797}
   - component: {fileID: 1166294884069947940}
   - component: {fileID: 8928056017940856886}
+  - component: {fileID: 8914588501011705554}
   m_Layer: 5
   m_Name: L. Straight
   m_TagString: Lower Section
@@ -6664,6 +6819,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &8914588501011705554
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8919969649099795076}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c52d21ca1dd0b3247bcc1aa383bc8ecd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  category: LARGE_STRAIGHT
 --- !u!1 &9057559484763531756
 GameObject:
   m_ObjectHideFlags: 0

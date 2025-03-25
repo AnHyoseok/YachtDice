@@ -47,6 +47,7 @@ MonoBehaviour:
   - RandomPoition
   - ObjectInstantiate
   - RandomDice
+  - RPC_UpdateTurn
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

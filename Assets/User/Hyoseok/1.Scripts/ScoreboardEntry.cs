@@ -14,7 +14,7 @@ public class ScoreboardEntry : MonoBehaviour
     public TextMeshProUGUI[] upperSectionTexts;
     public TextMeshProUGUI[] lowerSectionTexts;
     public TextMeshProUGUI totalScoreText;
-
+    private string selectedCategory = null; // 현재 선택 중인 카테고리
     private int[] scores = new int[14]; // 점수 저장 배열
     private Player player;
     private bool isAI = false;
@@ -27,18 +27,19 @@ public class ScoreboardEntry : MonoBehaviour
     void Awake()
     {
         string[] categories = {
-        "ONES", "TWOS", "THREES", "FOURS", "FIVES", "SIXES",
-        "Choice", "4 of a Kind", "Full House", "S. Straight", "L. Straight", "Yacht"
-    };
+    "ONES", "TWOS", "THREES", "FOURS", "FIVES", "SIXES",
+    "Subtotal", "Bonus",
+    "Choice", "4 of a Kind", "Full House", "SMALL_STRAIGHT", "LARGE_STRAIGHT", "Yacht"
+};
 
-        for (int i = 0; i < upperSectionTexts.Length && i < 6; i++)
+        for (int i = 0; i < upperSectionTexts.Length; i++)
         {
             scoreTexts[categories[i]] = upperSectionTexts[i];
         }
 
-        for (int i = 0; i < lowerSectionTexts.Length && i + 6 < categories.Length; i++)
+        for (int i = 0; i < lowerSectionTexts.Length; i++)
         {
-            scoreTexts[categories[i + 6]] = lowerSectionTexts[i];
+            scoreTexts[categories[i + upperSectionTexts.Length]] = lowerSectionTexts[i];
         }
     }
     public void SetPlayerData(Player player)
@@ -92,7 +93,7 @@ public class ScoreboardEntry : MonoBehaviour
             // 모든 플레이어에게 점수 동기화
             if (player != null)
             {
-                Hashtable hash = new Hashtable();
+                ExitGames.Client.Photon.Hashtable hash = new ExitGames.Client.Photon.Hashtable();
                 hash["Score"] = scores;
                 player.SetCustomProperties(hash);
             }
@@ -118,54 +119,51 @@ public class ScoreboardEntry : MonoBehaviour
 
     private void UpdateScoreUI()
     {
+        // Upper (0~7)
         for (int i = 0; i < upperSectionTexts.Length; i++)
         {
             upperSectionTexts[i].text = scores[i].ToString();
-
-            if (scoreTexts.TryGetValue(GetCategoryByIndex(i), out var text))
-            {
-                Color c = text.color;
-                c.a = (scores[i] != 0) ? 1f : c.a; // 이미 기록된 점수는 항상 a = 1
-                text.color = c;
-            }
         }
 
+        // Lower (8~13)
         for (int i = 0; i < lowerSectionTexts.Length; i++)
         {
-            int index = i + 8;
-            lowerSectionTexts[i].text = scores[index].ToString();
-
-            if (scoreTexts.TryGetValue(GetCategoryByIndex(index), out var text))
-            {
-                Color c = text.color;
-                c.a = (scores[index] != 0) ? 1f : c.a;
-                text.color = c;
-            }
+            int scoreIndex = i + 8;
+            lowerSectionTexts[i].text = scores[scoreIndex].ToString();
         }
 
-        int total = 0;
-        foreach (int score in scores) total += score;
+        // 총합 계산
+        int subtotal = 0;
+        for (int i = 0; i <= 5; i++) subtotal += scores[i];
+        int bonus = scores[7];
+        int lower = 0;
+        for (int i = 8; i <= 13; i++) lower += scores[i];
+        int total = subtotal + bonus + lower;
         totalScoreText.text = total.ToString();
     }
+
     private string GetCategoryByIndex(int index)
     {
-        switch (index)
+        return index switch
         {
-            case 0: return "ONES";
-            case 1: return "TWOS";
-            case 2: return "THREES";
-            case 3: return "FOURS";
-            case 4: return "FIVES";
-            case 5: return "SIXES";
-            case 8: return "Choice";
-            case 9: return "4 of a Kind";
-            case 10: return "Full House";
-            case 11: return "S. Straight";
-            case 12: return "L. Straight";
-            case 13: return "Yacht";
-            default: return "";
-        }
+            0 => "ONES",
+            1 => "TWOS",
+            2 => "THREES",
+            3 => "FOURS",
+            4 => "FIVES",
+            5 => "SIXES",
+            6 => "SUBTOTAL",
+            7 => "Bonus",
+            8 => "Choice",
+            9 => "4 of a Kind",
+            10 => "Full House",
+            11 => "SMALL_STRAIGHT",
+            12 => "LARGE_STRAIGHT",
+            13 => "Yacht",
+            _ => ""
+        };
     }
+
 
 
     public void ShowPreview(Dictionary<string, int> previewScores)
@@ -200,7 +198,7 @@ public class ScoreboardEntry : MonoBehaviour
     }
 
 
-    private int GetCategoryIndex(string category)
+    public int GetCategoryIndex(string category)
     {
         switch (category)
         {
@@ -210,13 +208,13 @@ public class ScoreboardEntry : MonoBehaviour
             case "FOURS": return 3;
             case "FIVES": return 4;
             case "SIXES": return 5;
-            case "Subtotal": return 6;
+            case "SUBTOTAL": return 6;
             case "Bonus": return 7;
             case "Choice": return 8;
             case "4 of a Kind": return 9;
-            case "Full House": return 10;
-            case "S. Straight": return 11;
-            case "L. Straight": return 12;
+            case "FULL_HOUSE": return 10;
+            case "SMALL_STRAIGHT": return 11;
+            case "LARGE_STRAIGHT": return 12;
             case "Yacht": return 13;
             case "Total": return 14;
             default: return -1;
@@ -242,17 +240,48 @@ public class ScoreboardEntry : MonoBehaviour
     public void ShowAll()
     {
         SetAllTextAlpha(0.5f);
+
     }
 
     public void HighlightScore(string category)
     {
+        int index = GetCategoryIndex(category);
+
+        if (index < 0 || index >= scores.Length)
+        {
+            Debug.LogWarning($"HighlightScore(): 잘못된 카테고리 또는 인덱스 범위 초과 - {category}, index: {index}");
+            return;
+        }
+
+        selectedCategory = category;
+
         foreach (var kvp in scoreTexts)
         {
+            string key = kvp.Key;
+            int keyIndex = GetCategoryIndex(key);
+
+            if (keyIndex < 0 || keyIndex >= scores.Length) continue; // 안전 처리
+
             Color c = kvp.Value.color;
-            c.a = (kvp.Key == category) ? 1f : 0f;
+            c.a = (scores[keyIndex] != 0) ? 1f : (key == category ? 1f : 0f);
             kvp.Value.color = c;
         }
+
+        Debug.Log(TurnManager.instance.IsMyTurn());
+        //  점수 확정 + 턴 넘기기
+        if (TurnManager.instance.IsMyTurn())
+        {
+            int score = DiceManager.Instance.CalculateScore(category);
+            UpdateScore(category, score);
+
+            Debug.Log($" {category} 확정됨 ({score}점), 턴 종료");
+
+            TurnManager.instance.EndMyTurn(); // 다음 턴으로
+        }
     }
+
+
+
 
     private void SetAllTextAlpha(float alpha)
     {
@@ -261,6 +290,28 @@ public class ScoreboardEntry : MonoBehaviour
             Color c = text.color;
             c.a = alpha;
             text.color = c;
+        }
+    }
+
+    //점수기록 여부 
+    public bool IsAlreadyScored(int index)
+    {
+        return scores[index] != 0;
+    }
+
+    //선택 초기화
+    public void ClearHighlight()
+    {
+        selectedCategory = null;
+
+        foreach (var kvp in scoreTexts)
+        {
+            string key = kvp.Key;
+            int index = GetCategoryIndex(key);
+            Color c = kvp.Value.color;
+
+            c.a = (scores[index] != 0) ? 1f : 0f;
+            kvp.Value.color = c;
         }
     }
 }

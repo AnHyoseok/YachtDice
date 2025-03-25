@@ -42,14 +42,14 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
             return;
         }
 
-        // ✅ 기존 방 목록 UI 초기화 (중복 추가 방지)
+        //  기존 방 목록 UI 초기화 (중복 추가 방지)
         foreach (GameObject button in roomButtons)
         {
             Destroy(button);
         }
         roomButtons.Clear();
 
-        // ✅ 새로운 방 목록 추가
+        //  새로운 방 목록 추가
         foreach (RoomInfo room in roomList)
         {
             if (room.RemovedFromList || room.PlayerCount == 0) // 삭제된 방 제거
@@ -115,7 +115,8 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
             CustomRoomProperties = new ExitGames.Client.Photon.Hashtable()
         {
             { "GameMode", gameMode },
-            { "HostName", PhotonNetwork.NickName } //  방장 닉네임 저장
+            { "HostName", PhotonNetwork.NickName }, //  방장 닉네임 저장
+             
         },
             CustomRoomPropertiesForLobby = new string[] { "GameMode", "HostName" } // 로비에서 표시할 정보
         };
