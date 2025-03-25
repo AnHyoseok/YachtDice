@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class DiceScore
 {
@@ -101,7 +100,7 @@ public class DiceManager : Singleton<DiceManager>
     {
         if (dices == null || dices.Length == 0)
         {
-            Debug.LogError(" GetDiceValues() - newdicelist가 비어 있음! 주사위가 추가되지 않음.");
+            Debug.LogError(" GetDiceValues() - dices가 비어 있음! 주사위가 추가되지 않음.");
             return new int[0];  // 빈 배열 반환 (오류 방지)
         }
 
@@ -252,9 +251,9 @@ public class DiceManager : Singleton<DiceManager>
         for(int i = 0; i < dices.Length;i++)
         {
             if (dices[i] == null) return;
-            if (!isArray && dices[i] != null)
+            if (!isArray)
             {
-                bool allStopped = System.Array.TrueForAll(dices, dice => dice.GetComponent<Rigidbody>().linearVelocity.magnitude < 0.1f
+                bool allStopped = System.Array.TrueForAll(dices, dice => dice != null && dice.GetComponent<Rigidbody>().linearVelocity.magnitude < 0.1f
                 && dice.GetComponent<Rigidbody>().angularVelocity.magnitude < 0.1f);
 
                 if (allStopped && dices.Length > 0)

@@ -99,30 +99,32 @@ public class CupController : MonoBehaviour
         if(falseDices.Contains(dice))
         {
             PhotonNetwork.Destroy(dice);
-            falseDices.Remove(dice);
         }
     }
-    //[PunRPC]
+    [PunRPC]
     public void ObjectInstantiate()
     {
-        for (int i = 0; i < selectDice.turnLimit - selectDice.movesThisTurn; i++)
+        boxGroup.SetActive(false);
+        GetComponent<BoxCollider>().enabled = false;
+        for (int i = 0; i < diceManager.dices.Length; i++)
         {
-            photonView.RPC("RandomPoition", RpcTarget.MasterClient,i);
-
+            if(i <= diceManager.dices.Length)
+            {
+                photonView.RPC("DesDiceList", RpcTarget.MasterClient, falseDices[i].GetComponent<PhotonView>().ViewID);
+                falseDices[i] = null;
+            }
+            photonView.RPC("RandomPoition", RpcTarget.MasterClient);
             diceManager.dices[i] = Dice.GetComponent<Dice>();
             Dice.name = $"Dice{i}";
-            Debug.Log("123123123");
         }
+        falseDices.RemoveAll(x => x == null);
         diceManager.isArray = false;
         diceManager.isRotat = false;
         diceManager.rollsLeft--;
     }
     [PunRPC]
-    void RandomPoition(int index)
+    void RandomPoition()
     {
-        photonView.RPC("DesDiceList", RpcTarget.MasterClient, falseDices[index].GetComponent<PhotonView>().ViewID);
-        boxGroup.SetActive(false);
-        GetComponent<BoxCollider>().enabled = false;
         Vector3 offset = diceManager.GetUniqueRandomPosition(transform.position.x, transform.position.x + 0.01f);
         Quaternion randomRot = Quaternion.Euler(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
         Dice = PhotonNetwork.Instantiate("Dice", offset, randomRot);
@@ -134,7 +136,7 @@ public class CupController : MonoBehaviour
         }
         animator.SetInteger(DiceCount, 0);
     }
-    //[PunRPC]
+    [PunRPC]
     public void RandomDice()
     {
         if (!PhotonNetwork.IsMasterClient) return;

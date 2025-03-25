@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
-//using Photon.Pun;
+using Photon.Pun;
 
 public class Dice : MonoBehaviour
 {
     #region Variables
-    //private PhotonView photonView;
+    private PhotonView photonView;
     private Rigidbody rb;
     public GameObject[] SelectUICavas;
     public float shakeForce = 2f;
@@ -24,7 +24,7 @@ public class Dice : MonoBehaviour
 
     private void Awake()
     {
-        //photonView = GetComponent<PhotonView>();
+        photonView = GetComponent<PhotonView>();
         rb = GetComponent<Rigidbody>();
         SetupDicePhysics(rb);
     }
@@ -44,6 +44,10 @@ public class Dice : MonoBehaviour
                 rb.linearVelocity = Vector3.zero;
                 rb.angularVelocity = Vector3.zero;
                 isSliding = false;
+                if(!photonView.IsMine)
+                {
+                    rb.isKinematic = true;
+                }
                 Debug.Log(GetDiceValue());
             }
         }

@@ -7841,6 +7841,7 @@ GameObject:
   - component: {fileID: 6853824383812675608}
   - component: {fileID: 9122442431974729957}
   - component: {fileID: 3400274334067200337}
+  - component: {fileID: 9122442431974729958}
   m_Layer: 0
   m_Name: "\uB2E4\uC774\uC2A4\uBC15\uC2A4"
   m_TagString: Untagged
@@ -9452,8 +9453,8 @@ Transform:
   m_GameObject: {fileID: 7199433625416611415}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -0, y: 2.45, z: 2.95}
-  m_LocalScale: {x: 1, y: 7, z: 6.55}
+  m_LocalPosition: {x: 0, y: -0.486, z: 2.95}
+  m_LocalScale: {x: 1, y: 2, z: 6.55}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8622918408997815252}
@@ -10573,6 +10574,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   scoreboardEntry: {fileID: 0}
+  selectdice: {fileID: 0}
   dicetrans: {fileID: 1129088134}
   spacing: 0.8
   moveSpeed: 5
@@ -15555,6 +15557,28 @@ MonoBehaviour:
     modifyNameEnabled: 1
   modified: 1
   modifiedChildren: 1
+--- !u!114 &9122442431974729958
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 925137490130465443}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 2
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!222 &9130806857400627020
 CanvasRenderer:
   m_ObjectHideFlags: 0
