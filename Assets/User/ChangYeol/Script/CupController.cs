@@ -93,46 +93,39 @@ public class CupController : MonoBehaviour
         }
     }
     [PunRPC]
-    public void DesDiceList()
+    public void DesDiceList(int diceID)
     {
-        for (int i = 0; i < selectDice.turnLimit - selectDice.movesThisTurn; i++)
+        GameObject dice = PhotonView.Find(diceID).gameObject;
+        if(falseDices.Contains(dice))
         {
-            Debug.Log("dddd");
-            Destroy(falseDices[i]);
-        }
-        for (int i = 0; i < selectDice.turnLimit - selectDice.movesThisTurn; i++)
-        {
-            falseDices.RemoveAll(x => x != null);
-
-            RandomPoition();
-            Debug.Log("123132");
-
-            diceManager.dices[i] = Dice.GetComponent<Dice>();
-            Dice.name = $"Dice{i}";
-
+            PhotonNetwork.Destroy(dice);
+            falseDices.Remove(dice);
         }
     }
     //[PunRPC]
     public void ObjectInstantiate()
     {
-        photonView.RPC("DesDiceList", RpcTarget.MasterClient);
-        
-      
+        for (int i = 0; i < selectDice.turnLimit - selectDice.movesThisTurn; i++)
+        {
+            photonView.RPC("RandomPoition", RpcTarget.MasterClient,i);
+
+            diceManager.dices[i] = Dice.GetComponent<Dice>();
+            Dice.name = $"Dice{i}";
+            Debug.Log("123123123");
+        }
         diceManager.isArray = false;
         diceManager.isRotat = false;
-
         diceManager.rollsLeft--;
-
-      
     }
-    void RandomPoition()
+    [PunRPC]
+    void RandomPoition(int index)
     {
+        photonView.RPC("DesDiceList", RpcTarget.MasterClient, falseDices[index].GetComponent<PhotonView>().ViewID);
         boxGroup.SetActive(false);
         GetComponent<BoxCollider>().enabled = false;
         Vector3 offset = diceManager.GetUniqueRandomPosition(transform.position.x, transform.position.x + 0.01f);
         Quaternion randomRot = Quaternion.Euler(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
-            Dice = PhotonNetwork.Instantiate("Dice", offset, randomRot);
-        
+        Dice = PhotonNetwork.Instantiate("Dice", offset, randomRot);
         Rigidbody dicerb = Dice.GetComponent<Rigidbody>();
         if (dicerb != null && wall != null)
         {
@@ -144,7 +137,6 @@ public class CupController : MonoBehaviour
     //[PunRPC]
     public void RandomDice()
     {
-     
         if (!PhotonNetwork.IsMasterClient) return;
         boxGroup.SetActive(true);
         GetComponent<BoxCollider>().enabled = true;
@@ -156,15 +148,18 @@ public class CupController : MonoBehaviour
             {
                 Forcedice = PhotonNetwork.Instantiate("Forcedice", offset, randomRot);
             }
-
-            photonView.RPC("AddDiceList", RpcTarget.Others); 
+            photonView.RPC("AddDiceList", RpcTarget.MasterClient, Forcedice.GetComponent<PhotonView>().ViewID);
         }
     }
 
     [PunRPC]
-    public void AddDiceList()
+    public void AddDiceList(int diceID)
     {
-        falseDices.Add(Forcedice);
+        GameObject dice = PhotonView.Find(diceID).gameObject;
+        if (!falseDices.Contains(dice))
+        {
+            falseDices.Add(dice);
+        }
     }
 }
 

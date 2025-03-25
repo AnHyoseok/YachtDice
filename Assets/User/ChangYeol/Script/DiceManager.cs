@@ -25,7 +25,7 @@ public class DiceManager : Singleton<DiceManager>
 {
     #region Vaiables
     [HideInInspector]public ScoreboardEntry scoreboardEntry;
-
+    public SelectDice selectdice;
     public Transform dicetrans;
     public float spacing = 0.8f;
     public float moveSpeed = 2f;
@@ -251,6 +251,7 @@ public class DiceManager : Singleton<DiceManager>
     {
         for(int i = 0; i < dices.Length;i++)
         {
+            if (dices[i] == null) return;
             if (!isArray && dices[i] != null)
             {
                 bool allStopped = System.Array.TrueForAll(dices, dice => dice.GetComponent<Rigidbody>().linearVelocity.magnitude < 0.1f
