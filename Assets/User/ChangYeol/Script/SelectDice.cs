@@ -1,11 +1,12 @@
 using System.Collections;
 using UnityEngine;
 using Photon.Pun;
+using UnityEngine.UI;
 
 public class SelectDice : MonoBehaviour
 {
     #region Variables
-    public RectTransform SelectUI;
+    public Button escbutton;
     public Transform[] targetPositions;
     public bool[] isTarget;
     public float moveSpeed = 2f;
@@ -24,11 +25,13 @@ public class SelectDice : MonoBehaviour
     private void Start()
     {
         mainCamera = Camera.main;
+        escbutton.onClick.AddListener(() => OnClickEscButton());
     }
     private void Update()
     {
         if (currentTargetIndex >= 0)
         {
+            escbutton.gameObject.SetActive(DiceManager.Instance.isDiceArray);
             isPut = Input.GetKey(KeyCode.Escape);
             if (isPut)
             {
@@ -50,6 +53,7 @@ public class SelectDice : MonoBehaviour
                     }
                 }
                 DiceManager.Instance.isDiceArray = false;
+                escbutton.gameObject.SetActive(false);
             }
         }
         if (Input.GetMouseButtonDown(0))
@@ -270,5 +274,27 @@ public class SelectDice : MonoBehaviour
         DiceManager.Instance.rollsLeft = 3;
         //ScoreboardEntry.HighlightScore 호출
         //ScoreboardManager.instance.HighlightLocalScore("고른카테고리"); 
+    }
+    void OnClickEscButton()
+    {
+        ScoreboardManager.instance.HideLocalScore();
+
+        foreach (Dice dice in DiceManager.Instance.dices)
+        {
+            if (dice != null)
+            {
+                PhotonNetwork.Destroy(dice.gameObject);
+                escbutton.gameObject.SetActive(false);
+            }
+        }
+        for (int i = 0; i < DiceManager.Instance.dices.Length; i++)
+        {
+            if (DiceManager.Instance.dices[i] != null)
+            {
+                DiceManager.Instance.dices[i] = null;
+            }
+        }
+        DiceManager.Instance.isDiceArray = false;
+        escbutton.gameObject.SetActive(false);
     }
 }
