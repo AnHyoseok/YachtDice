@@ -31,22 +31,26 @@ public class UIManager : MonoBehaviour
 
     void Start()
     {
-        // AI 추가 버튼
-        addAIButton.onClick.AddListener(() => PhotonRoom.instance.AddAIPlayer());
-       
+        // AI 추가 딜레이 추가 
+        addAIButton.onClick.AddListener(() => StartCoroutine(HandleAddAIClick()));
 
         goTitleButton.onClick.AddListener(OnTitleGo);
 
-        // 기본 이름 설정값
         if (string.IsNullOrEmpty(PhotonNetwork.NickName))
         {
             PhotonNetwork.NickName = "User" + Random.Range(10, 9999);
         }
 
         UpdatePlayerNameUI();
-        warningPanel.SetActive(false); // 경고 메시지 초기 비활성화
+        warningPanel.SetActive(false);
     }
-
+    private IEnumerator HandleAddAIClick()
+    {
+        addAIButton.interactable = false; //버튼 막기
+        PhotonRoom.instance.AddAIPlayer(); // AI 추가
+        yield return new WaitForSeconds(0.5f); 
+        addAIButton.interactable = true;
+    }
     void OnTitleGo()
     {
         SceneManager.LoadScene("Title");

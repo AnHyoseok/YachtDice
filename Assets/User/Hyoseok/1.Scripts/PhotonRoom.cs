@@ -103,8 +103,14 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
         }
 
         UIManager.instance.ShowTeamUI();
+        StartCoroutine(DelayedTeamUIUpdate());
     }
-
+    //딜레이용 
+    private IEnumerator DelayedTeamUIUpdate()
+    {
+        yield return new WaitForSeconds(0.2f);  // 네트워크 지연 보정용
+        UpdateTeamUI();
+    }
     //모드 패널 크리 조절
     void SetTeamPanelSize(int gameMode)
     {

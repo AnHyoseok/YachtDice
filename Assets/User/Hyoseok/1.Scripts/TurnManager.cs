@@ -17,7 +17,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
     public const int MAX_ROUNDS = 12;
 
     public GameObject turnAlarm;
-    public float popupDuration = 2f;
+    public float popupDuration = 15f;
 
     private void Awake()
     {
@@ -75,6 +75,8 @@ public class TurnManager : MonoBehaviourPunCallbacks
 
     public void EndMyTurn()
     {
+        Debug.Log(" EndMyTurn() 호출됨");
+        Debug.Log($" GameSceneManager.Instance == null ? {GameSceneManager.Instance == null}");
         if (!PhotonNetwork.IsMasterClient) return;
 
         int nextIndex = currentPlayerIndex + 1;
@@ -102,6 +104,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
 
     public void UpdateTurn(int playerIndex, int round)
     {
+        Debug.Log(" UpdateTurn() 호출됨");
         currentPlayerIndex = playerIndex;
         currentTurnRound = round;
 
@@ -112,12 +115,9 @@ public class TurnManager : MonoBehaviourPunCallbacks
         {
             entry.ClearHighlight();
         }
-
-        if (IsMyTurn())
-        {
-            ShowTurnPopup();
-        }
-
+        //알람껏다켰다
+        ShowTurnPopup();
+     
         Debug.Log($"현재 턴: {round + 1}턴 - 플레이어: {GetCurrentPlayer().NickName}");
     }
 
@@ -126,6 +126,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
         if (turnAlarm != null)
         {
             turnAlarm.SetActive(true);
+            Debug.Log(" 알람 오브젝트 SetActive(true) 호출됨");
             CancelInvoke(nameof(HideTurnPopup));
             Invoke(nameof(HideTurnPopup), popupDuration);
         }

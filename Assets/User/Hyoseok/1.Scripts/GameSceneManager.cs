@@ -17,6 +17,7 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
         if (Instance == null)
         {
             Instance = this;
+            DontDestroyOnLoad(this.gameObject);
         }
         else
         {
@@ -141,11 +142,13 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
     [PunRPC]
     public void RPC_UpdateTurn(int playerIndex, int round)
     {
+        Debug.Log("RPC_UpdateTurn »£√‚µ  ");
         TurnManager.instance.UpdateTurn(playerIndex, round);
     }
 
     public void BroadcastTurn(int playerIndex, int round)
     {
+        Debug.Log("BroadcastTurn »£√‚µ ");
         photonView.RPC("RPC_UpdateTurn", RpcTarget.All, playerIndex, round);
     }
 }

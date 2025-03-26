@@ -5,7 +5,7 @@ public class DiceTest : MonoBehaviour
 {
     private DiceManager diceManager;
     private ScoreboardEntry scoreboardEntry;
-    private bool testExecuted = false; // 딱 1번만 실행되도록 플래그
+ 
 
     void Start()
     {
@@ -43,6 +43,6 @@ public class DiceTest : MonoBehaviour
             scoreboardEntry.UpdateScore(category, score);
         }
 
-        testExecuted = true; // 중복 방지
+      
     }
 }

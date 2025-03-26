@@ -200,7 +200,7 @@ public class DiceManager : Singleton<DiceManager>
         UpdateScoreboard(category, score);
         return score;
     }
-
+ 
     private bool HasStraight(int requiredLength)
     {
         int[] allValues = GetDiceValues().Concat(GetDiceValue()).Distinct().OrderBy(v => v).ToArray();
@@ -264,7 +264,7 @@ public class DiceManager : Singleton<DiceManager>
         previewScores[DiceScore.YAHTZEE] = counts.Any(c => c == 5) ? 50 : 0;
 
         // 디버그 로그
-        Debug.Log($"[Preview] {PhotonNetwork.LocalPlayer.NickName} → {string.Join(", ", previewScores.Select(kv => $"{kv.Key}: {kv.Value}"))}");
+        //Debug.Log($"[Preview] {PhotonNetwork.LocalPlayer.NickName} → {string.Join(", ", previewScores.Select(kv => $"{kv.Key}: {kv.Value}"))}");
 
         // 점수 반영
         if (GameSceneManager.Instance != null && GameSceneManager.Instance.scoreboardEntries.ContainsKey(PhotonNetwork.LocalPlayer.ActorNumber))

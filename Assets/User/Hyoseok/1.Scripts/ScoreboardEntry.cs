@@ -4,6 +4,9 @@ using Photon.Realtime;
 using TMPro;
 using ExitGames.Client.Photon;
 using System.Collections.Generic;
+using Photon.Pun;
+using System.Collections;
+
 
 public class ScoreboardEntry : MonoBehaviour
 {
@@ -51,9 +54,46 @@ public class ScoreboardEntry : MonoBehaviour
         SetTeamColor(player.CustomProperties);
         SetProfileImage(player.CustomProperties, false);
         UpdateScoreData(player.CustomProperties);
+        if (player == PhotonNetwork.LocalPlayer)
+        {
+            Debug.Log(" 내 점수판 생성됨 - 클릭 허용");
+            EnableScoreButtons();  //  점수 칸 클릭 가능하게 설정
+        }
+        else
+        {
+            Debug.Log(" 다른 플레이어 점수판 - 클릭 차단");
+            DisableScoreButtons(); //  클릭 불가능하게 설정
+        }
     }
-
-    public void SetAIData(string aiName, Hashtable properties)
+    //버튼활성화
+    void EnableScoreButtons()
+    {
+        foreach (var kvp in scoreTexts)
+        {
+            Button btn = kvp.Value.GetComponentInParent<Button>();
+            if (btn != null)
+            {
+                btn.interactable = true;
+                string category = kvp.Key; 
+                btn.onClick.RemoveAllListeners();
+                btn.onClick.AddListener(() => HighlightScore(category));
+            }
+        }
+    }
+    //버튼비활성화
+    void DisableScoreButtons()
+    {
+        foreach (var kvp in scoreTexts)
+        {
+            Button btn = kvp.Value.GetComponentInParent<Button>();
+            if (btn != null)
+            {
+                btn.onClick.RemoveAllListeners();
+                btn.interactable = false;
+            }
+        }
+    }
+    public void SetAIData(string aiName, ExitGames.Client.Photon.Hashtable properties)
     {
         this.aiName = aiName;
         isAI = true;
@@ -64,7 +104,7 @@ public class ScoreboardEntry : MonoBehaviour
         UpdateScoreData(properties);
     }
 
-    private void SetTeamColor(Hashtable properties)
+    private void SetTeamColor(ExitGames.Client.Photon.Hashtable properties)
     {
         if (properties.ContainsKey("Team"))
         {
@@ -73,7 +113,7 @@ public class ScoreboardEntry : MonoBehaviour
         }
     }
 
-    private void SetProfileImage(Hashtable properties, bool isAI)
+    private void SetProfileImage(ExitGames.Client.Photon.Hashtable properties, bool isAI)
     {
         if (properties.ContainsKey(isAI ? "ProfileIndex" : "ProfileImageIndex"))
         {
@@ -91,7 +131,7 @@ public class ScoreboardEntry : MonoBehaviour
             UpdateScoreUI();
 
             // 모든 플레이어에게 점수 동기화
-            if (player != null)
+            if (player == PhotonNetwork.LocalPlayer)
             {
                 ExitGames.Client.Photon.Hashtable hash = new ExitGames.Client.Photon.Hashtable();
                 hash["Score"] = scores;
@@ -100,7 +140,7 @@ public class ScoreboardEntry : MonoBehaviour
         }
     }
 
-    public void UpdateAIScore(Hashtable properties)
+    public void UpdateAIScore(ExitGames.Client.Photon.Hashtable properties)
     {
         if (isAI)
         {
@@ -108,12 +148,21 @@ public class ScoreboardEntry : MonoBehaviour
         }
     }
 
-    public void UpdateScoreData(Hashtable properties)
+    public void UpdateScoreData(ExitGames.Client.Photon.Hashtable properties)
     {
-        if (properties.ContainsKey("Score"))
+        
+        if (player != null && !properties.ContainsKey("Score")) return;
+        if (player != null && player.CustomProperties.TryGetValue("Score", out object rawScore))
         {
-            scores = (int[])properties["Score"];
-            UpdateScoreUI();
+            if (player != PhotonNetwork.LocalPlayer) //  내 점수판이 아니면, 단순 UI 갱신만 허용
+            {
+                scores = (int[])rawScore;
+                UpdateScoreUI();
+            }
+            else
+            {
+                Debug.Log("내 점수판이므로 UpdateScoreData() 무시");
+            }
         }
     }
 
@@ -168,7 +217,7 @@ public class ScoreboardEntry : MonoBehaviour
 
     public void ShowPreview(Dictionary<string, int> previewScores)
     {
-        Debug.Log(" 점수 미리보기 업데이트 실행됨!");
+        //Debug.Log(" 점수 미리보기 업데이트 실행됨!");
 
         foreach (var scoreEntry in previewScores)
         {
@@ -178,12 +227,12 @@ public class ScoreboardEntry : MonoBehaviour
                 if (index < upperSectionTexts.Length)
                 {
                     upperSectionTexts[index].text = scoreEntry.Value.ToString();
-                    Debug.Log($" {scoreEntry.Key} UI 업데이트됨: {scoreEntry.Value}");
+                    //Debug.Log($" {scoreEntry.Key} UI 업데이트됨: {scoreEntry.Value}");
                 }
                 else if (index - 8 < lowerSectionTexts.Length)
                 {
                     lowerSectionTexts[index - 8].text = scoreEntry.Value.ToString();
-                    Debug.Log($" {scoreEntry.Key} UI 업데이트됨: {scoreEntry.Value}");
+                    //Debug.Log($" {scoreEntry.Key} UI 업데이트됨: {scoreEntry.Value}");
                 }
                 else
                 {
@@ -245,40 +294,37 @@ public class ScoreboardEntry : MonoBehaviour
 
     public void HighlightScore(string category)
     {
-        int index = GetCategoryIndex(category);
-
-        if (index < 0 || index >= scores.Length)
-        {
-            Debug.LogWarning($"HighlightScore(): 잘못된 카테고리 또는 인덱스 범위 초과 - {category}, index: {index}");
-            return;
-        }
-
-        selectedCategory = category;
-
-        foreach (var kvp in scoreTexts)
-        {
-            string key = kvp.Key;
-            int keyIndex = GetCategoryIndex(key);
-
-            if (keyIndex < 0 || keyIndex >= scores.Length) continue; // 안전 처리
-
-            Color c = kvp.Value.color;
-            c.a = (scores[keyIndex] != 0) ? 1f : (key == category ? 1f : 0f);
-            kvp.Value.color = c;
-        }
-
-        Debug.Log(TurnManager.instance.IsMyTurn());
-        //  점수 확정 + 턴 넘기기
-        if (TurnManager.instance.IsMyTurn())
-        {
-            int score = DiceManager.Instance.CalculateScore(category);
-            UpdateScore(category, score);
-
-            Debug.Log($" {category} 확정됨 ({score}점), 턴 종료");
-
-            TurnManager.instance.EndMyTurn(); // 다음 턴으로
-        }
+        StartCoroutine(DelayedScoreConfirm(category));
     }
+
+    private IEnumerator DelayedScoreConfirm(string category)
+    {
+        yield return new WaitForSeconds(0.2f); //  살짝 기다린 후 실행
+
+        if (player != PhotonNetwork.LocalPlayer)
+        {
+            Debug.LogWarning(" 내 점수판 아님. 차단.");
+            yield break;
+        }
+
+        int index = GetCategoryIndex(category);
+        if (IsAlreadyScored(index))
+        {
+            Debug.LogWarning(" 이미 기록된 점수입니다.");
+            yield break;
+        }
+
+        if (!TurnManager.instance.IsMyTurn())
+        {
+            Debug.LogWarning(" 내 턴 아님.");
+            yield break;
+        }
+
+        int score = DiceManager.Instance.CalculateScore(category);
+        UpdateScore(category, score);
+        TurnManager.instance.EndMyTurn();
+    }
+
 
 
 
