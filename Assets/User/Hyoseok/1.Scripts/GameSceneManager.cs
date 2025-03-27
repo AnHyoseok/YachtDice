@@ -11,6 +11,7 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
 {
     public static GameSceneManager Instance;
 
+    public SelectDice selectDice;
     public Transform scoreboardPanel;
     public GameObject scoreboardPrefab;
 
@@ -189,8 +190,24 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
 
         if (photonView != null)
         {
-
             photonView.RPC("RPC_UpdateTurn", RpcTarget.All, playerIndex, round);
+            foreach(Dice dice in DiceManager.Instance.newdicelist)
+            {
+                if(dice != null)
+                {
+                    selectDice.MoveDiceBetweenArrays(dice, DiceManager.Instance.newdicelist, DiceManager.Instance.dices);
+                }
+            }
+            for(int i =0;i < DiceManager.Instance.dices.Length; i++)
+            {
+                if(DiceManager.Instance.dices[i] != null)
+                {
+                    PhotonNetwork.Destroy(DiceManager.Instance.dices[i].gameObject);
+                    DiceManager.Instance.dices[i] = null;
+                }
+            }
+            DiceManager.Instance.isDiceArray = false;
+            selectDice.escbutton.gameObject.SetActive(DiceManager.Instance.isDiceArray);
         }
         else
         {

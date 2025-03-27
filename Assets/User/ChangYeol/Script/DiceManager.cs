@@ -30,6 +30,7 @@ public class DiceManager : Singleton<DiceManager>
     #region Vaiables
     [HideInInspector]public ScoreboardEntry scoreboardEntry;
     private PhotonView photonView;
+    public GameObject[] boxobject;
     public Transform dicetrans;
     public float spacing = 0.8f;
     public float moveSpeed = 2f;
@@ -412,6 +413,10 @@ public class DiceManager : Singleton<DiceManager>
             {
                 rb.isKinematic = true; // 완전히 멈추도록 설정
             }
+        }
+        for(int i=0;i<boxobject.Length;i++)
+        {
+            boxobject[i].SetActive(false);
         }
         isArrays = false;
         isDiceArray = true;

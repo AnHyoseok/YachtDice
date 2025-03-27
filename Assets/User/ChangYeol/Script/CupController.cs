@@ -132,6 +132,7 @@ public class CupController : MonoBehaviour
     {
         if(TurnManager.instance.IsMyTurn())
         {
+            photonView.RPC("BoxobjectActivetrue", RpcTarget.All);
             boxGroup.SetActive(true);
             GetComponent<BoxCollider>().enabled = true;
             for (int i = 0; i < selectDice.turnLimit - selectDice.movesThisTurn; i++)
@@ -143,7 +144,14 @@ public class CupController : MonoBehaviour
             }
         }
     }
-
+    [PunRPC]
+    void BoxobjectActivetrue()
+    {
+        for (int i = 0; i < diceManager.boxobject.Length; i++)
+        {
+            diceManager.boxobject[i].SetActive(true);
+        }
+    }
     [PunRPC]
     public void AddDiceList(int diceID)
     {

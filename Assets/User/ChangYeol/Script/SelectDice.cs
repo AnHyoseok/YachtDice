@@ -62,11 +62,12 @@ public class SelectDice : MonoBehaviour
         {
             DiceSelect();
         }
-        if(DiceManager.Instance.isDiceArray)
+        if(DiceManager.Instance.isDiceArray && TurnManager.instance.IsMyTurn())
         {
             MoveUItoMousePosition();
         }
     }
+    #region SelectDice
     void DiceSelect()
     {
         if(movesThisTurn >= turnLimit)
@@ -87,7 +88,6 @@ public class SelectDice : MonoBehaviour
                 {
                     selectDiceObject = hit.collider.gameObject;
                     Dice selectedDice = selectDiceObject.GetComponent<Dice>();
-
 
                     if (!selectedDice.isSelected)
                     {
@@ -151,7 +151,7 @@ public class SelectDice : MonoBehaviour
         isGoMove = false;
     }
 
-    void MoveDiceBetweenArrays(Dice selectedDice,Dice[] dices, Dice[] newdicelist)
+    public void MoveDiceBetweenArrays(Dice selectedDice,Dice[] dices, Dice[] newdicelist)
     {
         int index = System.Array.FindIndex(dices, d => d == selectedDice);
         if (index != -1)
@@ -179,6 +179,8 @@ public class SelectDice : MonoBehaviour
             }
         }
     }
+    #endregion
+    #region SelectedDiceUI
     void MoveUItoMousePosition()
     {
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
@@ -188,7 +190,7 @@ public class SelectDice : MonoBehaviour
             if (hit.collider.CompareTag("Dice") && DiceManager.Instance.isDiceArray)
             {
                 Dice dice = hit.collider.gameObject.GetComponent<Dice>();
-                SelectDiceUISwich(dice);
+                photon.RPC("SelectDiceUISwich", RpcTarget.All, dice);
                 return;
             }
         }
@@ -196,16 +198,10 @@ public class SelectDice : MonoBehaviour
         // 마우스가 주사위를 벗어났을 때 UI 비활성화
         if (currentActiveUI != null)
         {
-            currentActiveUI.SetActive(false);
-            if (currentAnimator != null)
-            {
-                currentAnimator.SetBool("IsSelect", false);
-                currentAnimator = null;
-            }
-            currentActiveUI = null;
+            photon.RPC("RPC_SelectUI", RpcTarget.All);
         }
     }
-
+    [PunRPC]
     void SelectDiceUISwich(Dice dice)
     {
         if(dice != null)
@@ -250,7 +246,17 @@ public class SelectDice : MonoBehaviour
             }
         }
     }
-
+    [PunRPC]
+    void RPC_SelectUI()
+    {
+        currentActiveUI.SetActive(false);
+        if (currentAnimator != null)
+        {
+            currentAnimator.SetBool("IsSelect", false);
+            currentAnimator = null;
+        }
+        currentActiveUI = null;
+    }
     // 주사위의 윗면 값을 가져오는 함수
     private int GetDiceTopValue(GameObject diceObject)
     {
@@ -268,7 +274,7 @@ public class SelectDice : MonoBehaviour
         
         return 1; // 기본값 반환
     }
-
+    #endregion
     private void OnTurnEnd()
     {
         movesThisTurn = 0;
