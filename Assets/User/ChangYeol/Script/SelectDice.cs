@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class SelectDice : MonoBehaviour
 {
     #region Variables
+    private PhotonView photon;
     public Button escbutton;
     public Transform[] targetPositions;
     public bool[] isTarget;
@@ -24,14 +25,15 @@ public class SelectDice : MonoBehaviour
 
     private void Start()
     {
+        photon = GetComponent<PhotonView>();
         mainCamera = Camera.main;
-        escbutton.onClick.AddListener(() => OnClickEscButton());
     }
     private void Update()
     {
-        if (currentTargetIndex >= 0)
+        if (currentTargetIndex >= 0 && TurnManager.instance.IsMyTurn())
         {
-            escbutton.gameObject.SetActive(DiceManager.Instance.isDiceArray);
+            photon.RPC("EscKeySetActive", RpcTarget.All, DiceManager.Instance.isDiceArray);
+            escbutton.onClick.AddListener(() => OnClickEscButton());
             isPut = Input.GetKey(KeyCode.Escape);
             if (isPut)
             {
@@ -53,10 +55,10 @@ public class SelectDice : MonoBehaviour
                     }
                 }
                 DiceManager.Instance.isDiceArray = false;
-                escbutton.gameObject.SetActive(false);
+                photon.RPC("EscKeySetActive", RpcTarget.All, DiceManager.Instance.isDiceArray);
             }
         }
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && TurnManager.instance.IsMyTurn())
         {
             DiceSelect();
         }
@@ -284,7 +286,6 @@ public class SelectDice : MonoBehaviour
             if (dice != null)
             {
                 PhotonNetwork.Destroy(dice.gameObject);
-                escbutton.gameObject.SetActive(false);
             }
         }
         for (int i = 0; i < DiceManager.Instance.dices.Length; i++)
@@ -295,6 +296,11 @@ public class SelectDice : MonoBehaviour
             }
         }
         DiceManager.Instance.isDiceArray = false;
-        escbutton.gameObject.SetActive(false);
+        photon.RPC("EscKeySetActive", RpcTarget.All, DiceManager.Instance.isDiceArray); 
+    }
+    [PunRPC]
+    void EscKeySetActive(bool isEsc)
+    {
+        escbutton.gameObject.SetActive(isEsc);
     }
 }

@@ -48,6 +48,8 @@ MonoBehaviour:
   - ObjectInstantiate
   - RandomDice
   - RPC_UpdateTurn
+  - ShowTurnPopupRPC
+  - EscKeySetActive
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1
