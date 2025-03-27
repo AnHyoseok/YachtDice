@@ -232,49 +232,44 @@ public class DiceManager : Singleton<DiceManager>
         int[] values = GetDiceValues().Concat(GetDiceValue()).ToArray();
         int[] counts = new int[7];
         foreach (int v in values) counts[v]++;
-        HashSet<int> uniqueValues = new HashSet<int>(values);
 
+        // 미리보기 점수 계산
         Dictionary<string, int> previewScores = new Dictionary<string, int>();
-
         previewScores[DiceScore.ONES] = counts[1] * 1;
         previewScores[DiceScore.TWOS] = counts[2] * 2;
         previewScores[DiceScore.THREES] = counts[3] * 3;
         previewScores[DiceScore.FOURS] = counts[4] * 4;
         previewScores[DiceScore.FIVES] = counts[5] * 5;
         previewScores[DiceScore.SIXES] = counts[6] * 6;
-
-        // CHOICE
         previewScores[DiceScore.Choice] = values.Sum();
-
-        // 4 of a Kind
         previewScores[DiceScore.FOUR_KIND] = counts.Any(c => c >= 4) ? values.Sum() : 0;
 
-        // Full House (정확히 3개 + 2개)
         bool hasThree = counts.Any(c => c == 3);
         bool hasTwo = counts.Any(c => c == 2);
         previewScores[DiceScore.FULL_HOUSE] = (hasThree && hasTwo) ? values.Sum() : 0;
-
-        // Small Straight
         previewScores[DiceScore.SMALL_STRAIGHT] = HasStraight(values, 4) ? 15 : 0;
-
-        // Large Straight
         previewScores[DiceScore.LARGE_STRAIGHT] = HasStraight(values, 5) ? 30 : 0;
-
-        // Yacht (5 of a kind)
         previewScores[DiceScore.YAHTZEE] = counts.Any(c => c == 5) ? 50 : 0;
 
-        // 디버그 로그
-        //Debug.Log($"[Preview] {PhotonNetwork.LocalPlayer.NickName} → {string.Join(", ", previewScores.Select(kv => $"{kv.Key}: {kv.Value}"))}");
-
-        // 점수 반영
+        // 본인 화면에 표시
         if (GameSceneManager.Instance != null && GameSceneManager.Instance.scoreboardEntries.ContainsKey(PhotonNetwork.LocalPlayer.ActorNumber))
         {
             GameSceneManager.Instance.scoreboardEntries[PhotonNetwork.LocalPlayer.ActorNumber].ShowPreview(previewScores);
         }
 
-        // 네트워크 전송
-        ExitGames.Client.Photon.Hashtable playerScores = new ExitGames.Client.Photon.Hashtable { { "PreviewScore", previewScores } };
-        PhotonNetwork.LocalPlayer.SetCustomProperties(playerScores);
+        // Hashtable로 변환하여 동기화
+        ExitGames.Client.Photon.Hashtable previewHash = new ExitGames.Client.Photon.Hashtable();
+        foreach (var kvp in previewScores)
+        {
+            previewHash[kvp.Key] = kvp.Value;
+        }
+
+        PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable
+    {
+        { "PreviewScore", previewHash }
+    });
+
+        Debug.Log($"[Preview 전송] {PhotonNetwork.LocalPlayer.NickName}: {string.Join(", ", previewScores.Select(kv => $"{kv.Key}:{kv.Value}"))}");
     }
 
     private bool HasStraight(int[] values, int requiredLength)

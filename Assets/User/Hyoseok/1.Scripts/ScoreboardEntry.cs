@@ -17,7 +17,7 @@ public class ScoreboardEntry : MonoBehaviour
     public TextMeshProUGUI[] upperSectionTexts;
     public TextMeshProUGUI[] lowerSectionTexts;
     public TextMeshProUGUI totalScoreText;
-    private string selectedCategory = null; // 현재 선택 중인 카테고리
+    //private string selectedCategory = null; // 현재 선택 중인 카테고리
     private int[] scores = new int[14]; // 점수 저장 배열
     private Player player;
     private bool isAI = false;
@@ -31,8 +31,8 @@ public class ScoreboardEntry : MonoBehaviour
     {
         string[] categories = {
     "ONES", "TWOS", "THREES", "FOURS", "FIVES", "SIXES",
-    "Subtotal", "Bonus",
-    "Choice", "4 of a Kind", "Full House", "SMALL_STRAIGHT", "LARGE_STRAIGHT", "Yacht"
+    "SUBTOTAL", "BONUS",
+    "Choice", "4 of a Kind", "FULL_HOUSE", "SMALL_STRAIGHT", "LARGE_STRAIGHT", "YAHTZEE"
 };
 
         for (int i = 0; i < upperSectionTexts.Length; i++)
@@ -202,13 +202,13 @@ public class ScoreboardEntry : MonoBehaviour
             4 => "FIVES",
             5 => "SIXES",
             6 => "SUBTOTAL",
-            7 => "Bonus",
+            7 => "BONUS",
             8 => "Choice",
             9 => "4 of a Kind",
-            10 => "Full House",
+            10 => "FULL_HOUSE",
             11 => "SMALL_STRAIGHT",
             12 => "LARGE_STRAIGHT",
-            13 => "Yacht",
+            13 => "YAHTZEE",
             _ => ""
         };
     }
@@ -258,13 +258,13 @@ public class ScoreboardEntry : MonoBehaviour
             case "FIVES": return 4;
             case "SIXES": return 5;
             case "SUBTOTAL": return 6;
-            case "Bonus": return 7;
+            case "BONUS": return 7;
             case "Choice": return 8;
             case "4 of a Kind": return 9;
             case "FULL_HOUSE": return 10;
             case "SMALL_STRAIGHT": return 11;
             case "LARGE_STRAIGHT": return 12;
-            case "Yacht": return 13;
+            case "YAHTZEE": return 13;
             case "Total": return 14;
             default: return -1;
         }
@@ -348,7 +348,7 @@ public class ScoreboardEntry : MonoBehaviour
     //선택 초기화
     public void ClearHighlight()
     {
-        selectedCategory = null;
+        //selectedCategory = null;
 
         foreach (var kvp in scoreTexts)
         {

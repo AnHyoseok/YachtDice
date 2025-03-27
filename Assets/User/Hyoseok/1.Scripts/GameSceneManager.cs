@@ -4,6 +4,8 @@ using Photon.Pun;
 using Photon.Realtime;
 using System.Collections.Generic;
 using ExitGames.Client.Photon;
+using System.Collections;
+using System.Linq;
 public class GameSceneManager : MonoBehaviourPunCallbacks
 {
     public static GameSceneManager Instance;
@@ -57,7 +59,7 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
             {
                 if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(aiName))
                 {
-                    AddAIToScoreboard(aiName, (Hashtable)PhotonNetwork.CurrentRoom.CustomProperties[aiName]);
+                    AddAIToScoreboard(aiName, (ExitGames.Client.Photon.Hashtable)PhotonNetwork.CurrentRoom.CustomProperties[aiName]);
                 }
             }
         }
@@ -70,7 +72,7 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
         scoreboardEntries[player.ActorNumber] = entry;
     }
 
-    void AddAIToScoreboard(string aiName, Hashtable properties)
+    void AddAIToScoreboard(string aiName, ExitGames.Client.Photon.Hashtable properties)
     {
         ScoreboardEntry entry = CreateScoreboardEntry();
         entry.SetAIData(aiName, properties);
@@ -87,7 +89,7 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
     {
         if (!scoreboardEntries.ContainsKey(player.ActorNumber)) return;
 
-        Hashtable playerProperties = new Hashtable { { "Score", newScores } };
+        ExitGames.Client.Photon.Hashtable playerProperties = new ExitGames.Client.Photon.Hashtable { { "Score", newScores } };
         player.SetCustomProperties(playerProperties);
         scoreboardEntries[player.ActorNumber].UpdateScoreData(playerProperties);
     }
@@ -96,8 +98,8 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
     {
         if (!scoreboardEntries.ContainsKey(aiName.GetHashCode())) return;
 
-        Hashtable aiProperties = new Hashtable { { "Score", newScores } };
-        PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable { { aiName, aiProperties } });
+        ExitGames.Client.Photon.Hashtable aiProperties = new ExitGames.Client.Photon.Hashtable { { "Score", newScores } };
+        PhotonNetwork.CurrentRoom.SetCustomProperties(new ExitGames.Client.Photon.Hashtable { { aiName, aiProperties } });
 
         scoreboardEntries[aiName.GetHashCode()].UpdateAIScore(aiProperties);
     }
@@ -106,23 +108,33 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
     {
         if (changedProps.ContainsKey("PreviewScore"))
         {
-            Dictionary<string, int> previewScores = (Dictionary<string, int>)changedProps["PreviewScore"];
-            Debug.Log($" {targetPlayer.NickName}의 점수 업데이트 감지!");
-
-            if (GameSceneManager.Instance != null && GameSceneManager.Instance.scoreboardEntries.ContainsKey(targetPlayer.ActorNumber))
+            if (changedProps["PreviewScore"] is ExitGames.Client.Photon.Hashtable previewTable)
             {
-                GameSceneManager.Instance.scoreboardEntries[targetPlayer.ActorNumber].ShowPreview(previewScores);
+                Dictionary<string, int> previewScores = previewTable
+                    .Cast<DictionaryEntry>()
+                    .ToDictionary(entry => (string)entry.Key, entry => (int)entry.Value);
+
+                if (GameSceneManager.Instance != null && GameSceneManager.Instance.scoreboardEntries.ContainsKey(targetPlayer.ActorNumber))
+                {
+                    GameSceneManager.Instance.scoreboardEntries[targetPlayer.ActorNumber].ShowPreview(previewScores);
+                    Debug.Log($"[Preview 수신] {targetPlayer.NickName}: {string.Join(", ", previewScores.Select(kv => $"{kv.Key}:{kv.Value}"))}");
+                }
+            }
+            else
+            {
+                Debug.LogWarning("PreviewScore가 Hashtable 타입이 아닙니다.");
             }
         }
     }
 
 
 
-    public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
+
+    public override void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable propertiesThatChanged)
     {
         foreach (var key in propertiesThatChanged.Keys)
         {
-            if (key is string aiName && propertiesThatChanged[key] is Hashtable aiProperties)
+            if (key is string aiName && propertiesThatChanged[key] is ExitGames.Client.Photon.Hashtable aiProperties)
             {
                 if (scoreboardEntries.ContainsKey(aiName.GetHashCode()))
                 {

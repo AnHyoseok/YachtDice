@@ -1210,7 +1210,7 @@ GameObject:
   - component: {fileID: 1948057673664763754}
   - component: {fileID: 1809651368923564973}
   m_Layer: 5
-  m_Name: Bonus
+  m_Name: BONUS
   m_TagString: Upper Section
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1290,7 +1290,7 @@ GameObject:
   - component: {fileID: 4835592002041594881}
   - component: {fileID: 6882009267305070320}
   m_Layer: 5
-  m_Name: Aces
+  m_Name: ONES
   m_TagString: Upper Section
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1722,7 +1722,7 @@ GameObject:
   - component: {fileID: 2752612189304101057}
   - component: {fileID: 3894159897840608173}
   m_Layer: 5
-  m_Name: Full House
+  m_Name: FULL_HOUSE
   m_TagString: Lower Section
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2527,7 +2527,7 @@ GameObject:
   - component: {fileID: 7392748632564979074}
   - component: {fileID: 3199013938668192518}
   m_Layer: 5
-  m_Name: Fives
+  m_Name: FIVES
   m_TagString: Upper Section
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2664,7 +2664,7 @@ GameObject:
   - component: {fileID: 7055092955013645967}
   - component: {fileID: 3551753318878333352}
   m_Layer: 5
-  m_Name: Fours
+  m_Name: FOURS
   m_TagString: Upper Section
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2937,7 +2937,7 @@ GameObject:
   - component: {fileID: 6936290389240859601}
   - component: {fileID: 1867902979460733875}
   m_Layer: 5
-  m_Name: Threes
+  m_Name: THREES
   m_TagString: Upper Section
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4738,7 +4738,7 @@ GameObject:
   - component: {fileID: 2365841664700650836}
   - component: {fileID: 475173378856615257}
   m_Layer: 5
-  m_Name: Sixes
+  m_Name: SIXES
   m_TagString: Upper Section
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4993,7 +4993,7 @@ GameObject:
   - component: {fileID: 6828767837706883081}
   - component: {fileID: 5534635110885235309}
   m_Layer: 5
-  m_Name: Yacht
+  m_Name: YAHTZEE
   m_TagString: Lower Section
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5115,7 +5115,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c52d21ca1dd0b3247bcc1aa383bc8ecd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  category: Yacht
+  category: YAHTZEE
 --- !u!1 &7254641640702777584
 GameObject:
   m_ObjectHideFlags: 0
@@ -5264,7 +5264,7 @@ GameObject:
   - component: {fileID: 6189489139584423310}
   - component: {fileID: 103983331323934593}
   m_Layer: 5
-  m_Name: Subtotal
+  m_Name: SUBTOTAL
   m_TagString: Upper Section
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5435,7 +5435,7 @@ GameObject:
   - component: {fileID: 4621965736857422982}
   - component: {fileID: 7234215503948884977}
   m_Layer: 5
-  m_Name: Deuces
+  m_Name: TWOS
   m_TagString: Upper Section
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6209,7 +6209,7 @@ GameObject:
   - component: {fileID: 5857954794567502631}
   - component: {fileID: 4223780951570956586}
   m_Layer: 5
-  m_Name: S. Straight
+  m_Name: SMALL_STRAIGHT
   m_TagString: Lower Section
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6709,7 +6709,7 @@ GameObject:
   - component: {fileID: 8928056017940856886}
   - component: {fileID: 8914588501011705554}
   m_Layer: 5
-  m_Name: L. Straight
+  m_Name: LARGE_STRAIGHT
   m_TagString: Lower Section
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

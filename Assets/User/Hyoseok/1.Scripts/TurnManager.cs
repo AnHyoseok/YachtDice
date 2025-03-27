@@ -9,7 +9,7 @@ using System.Linq;
 public class TurnManager : MonoBehaviourPunCallbacks
 {
     public static TurnManager instance;
-
+    private PhotonView pv;
     public List<Player> playersInRoom = new List<Player>();
     public TextMeshProUGUI currentturnText;
     public int currentPlayerIndex = 0;
@@ -17,12 +17,15 @@ public class TurnManager : MonoBehaviourPunCallbacks
     public const int MAX_ROUNDS = 12;
 
     public GameObject turnAlarm;
+    public TextMeshProUGUI UsernameText;
     public float popupDuration = 15f;
 
     private void Awake()
     {
         if (instance == null) instance = this;
         else Destroy(gameObject);
+
+        pv = GetComponent<PhotonView>();
     }
 
     private void Start()
@@ -39,12 +42,19 @@ public class TurnManager : MonoBehaviourPunCallbacks
         }
 
         playersInRoom = GameSceneManager.Instance.GetSortedPlayers();
+
+        if (playersInRoom == null || playersInRoom.Count == 0)
+        {
+            Debug.LogError("플레이어 리스트를 가져오지 못했습니다.");
+            yield break;
+        }
+
         Debug.Log("TurnManager: GameSceneManager로부터 플레이어 리스트 수신 완료");
 
         if (PhotonNetwork.IsMasterClient)
         {
-            UpdateTurn(0, 0);  // 첫 턴 직접 시작
-            GameSceneManager.Instance.BroadcastTurn(0, 0);  // 네트워크 전체에 동기화
+            UpdateTurn(0, 0);  // 첫 턴 시작
+            GameSceneManager.Instance.BroadcastTurn(0, 0);
         }
     }
 
@@ -104,29 +114,42 @@ public class TurnManager : MonoBehaviourPunCallbacks
 
     public void UpdateTurn(int playerIndex, int round)
     {
-        Debug.Log(" UpdateTurn() 호출됨");
+        Debug.Log("UpdateTurn() 호출됨");
+
         currentPlayerIndex = playerIndex;
         currentTurnRound = round;
 
-        DiceManager.Instance.rollsLeft = 3;
+        if (DiceManager.Instance != null)
+            DiceManager.Instance.rollsLeft = 3;
+        else
+            Debug.LogWarning("DiceManager.Instance가 null입니다.");
+
         currentturnText.text = $"{currentTurnRound + 1} / {MAX_ROUNDS}";
 
         foreach (var entry in FindObjectsByType<ScoreboardEntry>(FindObjectsSortMode.None))
         {
-            entry.ClearHighlight();
+            if (entry != null)
+                entry.ClearHighlight();
         }
-        //알람껏다켰다
-        ShowTurnPopup();
-     
-        Debug.Log($"현재 턴: {round + 1}턴 - 플레이어: {GetCurrentPlayer().NickName}");
+
+        // 알림은 RPC로 실행
+        if (PhotonNetwork.IsMasterClient && PhotonView.Get(this) != null)
+        {
+            string playerName = GetCurrentPlayer()?.NickName ?? "???";
+            PhotonView.Get(this).RPC(nameof(ShowTurnPopupRPC), RpcTarget.All, playerName);
+        }
+
+        Debug.Log($"현재 턴: {round + 1}턴 - 플레이어: {GetCurrentPlayer()?.NickName}");
     }
 
-    private void ShowTurnPopup()
+
+    [PunRPC]
+    private void ShowTurnPopupRPC(string playerName)
     {
-        if (turnAlarm != null)
+        if (turnAlarm != null && UsernameText != null)
         {
+            UsernameText.text = $"{playerName}'S";
             turnAlarm.SetActive(true);
-            Debug.Log(" 알람 오브젝트 SetActive(true) 호출됨");
             CancelInvoke(nameof(HideTurnPopup));
             Invoke(nameof(HideTurnPopup), popupDuration);
         }
