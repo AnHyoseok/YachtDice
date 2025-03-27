@@ -13790,6 +13790,7 @@ GameObject:
   - component: {fileID: 5865461393944353690}
   - component: {fileID: 8539591554950688593}
   - component: {fileID: 8539591554950688594}
+  - component: {fileID: 8539591554950688595}
   m_Layer: 0
   m_Name: DiceBox
   m_TagString: Untagged
@@ -16518,6 +16519,28 @@ MonoBehaviour:
   isArrays: 0
   isRotat: 0
   isDiceArray: 0
+--- !u!114 &8539591554950688595
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5361168667570453071}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 6
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!222 &8573832582394320110
 CanvasRenderer:
   m_ObjectHideFlags: 0

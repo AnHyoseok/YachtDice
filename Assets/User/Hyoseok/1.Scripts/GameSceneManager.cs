@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using ExitGames.Client.Photon;
 using System.Collections;
 using System.Linq;
+
 public class GameSceneManager : MonoBehaviourPunCallbacks
 {
     public static GameSceneManager Instance;
@@ -14,6 +15,7 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
     public GameObject scoreboardPrefab;
 
     public Dictionary<int, ScoreboardEntry> scoreboardEntries = new Dictionary<int, ScoreboardEntry>();
+
     void Awake()
     {
         if (Instance == null)
@@ -26,6 +28,7 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
             Destroy(gameObject);
         }
     }
+
     void Start()
     {
         if (PhotonNetwork.InRoom)
@@ -38,9 +41,13 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
         }
     }
 
-    private void Update()
+    void Update()
     {
-        DiceManager.Instance.ShowPreviewScore();
+        // 매 프레임 미리보기 계산하지 않도록 조건 검사
+        if (DiceManager.Instance != null && DiceManager.Instance.isDiceArray)
+        {
+            DiceManager.Instance.ShowPreviewScore();
+        }
     }
 
     void InitializeScoreboard()
@@ -57,9 +64,14 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
             string[] aiPlayers = (string[])PhotonNetwork.CurrentRoom.CustomProperties["AIPlayers"];
             foreach (string aiName in aiPlayers)
             {
-                if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(aiName))
+                if (PhotonNetwork.CurrentRoom.CustomProperties[aiName] is System.Collections.Hashtable aiRawProps)
                 {
-                    AddAIToScoreboard(aiName, (ExitGames.Client.Photon.Hashtable)PhotonNetwork.CurrentRoom.CustomProperties[aiName]);
+                    ExitGames.Client.Photon.Hashtable aiProps = new ExitGames.Client.Photon.Hashtable();
+                    foreach (DictionaryEntry entry in aiRawProps)
+                    {
+                        aiProps[entry.Key] = entry.Value;
+                    }
+                    AddAIToScoreboard(aiName, aiProps);
                 }
             }
         }
@@ -106,29 +118,35 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
 
     public override void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
     {
-        if (changedProps.ContainsKey("PreviewScore"))
+        Debug.Log($"[변경 감지] {targetPlayer.NickName} → {string.Join(", ", changedProps.Keys.Cast<object>())}");
+        if (changedProps.ContainsKey("PreviewScore") && changedProps["PreviewScore"] is ExitGames.Client.Photon.Hashtable previewTable)
         {
-            if (changedProps["PreviewScore"] is ExitGames.Client.Photon.Hashtable previewTable)
-            {
-                Dictionary<string, int> previewScores = previewTable
-                    .Cast<DictionaryEntry>()
-                    .ToDictionary(entry => (string)entry.Key, entry => (int)entry.Value);
+            Dictionary<string, int> previewScores = new Dictionary<string, int>();
 
-                if (GameSceneManager.Instance != null && GameSceneManager.Instance.scoreboardEntries.ContainsKey(targetPlayer.ActorNumber))
+            foreach (DictionaryEntry entry in previewTable)
+            {
+                string key = entry.Key as string;
+                if (entry.Value is int intVal)
                 {
-                    GameSceneManager.Instance.scoreboardEntries[targetPlayer.ActorNumber].ShowPreview(previewScores);
-                    Debug.Log($"[Preview 수신] {targetPlayer.NickName}: {string.Join(", ", previewScores.Select(kv => $"{kv.Key}:{kv.Value}"))}");
+                    previewScores[key] = intVal;
+                }
+                else if (entry.Value is long longVal) // Photon sometimes uses long
+                {
+                    previewScores[key] = (int)longVal;
+                }
+                else
+                {
+                    Debug.LogWarning($"PreviewScore 변환 실패: {entry.Key} = {entry.Value} ({entry.Value?.GetType()})");
                 }
             }
-            else
+
+            if (scoreboardEntries.ContainsKey(targetPlayer.ActorNumber))
             {
-                Debug.LogWarning("PreviewScore가 Hashtable 타입이 아닙니다.");
+                scoreboardEntries[targetPlayer.ActorNumber].ShowPreview(previewScores);
+                Debug.Log($"[Preview 수신] {targetPlayer.NickName}: {string.Join(", ", previewScores.Select(kv => $"{kv.Key}:{kv.Value}"))}");
             }
         }
     }
-
-
-
 
     public override void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable propertiesThatChanged)
     {
@@ -155,12 +173,28 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
     public void RPC_UpdateTurn(int playerIndex, int round)
     {
         Debug.Log("RPC_UpdateTurn 호출됨 ");
-        TurnManager.instance.UpdateTurn(playerIndex, round);
+        if (TurnManager.instance != null)
+        {
+            TurnManager.instance.UpdateTurn(playerIndex, round);
+        }
+        else
+        {
+            Debug.LogError("TurnManager.instance가 null입니다.");
+        }
     }
 
     public void BroadcastTurn(int playerIndex, int round)
     {
         Debug.Log("BroadcastTurn 호출됨");
-        photonView.RPC("RPC_UpdateTurn", RpcTarget.All, playerIndex, round);
+
+        if (photonView != null)
+        {
+
+            photonView.RPC("RPC_UpdateTurn", RpcTarget.All, playerIndex, round);
+        }
+        else
+        {
+            Debug.LogError("photonView가 null입니다. BroadcastTurn 실패");
+        }
     }
 }

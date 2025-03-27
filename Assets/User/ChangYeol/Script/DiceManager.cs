@@ -1,4 +1,5 @@
 using Photon.Pun;
+using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,6 +29,7 @@ public class DiceManager : Singleton<DiceManager>
 {
     #region Vaiables
     [HideInInspector]public ScoreboardEntry scoreboardEntry;
+    private PhotonView photonView;
     public SelectDice selectdice;
     public Transform dicetrans;
     public float spacing = 0.8f;
@@ -51,7 +53,11 @@ public class DiceManager : Singleton<DiceManager>
     [HideInInspector] public bool isRotat = false;
     public bool isDiceArray = false;
     #endregion
-
+    protected override void Awake()
+    {
+        base.Awake();
+        photonView = GetComponent<PhotonView>();
+    }
     private void Start()
     {
         scoreboardEntry = FindAnyObjectByType<ScoreboardEntry>();
@@ -225,6 +231,7 @@ public class DiceManager : Singleton<DiceManager>
     }
 
     //점수 미리보여주기
+    // 점수 미리보기 호출 (내가 주사위 던졌을 때 실행)
     public void ShowPreviewScore()
     {
         if (!isDiceArray) return;
@@ -233,7 +240,6 @@ public class DiceManager : Singleton<DiceManager>
         int[] counts = new int[7];
         foreach (int v in values) counts[v]++;
 
-        // 미리보기 점수 계산
         Dictionary<string, int> previewScores = new Dictionary<string, int>();
         previewScores[DiceScore.ONES] = counts[1] * 1;
         previewScores[DiceScore.TWOS] = counts[2] * 2;
@@ -251,27 +257,16 @@ public class DiceManager : Singleton<DiceManager>
         previewScores[DiceScore.LARGE_STRAIGHT] = HasStraight(values, 5) ? 30 : 0;
         previewScores[DiceScore.YAHTZEE] = counts.Any(c => c == 5) ? 50 : 0;
 
-        // 본인 화면에 표시
-        if (GameSceneManager.Instance != null && GameSceneManager.Instance.scoreboardEntries.ContainsKey(PhotonNetwork.LocalPlayer.ActorNumber))
-        {
-            GameSceneManager.Instance.scoreboardEntries[PhotonNetwork.LocalPlayer.ActorNumber].ShowPreview(previewScores);
-        }
+        // 딕셔너리 -> 배열로 변환 (RPC 전송용)
+        string[] keys = previewScores.Keys.ToArray();
+        int[] vals = previewScores.Values.ToArray();
 
-        // Hashtable로 변환하여 동기화
-        ExitGames.Client.Photon.Hashtable previewHash = new ExitGames.Client.Photon.Hashtable();
-        foreach (var kvp in previewScores)
-        {
-            previewHash[kvp.Key] = kvp.Value;
-        }
-
-        PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable
-    {
-        { "PreviewScore", previewHash }
-    });
+        // 모든 유저에게 A의 점수 미리보기 전송
+        PhotonView photonView = GetComponent<PhotonView>();
+        photonView.RPC("RPC_ShowPreviewScore", RpcTarget.All, PhotonNetwork.LocalPlayer.ActorNumber, keys, vals);
 
         Debug.Log($"[Preview 전송] {PhotonNetwork.LocalPlayer.NickName}: {string.Join(", ", previewScores.Select(kv => $"{kv.Key}:{kv.Value}"))}");
     }
-
     private bool HasStraight(int[] values, int requiredLength)
     {
         int[] sorted = values.Distinct().OrderBy(v => v).ToArray();
@@ -294,6 +289,22 @@ public class DiceManager : Singleton<DiceManager>
         return maxLength >= requiredLength;
     }
 
+    [PunRPC]
+    public void RPC_ShowPreviewScore(int actorNumber, string[] keys, int[] values)
+    {
+        Dictionary<string, int> previewScores = new Dictionary<string, int>();
+        for (int i = 0; i < keys.Length; i++)
+        {
+            previewScores[keys[i]] = values[i];
+        }
+
+        if (GameSceneManager.Instance.scoreboardEntries.TryGetValue(actorNumber, out var entry))
+        {
+            entry.ShowPreview(previewScores);
+            Debug.Log($"[모두에게 미리보기 적용됨] 플레이어 {actorNumber}: {string.Join(", ", previewScores.Select(kv => $"{kv.Key}:{kv.Value}"))}");
+        }
+    }
+
     private void CheckForBoonus()
     {
         if (! boonsGiven && upperSectionScore >= 63)
@@ -305,9 +316,12 @@ public class DiceManager : Singleton<DiceManager>
     }
     private void UpdateScoreboard(string category, int score)
     {
-        if (scoreboardEntry != null)
+        Player currentPlayer = TurnManager.instance.GetCurrentPlayer();
+        int actorNumber = currentPlayer.ActorNumber;
+
+        if (GameSceneManager.Instance.scoreboardEntries.TryGetValue(actorNumber, out ScoreboardEntry entry))
         {
-            scoreboardEntry.UpdateScore(category, score);
+            entry.UpdateScore(category, score);
         }
     }
     public int GetUpperSectionScore()

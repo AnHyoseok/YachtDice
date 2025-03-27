@@ -227,12 +227,14 @@ public class ScoreboardEntry : MonoBehaviour
                 if (index < upperSectionTexts.Length)
                 {
                     upperSectionTexts[index].text = scoreEntry.Value.ToString();
-                    //Debug.Log($" {scoreEntry.Key} UI 機等檜お脾: {scoreEntry.Value}");
+                    SetAlpha(upperSectionTexts[index], 0.5f); 
+                    
                 }
                 else if (index - 8 < lowerSectionTexts.Length)
                 {
                     lowerSectionTexts[index - 8].text = scoreEntry.Value.ToString();
-                    //Debug.Log($" {scoreEntry.Key} UI 機等檜お脾: {scoreEntry.Value}");
+                    SetAlpha(lowerSectionTexts[index - 8], 0.5f); 
+                    
                 }
                 else
                 {
@@ -246,6 +248,12 @@ public class ScoreboardEntry : MonoBehaviour
         }
     }
 
+    private void SetAlpha(TextMeshProUGUI text, float alpha)
+    {
+        Color c = text.color;
+        c.a = alpha;
+        text.color = c;
+    }
 
     public int GetCategoryIndex(string category)
     {
@@ -322,6 +330,9 @@ public class ScoreboardEntry : MonoBehaviour
 
         int score = DiceManager.Instance.CalculateScore(category);
         UpdateScore(category, score);
+
+        //
+
         TurnManager.instance.EndMyTurn();
     }
 
