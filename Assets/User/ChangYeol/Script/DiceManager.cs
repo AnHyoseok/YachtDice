@@ -30,7 +30,6 @@ public class DiceManager : Singleton<DiceManager>
     #region Vaiables
     [HideInInspector]public ScoreboardEntry scoreboardEntry;
     private PhotonView photonView;
-    public SelectDice selectdice;
     public Transform dicetrans;
     public float spacing = 0.8f;
     public float moveSpeed = 2f;
@@ -230,7 +229,7 @@ public class DiceManager : Singleton<DiceManager>
         return maxLength >= requiredLength;
     }
 
-    //점수 미리보여주기
+   
     // 점수 미리보기 호출 (내가 주사위 던졌을 때 실행)
     public void ShowPreviewScore()
     {
@@ -419,8 +418,10 @@ public class DiceManager : Singleton<DiceManager>
 
         //점수 알파 0.5
         ScoreboardManager.instance.ShowLocalScore();
+      
 
     }
+
     private Quaternion GetTargetRotation(int faceValue)
     {
         switch(faceValue)

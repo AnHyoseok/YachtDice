@@ -128,8 +128,16 @@ public class ScoreboardEntry : MonoBehaviour
         if (index != -1)
         {
             scores[index] = score;
+            ClearHighlight();
+      
+            
+            if (scoreTexts.TryGetValue(category, out var textUI))
+            {
+                Color c = textUI.color;
+                c.a = 1f;
+                textUI.color = c;
+            }
             UpdateScoreUI();
-
             // 모든 플레이어에게 점수 동기화
             if (player == PhotonNetwork.LocalPlayer)
             {
@@ -227,13 +235,13 @@ public class ScoreboardEntry : MonoBehaviour
                 if (index < upperSectionTexts.Length)
                 {
                     upperSectionTexts[index].text = scoreEntry.Value.ToString();
-                    SetAlpha(upperSectionTexts[index], 0.5f); 
+                 
                     
                 }
                 else if (index - 8 < lowerSectionTexts.Length)
                 {
                     lowerSectionTexts[index - 8].text = scoreEntry.Value.ToString();
-                    SetAlpha(lowerSectionTexts[index - 8], 0.5f); 
+                   
                     
                 }
                 else
