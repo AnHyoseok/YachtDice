@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
-using System.Linq;
 
 public class CupController : MonoBehaviour
 {
@@ -61,14 +60,6 @@ public class CupController : MonoBehaviour
     }
     void UpdateCupState()
     {
-        AnimeCup();
-        //photonView.RPC("AnimeCup", RpcTarget.All);
-    }
-    //[PunRPC]
-    void AnimeCup()
-    {
-        
-
         int ani = selectDice.turnLimit - selectDice.movesThisTurn;
         animator.SetInteger(DiceCount, ani);
         animator.SetBool(IsShake, isShake);
@@ -76,14 +67,11 @@ public class CupController : MonoBehaviour
     }
     public void TryRollDice()
     {
-
         if (TurnManager.instance.IsMyTurn() && DiceManager.Instance.rollsLeft > 0)
         {
             photonView.RPC("RPC_RequestDiceSpawn", RpcTarget.MasterClient);
         }
     }
-
-
     [PunRPC]
     public void RPC_RequestDiceSpawn()
     {
@@ -104,23 +92,26 @@ public class CupController : MonoBehaviour
     [PunRPC]
     public void ObjectInstantiate()
     {
-        boxGroup.SetActive(false);
-        GetComponent<BoxCollider>().enabled = false;
-        for (int i = 0; i < diceManager.dices.Length; i++)
+        if(TurnManager.instance.IsMyTurn())
         {
-            if(i <= diceManager.dices.Length)
+            boxGroup.SetActive(false);
+            GetComponent<BoxCollider>().enabled = false;
+            for (int i = 0; i < diceManager.dices.Length; i++)
             {
-                photonView.RPC("DesDiceList", RpcTarget.MasterClient, falseDices[i].GetComponent<PhotonView>().ViewID);
-                falseDices[i] = null;
+                if (i <= diceManager.dices.Length)
+                {
+                    photonView.RPC("DesDiceList", RpcTarget.MasterClient, falseDices[i].GetComponent<PhotonView>().ViewID);
+                    falseDices[i] = null;
+                }
+                photonView.RPC("RandomPoition", RpcTarget.MasterClient);
+                diceManager.dices[i] = Dice.GetComponent<Dice>();
+                Dice.name = $"Dice{i}";
             }
-            photonView.RPC("RandomPoition", RpcTarget.MasterClient);
-            diceManager.dices[i] = Dice.GetComponent<Dice>();
-            Dice.name = $"Dice{i}";
+            falseDices.RemoveAll(x => x == null);
+            diceManager.isArray = false;
+            diceManager.isRotat = false;
+            diceManager.rollsLeft--;
         }
-        falseDices.RemoveAll(x => x == null);
-        diceManager.isArray = false;
-        diceManager.isRotat = false;
-        diceManager.rollsLeft--;
     }
     [PunRPC]
     void RandomPoition()
@@ -139,18 +130,17 @@ public class CupController : MonoBehaviour
     [PunRPC]
     public void RandomDice()
     {
-        if (!PhotonNetwork.IsMasterClient) return;
-        boxGroup.SetActive(true);
-        GetComponent<BoxCollider>().enabled = true;
-        for (int i = 0; i < selectDice.turnLimit - selectDice.movesThisTurn; i++)
+        if(TurnManager.instance.IsMyTurn())
         {
-            Vector3 offset = diceManager.GetUniqueRandomPosition(transform.position.x, transform.position.x + 0.01f);
-            Quaternion randomRot = Quaternion.Euler(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
-            if (PhotonNetwork.IsMasterClient)
+            boxGroup.SetActive(true);
+            GetComponent<BoxCollider>().enabled = true;
+            for (int i = 0; i < selectDice.turnLimit - selectDice.movesThisTurn; i++)
             {
+                Vector3 offset = diceManager.GetUniqueRandomPosition(transform.position.x, transform.position.x + 0.01f);
+                Quaternion randomRot = Quaternion.Euler(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
                 Forcedice = PhotonNetwork.Instantiate("Forcedice", offset, randomRot);
+                photonView.RPC("AddDiceList", RpcTarget.MasterClient, Forcedice.GetComponent<PhotonView>().ViewID);
             }
-            photonView.RPC("AddDiceList", RpcTarget.MasterClient, Forcedice.GetComponent<PhotonView>().ViewID);
         }
     }
 
