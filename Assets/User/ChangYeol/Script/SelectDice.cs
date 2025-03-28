@@ -190,7 +190,7 @@ public class SelectDice : MonoBehaviour
             if (hit.collider.CompareTag("Dice") && DiceManager.Instance.isDiceArray)
             {
                 Dice dice = hit.collider.gameObject.GetComponent<Dice>();
-                photon.RPC("SelectDiceUISwich", RpcTarget.All, dice);
+                SelectDiceUISwich(dice);
                 return;
             }
         }
@@ -198,7 +198,7 @@ public class SelectDice : MonoBehaviour
         // 마우스가 주사위를 벗어났을 때 UI 비활성화
         if (currentActiveUI != null)
         {
-            photon.RPC("RPC_SelectUI", RpcTarget.All);
+            RPC_SelectUI();
         }
     }
     [PunRPC]
@@ -216,7 +216,7 @@ public class SelectDice : MonoBehaviour
                 }
             }
 
-            int diceValue = GetDiceTopValue(dice.gameObject);
+            int diceValue = dice.GetDiceValue();
             
             // UI 선택 및 애니메이터 설정
             switch (diceValue)
@@ -257,25 +257,8 @@ public class SelectDice : MonoBehaviour
         }
         currentActiveUI = null;
     }
-    // 주사위의 윗면 값을 가져오는 함수
-    private int GetDiceTopValue(GameObject diceObject)
-    {
-        // 주사위의 모든 TriggerDice 컴포넌트를 가져옵니다
-        TriggerDice[] triggerDices = diceObject.GetComponentsInChildren<TriggerDice>();
-        
-        // 각 면을 확인하여 현재 위를 향하고 있는 면의 값을 찾습니다
-        foreach (TriggerDice trigger in triggerDices)
-        {
-            if (trigger.diceValue > 0)
-            {
-                return trigger.diceValue;
-            }
-        }
-        
-        return 1; // 기본값 반환
-    }
     #endregion
-    private void OnTurnEnd()
+    public void OnTurnEnd()
     {
         movesThisTurn = 0;
         currentTargetIndex = 0;

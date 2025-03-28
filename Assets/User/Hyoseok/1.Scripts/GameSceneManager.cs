@@ -223,6 +223,7 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
             }
             DiceManager.Instance.isDiceArray = false;
             selectDice.escbutton.gameObject.SetActive(DiceManager.Instance.isDiceArray);
+            selectDice.OnTurnEnd();
         }
         else
         {

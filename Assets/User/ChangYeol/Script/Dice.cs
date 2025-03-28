@@ -64,11 +64,7 @@ public class Dice : MonoBehaviour
             maxDot = dot;
             upside = side;
         }
-        if (upside != null)
-        {
-            Debug.Log(upside.name);
-            return int.Parse(upside.name);
-        }
+        if (upside != null) return int.Parse(upside.name);
         return 1;
     }
     void SetupDicePhysics(Rigidbody rb)
