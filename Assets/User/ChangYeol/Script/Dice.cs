@@ -7,6 +7,7 @@ public class Dice : MonoBehaviour
     #region Variables
     private PhotonView photonView;
     private Rigidbody rb;
+    public Transform[] diceSides;
     public GameObject[] SelectUICavas;
     public float shakeForce = 2f;
 
@@ -17,7 +18,6 @@ public class Dice : MonoBehaviour
     public float nudgeForce = 0.5f; // ¸ð¼­¸® ´ê¾ÒÀ» ¶§ ¾àÇÑ Èû Ãß°¡
 
     private bool isSliding = false;
-    public List<TriggerDice> diceList;
     public int index = 0;
     #endregion
 
@@ -55,12 +55,19 @@ public class Dice : MonoBehaviour
     }
     public int GetDiceValue()
     {
-        foreach(TriggerDice triggerDice in diceList)
+        Transform upside = null;
+        float maxDot = -1;
+        foreach (Transform side in diceSides)
         {
-            if(triggerDice.diceValue > 0)
-            {
-                return triggerDice.diceValue;
-            }
+            float dot = Vector3.Dot(side.up, Vector3.up);
+            if (!(dot > maxDot)) continue;
+            maxDot = dot;
+            upside = side;
+        }
+        if (upside != null)
+        {
+            Debug.Log(upside.name);
+            return int.Parse(upside.name);
         }
         return 1;
     }
@@ -101,7 +108,7 @@ public class Dice : MonoBehaviour
     }
     private void OnCollisionEnter(Collision collision)
     {
-        if(collision.gameObject.CompareTag("Ground"))
+        if(collision.gameObject.CompareTag("Ground") || collision.gameObject.CompareTag("Dice"))
         {
             isSliding = true;
             //Debug.Log("¹Ì²ô·¯Áü");

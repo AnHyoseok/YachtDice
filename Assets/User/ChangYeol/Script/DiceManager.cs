@@ -404,29 +404,31 @@ public class DiceManager : Singleton<DiceManager>
             dice.transform.rotation = targetRotation;
             dice.GetComponent<Dice>().originPos = dice.transform.position;
             //Debug.Log(dice.GetComponent<Dice>().originPos);
-            for(int j= 0;j < dice.GetComponent<Dice>().diceList.Count; j++)
-            {
-                BoxCollider box = dice.GetComponent<Dice>().diceList[j].GetComponent<BoxCollider>();
-                box.enabled = false;
-            }
+            //for(int j= 0;j < dice.GetComponent<Dice>().diceList.Count; j++)
+            //{
+            //    BoxCollider box = dice.GetComponent<Dice>().diceList[j].GetComponent<BoxCollider>();
+            //    box.enabled = false;
+            //}
             if (rb != null)
             {
                 rb.isKinematic = true; // 완전히 멈추도록 설정
             }
         }
-        for(int i=0;i<boxobject.Length;i++)
-        {
-            boxobject[i].SetActive(false);
-        }
+        photonView.RPC("BoxobjectActiveFalse", RpcTarget.All);
         isArrays = false;
         isDiceArray = true;
 
         //점수 알파 0.5
         ScoreboardManager.instance.ShowLocalScore();
-      
-
     }
-
+    [PunRPC]
+    void BoxobjectActiveFalse()
+    {
+        for (int i = 0; i < boxobject.Length; i++)
+        {
+            boxobject[i].SetActive(false);
+        }
+    }
     private Quaternion GetTargetRotation(int faceValue)
     {
         switch(faceValue)

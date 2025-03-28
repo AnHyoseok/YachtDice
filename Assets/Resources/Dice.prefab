@@ -314,7 +314,7 @@ GameObject:
   - component: {fileID: 6779299065335537024}
   - component: {fileID: 6277716761266077492}
   m_Layer: 0
-  m_Name: DiceFace_5
+  m_Name: 3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -329,7 +329,7 @@ Transform:
   m_GameObject: {fileID: 1810029887201595501}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 0.61}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.7, y: 0.2, z: 0.7}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -408,7 +408,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 3, z: 0}
 --- !u!114 &6277716761266077492
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -534,12 +534,12 @@ Transform:
   m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 7649430254150758790}
-  - {fileID: 9042222482191711444}
-  - {fileID: 7872766089331310461}
+  - {fileID: 7582701613418128657}
   - {fileID: 6788861895334894296}
   - {fileID: 4342382824521642215}
-  - {fileID: 7582701613418128657}
+  - {fileID: 9042222482191711444}
+  - {fileID: 7872766089331310461}
+  - {fileID: 7649430254150758790}
   - {fileID: 4301827131098022714}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -608,6 +608,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a65e3525c90d5642ba9f11f6f4d1247, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  diceSides:
+  - {fileID: 7582701613418128657}
+  - {fileID: 6788861895334894296}
+  - {fileID: 4342382824521642215}
+  - {fileID: 9042222482191711444}
+  - {fileID: 7872766089331310461}
+  - {fileID: 7649430254150758790}
   SelectUICavas:
   - {fileID: 7276037235151562820}
   - {fileID: 9122120938609298915}
@@ -744,7 +751,7 @@ GameObject:
   - component: {fileID: 2055839695687237941}
   - component: {fileID: 8891494349097388508}
   m_Layer: 0
-  m_Name: DiceFace_4
+  m_Name: 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -759,7 +766,7 @@ Transform:
   m_GameObject: {fileID: 2530853596432772595}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: -0.61, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.7, y: 0.2, z: 0.7}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -838,7 +845,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 3, z: 0}
 --- !u!114 &8891494349097388508
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1016,7 +1023,7 @@ GameObject:
   - component: {fileID: 6990627338951794525}
   - component: {fileID: 1986820389276057107}
   m_Layer: 0
-  m_Name: DiceFace_3
+  m_Name: 5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1031,7 +1038,7 @@ Transform:
   m_GameObject: {fileID: 4399238267542101601}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: -0.61}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.7, y: 0.2, z: 0.7}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1110,7 +1117,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 3, z: 0}
 --- !u!114 &1986820389276057107
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1591,7 +1598,7 @@ GameObject:
   - component: {fileID: 6613596209311474809}
   - component: {fileID: 8000445327154374582}
   m_Layer: 0
-  m_Name: DiceFace_6
+  m_Name: 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1606,7 +1613,7 @@ Transform:
   m_GameObject: {fileID: 7455438498518559087}
   serializedVersion: 2
   m_LocalRotation: {x: -1, y: 0, z: 0, w: 0}
-  m_LocalPosition: {x: 0, y: -0.61, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.7, y: 0.2, z: 0.7}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1685,7 +1692,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 3, z: 0}
 --- !u!114 &8000445327154374582
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1713,7 +1720,7 @@ GameObject:
   - component: {fileID: 4782175503367342004}
   - component: {fileID: 6288598012149736515}
   m_Layer: 0
-  m_Name: DiceFace_1
+  m_Name: 6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1728,7 +1735,7 @@ Transform:
   m_GameObject: {fileID: 7663748035248873080}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.61, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.7, y: 0.2, z: 0.7}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1807,7 +1814,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 3, z: 0}
 --- !u!114 &6288598012149736515
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1910,7 +1917,7 @@ GameObject:
   - component: {fileID: 6464958098070443982}
   - component: {fileID: 8318418679701725465}
   m_Layer: 0
-  m_Name: DiceFace_2
+  m_Name: 4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1925,7 +1932,7 @@ Transform:
   m_GameObject: {fileID: 9072260942385934075}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: -0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: 0.61, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.7, y: 0.2, z: 0.7}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2004,7 +2011,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 3, z: 0}
 --- !u!114 &8318418679701725465
 MonoBehaviour:
   m_ObjectHideFlags: 0
