@@ -3,6 +3,7 @@ using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameResultManager : MonoBehaviour
 {
@@ -13,18 +14,21 @@ public class GameResultManager : MonoBehaviour
     public GameObject scoreboardPanel;
     public GameObject backgroundPanel;
 
-    public GameObject nextButton;
+    public Button nextButton;
     public GameObject winloseCanvas;
  
     public Transform resultContentParent;
-    public GameObject resultEntryPrefab;
-
+    public GameObject userResultPrefab;
+    private Dictionary<string, int> teamScores = new Dictionary<string, int>();
     private void Awake()
     {
         Instance = this;
     }
     private void Start()
     {
+     
+        nextButton.onClick.AddListener(() => StartCoroutine(ShowResultsAfterDelay()));
+
         StartResultSequence();
     }
     public void StartResultSequence()
@@ -40,24 +44,20 @@ public class GameResultManager : MonoBehaviour
         backgroundPanel.SetActive(true);
         scoreboardPanel.transform.localPosition = Vector3.zero;
         scoreboardPanel.SetActive(true);
-        nextButton.SetActive(true);
+        nextButton.gameObject.SetActive(true);
     }
 
-    public void OnClickNext()
-    {
-        StartCoroutine(ShowResultsAfterDelay());
-    }
 
     private IEnumerator ShowResultsAfterDelay()
     {
         scoreboardPanel.SetActive(false);
-        nextButton.SetActive(false);
+        nextButton.gameObject.SetActive(false);
 
         yield return new WaitForSeconds(1f);
 
         winloseCanvas.SetActive(true);
 
-       
+        GameObject go = Instantiate(userResultPrefab, resultContentParent);
     }
    
 }

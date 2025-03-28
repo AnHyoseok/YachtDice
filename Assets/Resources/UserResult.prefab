@@ -292,7 +292,7 @@ GameObject:
   - component: {fileID: 2110166125410235853}
   - component: {fileID: 6684548818208028062}
   m_Layer: 5
-  m_Name: userNameText
+  m_Name: playerNameText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -345,7 +345,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: userName
+  m_text: playerName
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1d63651ea490f6747be58e992e564a1c, type: 2}
   m_sharedMaterial: {fileID: 1905771355083818549, guid: 1d63651ea490f6747be58e992e564a1c, type: 2}
@@ -564,6 +564,7 @@ GameObject:
   - component: {fileID: 5558915859293628893}
   - component: {fileID: 4365010748779006255}
   - component: {fileID: 6168201448887579750}
+  - component: {fileID: 7875031451006429938}
   m_Layer: 5
   m_Name: UserResult
   m_TagString: Untagged
@@ -580,7 +581,7 @@ RectTransform:
   m_GameObject: {fileID: 4421839381098071722}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7831536880113299963}
@@ -655,6 +656,23 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &7875031451006429938
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4421839381098071722}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b84bb57659deaad459d1321cb31da779, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerNameText: {fileID: 6684548818208028062}
+  profileImage: {fileID: 1683179533147174659}
+  scoreText: {fileID: 6095815019593977307}
+  teamColor: {fileID: 4365010748779006255}
+  animator: {fileID: 6168201448887579750}
 --- !u!1 &4735442059021149825
 GameObject:
   m_ObjectHideFlags: 0
@@ -668,7 +686,7 @@ GameObject:
   - component: {fileID: 2461279377529454609}
   - component: {fileID: 6415154754785923567}
   m_Layer: 5
-  m_Name: UserImage
+  m_Name: profileImageBackGround
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -832,7 +850,7 @@ GameObject:
   - component: {fileID: 1962485007056178320}
   - component: {fileID: 1683179533147174659}
   m_Layer: 5
-  m_Name: UserImage
+  m_Name: profileImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
