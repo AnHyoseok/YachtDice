@@ -41,6 +41,11 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
             {
                 AssignTurnIndices();
             }
+
+            if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("AIPlayers"))
+            {
+                OnRoomPropertiesUpdate(PhotonNetwork.CurrentRoom.CustomProperties);
+            } 
         }
         else
         {
@@ -157,13 +162,17 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
 
     public override void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable propertiesThatChanged)
     {
-        foreach (var key in propertiesThatChanged.Keys)
+        if (propertiesThatChanged.ContainsKey("AIPlayers"))
         {
-            if (key is string aiName && propertiesThatChanged[key] is ExitGames.Client.Photon.Hashtable aiProperties)
+            string[] aiNames = (string[])PhotonNetwork.CurrentRoom.CustomProperties["AIPlayers"];
+            foreach (string aiName in aiNames)
             {
-                if (scoreboardEntries.ContainsKey(aiName.GetHashCode()))
+                if (PhotonNetwork.CurrentRoom.CustomProperties[aiName] is ExitGames.Client.Photon.Hashtable aiProps)
                 {
-                    scoreboardEntries[aiName.GetHashCode()].UpdateAIScore(aiProperties);
+                    if (!scoreboardEntries.ContainsKey(aiName.GetHashCode()))
+                    {
+                        AddAIToScoreboard(aiName, aiProps);
+                    }
                 }
             }
         }
