@@ -67,6 +67,7 @@ public class DiceManager : Singleton<DiceManager>
         CheckDiceStopped();
         //스코어 기록 
         rollsLeftText.text = rollsLeft.ToString() + " left";
+        Debug.Log($"[Check] isArray={isArray}, dices length={dices.Length}");
         if (rollsLeft <= 0)
         {
             
@@ -332,7 +333,12 @@ public class DiceManager : Singleton<DiceManager>
     {
         for(int i = 0; i < dices.Length;i++)
         {
-            if (dices[i] == null) return;
+            if (dices[i] == null)
+            {
+                Debug.LogWarning($"[CheckDiceStopped] dice {i} is null");
+                return;
+            }
+           
             if (!isArray)
             {
                 bool allStopped = System.Array.TrueForAll(dices, dice => dice != null && dice.GetComponent<Rigidbody>().linearVelocity.magnitude < 0.1f
@@ -403,12 +409,7 @@ public class DiceManager : Singleton<DiceManager>
             dice.transform.position = targetPosition;
             dice.transform.rotation = targetRotation;
             dice.GetComponent<Dice>().originPos = dice.transform.position;
-            //Debug.Log(dice.GetComponent<Dice>().originPos);
-            //for(int j= 0;j < dice.GetComponent<Dice>().diceList.Count; j++)
-            //{
-            //    BoxCollider box = dice.GetComponent<Dice>().diceList[j].GetComponent<BoxCollider>();
-            //    box.enabled = false;
-            //}
+        
             if (rb != null)
             {
                 rb.isKinematic = true; // 완전히 멈추도록 설정

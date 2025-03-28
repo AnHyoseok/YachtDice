@@ -77,13 +77,26 @@ public class CupController : MonoBehaviour
         UpdateCupState();
     }
   
+
     void UpdateCupState()
     {
         int ani = selectDice.turnLimit - selectDice.movesThisTurn;
         animator.SetInteger(DiceCount, ani);
         animator.SetBool(IsShake, isShake);
         animator.SetBool(IsButton, button.isButton);
+      
+        // 다른 유저한테 동기화
+        photonView.RPC("SyncAnimatorState", RpcTarget.Others, ani, isShake, button.isButton);
     }
+
+
+    [PunRPC]
+void SyncAnimatorState(int ani, bool shake, bool isBtn)
+{
+    animator.SetInteger("DiceCount", ani);
+    animator.SetBool("IsShake", shake);
+    animator.SetBool("IsButton", isBtn);
+}
     public void TryRollDice()
     {
 
@@ -95,7 +108,7 @@ public class CupController : MonoBehaviour
     [PunRPC]
     public void RPC_RequestDiceSpawn()
     {
-        if (!TurnManager.instance.IsMyTurn())
+        if (TurnManager.instance.IsMyTurn())
         {
             ObjectInstantiate();
         }
@@ -110,29 +123,48 @@ public class CupController : MonoBehaviour
         }
     }
     [PunRPC]
+ 
     public void ObjectInstantiate()
     {
-        if(TurnManager.instance.IsMyTurn())
+        if (!TurnManager.instance.IsMyTurn()) return;
+
+        boxGroup.SetActive(false);
+        GetComponent<BoxCollider>().enabled = false;
+
+        //  가짜 주사위 먼저 정리
+        for (int i = 0; i < falseDices.Count; i++)
         {
-            boxGroup.SetActive(false);
-            GetComponent<BoxCollider>().enabled = false;
-            for (int i = 0; i < diceManager.dices.Length; i++)
+            if (falseDices[i] != null)
             {
-                if (i <= diceManager.dices.Length)
-                {
-                    photonView.RPC("DesDiceList", RpcTarget.MasterClient, falseDices[i].GetComponent<PhotonView>().ViewID);
-                    falseDices[i] = null;
-                }
-                photonView.RPC("RandomPoition", RpcTarget.MasterClient);
-                diceManager.dices[i] = Dice.GetComponent<Dice>();
-                Dice.name = $"Dice{i}";
+                PhotonNetwork.Destroy(falseDices[i]);
             }
-            falseDices.RemoveAll(x => x == null);
-            diceManager.isArray = false;
-            diceManager.isRotat = false;
-            diceManager.rollsLeft--;
         }
+        falseDices.Clear();
+
+        //  진짜 주사위 생성 및 배열 할당
+        for (int i = 0; i < diceManager.dices.Length; i++)
+        {
+            Vector3 offset = diceManager.GetUniqueRandomPosition(transform.position.x, transform.position.x + 0.01f);
+            Quaternion randomRot = Quaternion.Euler(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
+
+            GameObject diceObj = PhotonNetwork.Instantiate("Dice", offset, randomRot);
+            diceManager.dices[i] = diceObj.GetComponent<Dice>();
+            diceObj.name = $"Dice{i}";
+
+            Rigidbody dicerb = diceObj.GetComponent<Rigidbody>();
+            if (dicerb != null && wall != null)
+            {
+                Vector3 forceDirection = (wall.position - offset).normalized;
+                dicerb.AddForce(forceDirection * initialForce, ForceMode.Impulse);
+            }
+        }
+
+        // 상태 초기화
+        diceManager.isArray = false;
+        diceManager.isRotat = false;
+        diceManager.rollsLeft--;
     }
+
     [PunRPC]
     void RandomPoition()
     {
