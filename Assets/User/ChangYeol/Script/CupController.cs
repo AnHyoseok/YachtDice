@@ -192,7 +192,7 @@ void SyncAnimatorState(int ani, bool shake, bool isBtn)
                 Vector3 offset = diceManager.GetUniqueRandomPosition(transform.position.x, transform.position.x + 0.01f);
                 Quaternion randomRot = Quaternion.Euler(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
                 Forcedice = PhotonNetwork.Instantiate("Forcedice", offset, randomRot);
-                photonView.RPC("AddDiceList", RpcTarget.MasterClient, Forcedice.GetComponent<PhotonView>().ViewID);
+                photonView.RPC("AddDiceList", RpcTarget.All, Forcedice.GetComponent<PhotonView>().ViewID);
             }
         }
     }
