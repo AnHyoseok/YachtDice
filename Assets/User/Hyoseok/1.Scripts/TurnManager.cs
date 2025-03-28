@@ -110,16 +110,16 @@ public class TurnManager : MonoBehaviourPunCallbacks
     {
         Debug.Log(" EndMyTurn() 호출됨");
         Debug.Log($" GameSceneManager.Instance == null ? {GameSceneManager.Instance == null}");
-        if (!PhotonNetwork.IsMasterClient) return;
-
+        //if (!PhotonNetwork.IsMasterClient) return;
         int nextIndex = currentPlayerIndex + 1;
         int nextRound = currentTurnRound;
-
+        Debug.Log($"현재 인덱스{nextIndex-1}");
         if (nextIndex >= playersInRoom.Count)
         {
             nextIndex = 0;
             nextRound++;
 
+            Debug.Log($"다음 인덱스{nextIndex}");
             if (nextRound >= MAX_ROUNDS)
             {
                 Debug.Log("게임 종료!");

@@ -235,8 +235,9 @@ public class DiceManager : Singleton<DiceManager>
     // 점수 미리보기 호출 (내가 주사위 던졌을 때 실행)
     public void ShowPreviewScore()
     {
-        if (!isDiceArray) return;
-
+        if (!isDiceArray ) return;
+        
+       
         int[] values = GetDiceValues().Concat(GetDiceValue()).ToArray();
         int[] counts = new int[7];
         foreach (int v in values) counts[v]++;
@@ -263,6 +264,7 @@ public class DiceManager : Singleton<DiceManager>
         int[] vals = previewScores.Values.ToArray();
 
         // 모든 유저에게 A의 점수 미리보기 전송
+
         PhotonView photonView = GetComponent<PhotonView>();
         photonView.RPC("RPC_ShowPreviewScore", RpcTarget.All, PhotonNetwork.LocalPlayer.ActorNumber, keys, vals);
 
@@ -293,6 +295,7 @@ public class DiceManager : Singleton<DiceManager>
     [PunRPC]
     public void RPC_ShowPreviewScore(int actorNumber, string[] keys, int[] values)
     {
+
         Dictionary<string, int> previewScores = new Dictionary<string, int>();
         for (int i = 0; i < keys.Length; i++)
         {
@@ -301,6 +304,7 @@ public class DiceManager : Singleton<DiceManager>
 
         if (GameSceneManager.Instance.scoreboardEntries.TryGetValue(actorNumber, out var entry))
         {
+
             entry.ShowPreview(previewScores);
             Debug.Log($"[모두에게 미리보기 적용됨] 플레이어 {actorNumber}: {string.Join(", ", previewScores.Select(kv => $"{kv.Key}:{kv.Value}"))}");
         }

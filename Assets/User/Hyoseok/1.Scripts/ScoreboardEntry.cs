@@ -130,6 +130,7 @@ public class ScoreboardEntry : MonoBehaviour
             scores[index] = score;
             ClearHighlight();
 
+         
 
             if (scoreTexts.TryGetValue(category, out var textUI))
             {
@@ -137,14 +138,17 @@ public class ScoreboardEntry : MonoBehaviour
                 Color c = textUI.color;
                 c.a = 1f;                      //  확정된 점수는 불투명
                 textUI.color = c;
+         
             }
             UpdateScoreUI();
             // 모든 플레이어에게 점수 동기화
             if (player == PhotonNetwork.LocalPlayer)
             {
+              
                 ExitGames.Client.Photon.Hashtable hash = new ExitGames.Client.Photon.Hashtable();
                 hash["Score"] = scores;
                 player.SetCustomProperties(hash);
+            
             }
         }
     }
@@ -226,8 +230,9 @@ public class ScoreboardEntry : MonoBehaviour
 
     public void ShowPreview(Dictionary<string, int> previewScores)
     {
-        //Debug.Log(" 점수 미리보기 업데이트 실행됨!");
-        ClearHighlight();
+        //if (!TurnManager.instance.IsMyTurn()) return;
+            //Debug.Log(" 점수 미리보기 업데이트 실행됨!");
+            ClearHighlight();
         foreach (var scoreEntry in previewScores)
         {
             int index = GetCategoryIndex(scoreEntry.Key);
@@ -338,10 +343,11 @@ public class ScoreboardEntry : MonoBehaviour
         }
 
         int score = DiceManager.Instance.CalculateScore(category);
+      
         UpdateScore(category, score);
 
-        //
 
+       
         TurnManager.instance.EndMyTurn();
     }
 
