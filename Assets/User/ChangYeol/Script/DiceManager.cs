@@ -159,10 +159,10 @@ public class DiceManager : Singleton<DiceManager>
                 break;
 
             case "BONUS":
-                int subtotal = 0;
+                int bonusSubtotal = 0;
                 for (int i = 1; i <= 6; i++)
-                    subtotal += counts[i] * i;
-                score = subtotal >= 63 ? 35 : 0;
+                    bonusSubtotal += counts[i] * i;
+                score = bonusSubtotal >= 63 ? 35 : 0;
                 break;
 
             case "Choice":
@@ -203,6 +203,21 @@ public class DiceManager : Singleton<DiceManager>
             upperSectionScore += score;
             CheckForBoonus();
         }
+
+        int subtotal = 0;
+int bonus = 0;
+
+Player currentPlayer = TurnManager.instance.GetCurrentPlayer();
+if (currentPlayer.CustomProperties.TryGetValue("Score", out object rawScore))
+{
+    int[] confirmedScores = (int[])rawScore;
+    for (int i = 0; i <= 5; i++) subtotal += confirmedScores[i];
+    bonus = subtotal >= 63 ? 35 : 0;
+}
+
+
+        UpdateScoreboard(DiceScore.SUBTOTAL, subtotal);
+        UpdateScoreboard(DiceScore.BONUS, bonus);
 
         UpdateScoreboard(category, score);
         return score;
@@ -249,6 +264,23 @@ public class DiceManager : Singleton<DiceManager>
         previewScores[DiceScore.FOURS] = counts[4] * 4;
         previewScores[DiceScore.FIVES] = counts[5] * 5;
         previewScores[DiceScore.SIXES] = counts[6] * 6;
+        // 확정된 점수 가져오기
+        int subtotal = 0;
+        var currentPlayer = TurnManager.instance.GetCurrentPlayer();
+        if (currentPlayer.CustomProperties.TryGetValue("Score", out object rawScore))
+        {
+            int[] confirmedScores = (int[])rawScore;
+
+            // 0~5: ONES~SIXES
+            for (int i = 0; i <= 5; i++)
+            {
+                subtotal += confirmedScores[i];
+            }
+        }
+        previewScores[DiceScore.SUBTOTAL] = subtotal;
+
+        previewScores[DiceScore.BONUS] = subtotal >= 63 ? 35 : 0;
+     
         previewScores[DiceScore.Choice] = values.Sum();
         previewScores[DiceScore.FOUR_KIND] = counts.Any(c => c >= 4) ? values.Sum() : 0;
 
@@ -295,7 +327,7 @@ public class DiceManager : Singleton<DiceManager>
     [PunRPC]
     public void RPC_ShowPreviewScore(int actorNumber, string[] keys, int[] values)
     {
-
+    
         Dictionary<string, int> previewScores = new Dictionary<string, int>();
         for (int i = 0; i < keys.Length; i++)
         {

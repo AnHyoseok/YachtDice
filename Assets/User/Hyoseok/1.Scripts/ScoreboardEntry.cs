@@ -140,6 +140,7 @@ public class ScoreboardEntry : MonoBehaviour
                 textUI.color = c;
          
             }
+            UpdateSubtotalAndBonus();
             UpdateScoreUI();
             // 모든 플레이어에게 점수 동기화
             if (player == PhotonNetwork.LocalPlayer)
@@ -148,8 +149,38 @@ public class ScoreboardEntry : MonoBehaviour
                 ExitGames.Client.Photon.Hashtable hash = new ExitGames.Client.Photon.Hashtable();
                 hash["Score"] = scores;
                 player.SetCustomProperties(hash);
-            
+              
             }
+        }
+
+    }
+    private void UpdateSubtotalAndBonus()
+    {
+        int subtotal = 0;
+        for (int i = 0; i <= 5; i++) // ONES ~ SIXES
+        {
+            subtotal += scores[i];
+        }
+
+        int bonus = subtotal >= 63 ? 35 : 0;
+
+        scores[6] = subtotal; // SUBTOTAL
+        scores[7] = bonus;    // BONUS
+
+        if (scoreTexts.TryGetValue(DiceScore.SUBTOTAL, out var subtotalText))
+        {
+            subtotalText.text = subtotal.ToString();
+            Color c = subtotalText.color;
+            c.a = 1f;
+            subtotalText.color = c;
+        }
+
+        if (scoreTexts.TryGetValue(DiceScore.BONUS, out var bonusText))
+        {
+            bonusText.text = bonus.ToString();
+            Color c = bonusText.color;
+            c.a = 1f;
+            bonusText.color = c;
         }
     }
 
@@ -230,37 +261,44 @@ public class ScoreboardEntry : MonoBehaviour
 
     public void ShowPreview(Dictionary<string, int> previewScores)
     {
-        //if (!TurnManager.instance.IsMyTurn()) return;
-            //Debug.Log(" 점수 미리보기 업데이트 실행됨!");
-            ClearHighlight();
+        ClearHighlight();
+
         foreach (var scoreEntry in previewScores)
         {
             int index = GetCategoryIndex(scoreEntry.Key);
-            if (index != -1)
+            if (index == -1) continue;
+
+            if (scoreEntry.Key == DiceScore.SUBTOTAL || scoreEntry.Key == DiceScore.BONUS)
             {
-                if (index < upperSectionTexts.Length)
+                if (scoreTexts.TryGetValue(scoreEntry.Key, out var textUI))
                 {
-                    upperSectionTexts[index].text = scoreEntry.Value.ToString();
-                    ShowAll();
+                    textUI.text = scoreEntry.Value.ToString();
+                    textUI.color = new Color(textUI.color.r, textUI.color.g, textUI.color.b, 1f); // 항상 불투명
+                }
+                continue;
+            }
 
-                }
-                else if (index - 8 < lowerSectionTexts.Length)
-                {
-                    lowerSectionTexts[index - 8].text = scoreEntry.Value.ToString();
-                    ShowAll();
 
-                }
-                else
-                {
-                    Debug.LogWarning($" {scoreEntry.Key} UI 업데이트 실패 - 인덱스 범위 초과");
-                }
+            // 이미 점수가 기록된 항목은 미리보기 적용하지 않음
+            if (IsAlreadyScored(index)) continue;
+
+            if (index < upperSectionTexts.Length)
+            {
+                upperSectionTexts[index].text = scoreEntry.Value.ToString();
+            }
+            else if (index - 8 < lowerSectionTexts.Length)
+            {
+                lowerSectionTexts[index - 8].text = scoreEntry.Value.ToString();
             }
             else
             {
-                Debug.LogWarning($" {scoreEntry.Key}의 인덱스를 찾을 수 없음!");
+                Debug.LogWarning($"[미리보기 실패] {scoreEntry.Key}는 인덱스 범위를 초과했어요.");
             }
         }
+
+        ShowAll();  // 알파값 적용 (이미 기록된 항목은 1f, 미기록은 0.5f)
     }
+
 
     public void SetAlpha(TextMeshProUGUI text, float alpha)
     {
@@ -310,7 +348,22 @@ public class ScoreboardEntry : MonoBehaviour
 
     public void ShowAll()
     {
-        SetAllTextAlpha(0.5f);
+        foreach (var kvp in scoreTexts)
+        {
+            int index = GetCategoryIndex(kvp.Key);
+            if (index == -1) continue;
+
+            Color c = kvp.Value.color;
+            if (kvp.Key == DiceScore.SUBTOTAL || kvp.Key == DiceScore.BONUS)
+            {
+                c.a = 1f;
+            }
+            else
+            {
+                c.a = (scores[index] == 0) ? 0.5f : 1f;
+            } // 기록되지 않은 항목만 반투명
+            kvp.Value.color = c;
+        }
 
     }
 
@@ -382,7 +435,15 @@ public class ScoreboardEntry : MonoBehaviour
             int index = GetCategoryIndex(key);
             Color c = kvp.Value.color;
 
-            c.a = (scores[index] != 0) ? 1f : 0f;
+            if (key == DiceScore.SUBTOTAL || key == DiceScore.BONUS)
+            {
+                c.a = 1f;
+            }
+            else
+            {
+                c.a = (scores[index] != 0) ? 1f : 0f;
+            }
+
             kvp.Value.color = c;
         }
     }
