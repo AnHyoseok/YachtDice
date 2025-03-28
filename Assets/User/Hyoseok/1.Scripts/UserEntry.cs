@@ -9,6 +9,7 @@ public class UserEntry : MonoBehaviour
     public TextMeshProUGUI playerNameText;
     public Image profileImage;
     public TextMeshProUGUI scoreText;
+    public TextMeshProUGUI Win_LoseText;
     public Image teamColor;
     public Animator animator;
     public void Setup(Player player, bool isWinner)
@@ -42,7 +43,7 @@ public class UserEntry : MonoBehaviour
 
         // 승리 여부 (임시)
         animator.SetTrigger(isWinner ? "IsWin" : "IsLose");
-    
+        Win_LoseText.text = isWinner ? "Winner!" : "Too bad...";
     }
 
     private int CalculateTotalScore(int[] scores)

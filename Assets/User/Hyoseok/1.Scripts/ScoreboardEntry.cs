@@ -22,7 +22,7 @@ public class ScoreboardEntry : MonoBehaviour
     private Player player;
     private bool isAI = false;
     private string aiName;
-
+    private bool[] isScored = new bool[14];
     //점수 이미지 
     public Dictionary<string, TextMeshProUGUI> scoreTexts = new Dictionary<string, TextMeshProUGUI>();
 
@@ -128,6 +128,7 @@ public class ScoreboardEntry : MonoBehaviour
         if (index != -1)
         {
             scores[index] = score;
+            isScored[index] = true;
             ClearHighlight();
 
          
@@ -148,6 +149,7 @@ public class ScoreboardEntry : MonoBehaviour
               
                 ExitGames.Client.Photon.Hashtable hash = new ExitGames.Client.Photon.Hashtable();
                 hash["Score"] = scores;
+                hash["ScoredFlags"] = isScored;
                 player.SetCustomProperties(hash);
               
             }
@@ -198,9 +200,23 @@ public class ScoreboardEntry : MonoBehaviour
         if (player != null && !properties.ContainsKey("Score")) return;
         if (player != null && player.CustomProperties.TryGetValue("Score", out object rawScore))
         {
-            if (player != PhotonNetwork.LocalPlayer) //  내 점수판이 아니면, 단순 UI 갱신만 허용
+            if (player != PhotonNetwork.LocalPlayer)
             {
                 scores = (int[])rawScore;
+
+                if (properties.TryGetValue("ScoredFlags", out object rawFlags))
+                {
+                    isScored = (bool[])rawFlags;
+                }
+                else
+                {
+                    // fallback - 점수 값 기준 추론
+                    for (int i = 0; i < scores.Length; i++)
+                    {
+                        isScored[i] = scores[i] != 0;
+                    }
+                }
+
                 UpdateScoreUI();
             }
             else
@@ -345,7 +361,6 @@ public class ScoreboardEntry : MonoBehaviour
     {
         SetAllTextAlpha(0f);
     }
-
     public void ShowAll()
     {
         foreach (var kvp in scoreTexts)
@@ -354,18 +369,20 @@ public class ScoreboardEntry : MonoBehaviour
             if (index == -1) continue;
 
             Color c = kvp.Value.color;
+
             if (kvp.Key == DiceScore.SUBTOTAL || kvp.Key == DiceScore.BONUS)
             {
                 c.a = 1f;
             }
             else
             {
-                c.a = (scores[index] == 0) ? 0.5f : 1f;
-            } // 기록되지 않은 항목만 반투명
+                c.a = isScored[index] ? 1f : 0.5f; //  기입 여부로 알파 결정
+            }
+
             kvp.Value.color = c;
         }
-
     }
+
 
     public void HighlightScore(string category)
     {
@@ -421,12 +438,7 @@ public class ScoreboardEntry : MonoBehaviour
     //점수기록 여부 
     public bool IsAlreadyScored(int index)
     {
-        if (scoreTexts.TryGetValue(GetCategoryByIndex(index), out var textUI))
-        {
-            return !string.IsNullOrEmpty(textUI.text); // 텍스트가 있으면 이미 기록된 것으로 간주
-        }
-
-        return false;
+        return isScored[index];
     }
 
     //선택 초기화
@@ -446,7 +458,7 @@ public class ScoreboardEntry : MonoBehaviour
             }
             else
             {
-                c.a = string.IsNullOrEmpty(kvp.Value.text) ? 0f : 1f;
+                c.a = isScored[index] ? 1f : 0.5f;
             }
 
             kvp.Value.color = c;

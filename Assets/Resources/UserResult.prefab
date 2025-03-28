@@ -671,6 +671,7 @@ MonoBehaviour:
   playerNameText: {fileID: 6684548818208028062}
   profileImage: {fileID: 1683179533147174659}
   scoreText: {fileID: 6095815019593977307}
+  Win_LoseText: {fileID: 6730206356894884536}
   teamColor: {fileID: 4365010748779006255}
   animator: {fileID: 6168201448887579750}
 --- !u!1 &4735442059021149825

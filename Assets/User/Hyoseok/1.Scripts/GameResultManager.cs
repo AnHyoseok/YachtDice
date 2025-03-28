@@ -26,14 +26,29 @@ public class GameResultManager : MonoBehaviour
 
     private void Start()
     {
+       
         nextButton.onClick.AddListener(() => StartCoroutine(ShowResultsAfterDelay()));
        
     }
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.G))
+        {
+            StartResultSequence();
+        }
+    }
     public void StartResultSequence()
+    {
+        PhotonView photonView = GetComponent<PhotonView>();
+        photonView.RPC(nameof(RPC_StartResultSequence), RpcTarget.All);
+    }
+
+    [PunRPC]
+    public void RPC_StartResultSequence()
     {
         StartCoroutine(ResultFlow());
     }
-
+    
     private IEnumerator ResultFlow()
     {
         yield return new WaitForSeconds(1f);

@@ -12475,6 +12475,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1437440638006431884}
   - component: {fileID: 6259809327400243176}
+  - component: {fileID: 6259809327400243177}
   m_Layer: 0
   m_Name: GameResultManager
   m_TagString: Untagged
@@ -15075,6 +15076,28 @@ MonoBehaviour:
   winloseCanvas: {fileID: 1910518340622428973}
   resultContentParent: {fileID: 5082677567142961742}
   userResultPrefab: {fileID: 4421839381098071722, guid: 1c60220e18596d343baa7a1d85082998, type: 3}
+--- !u!114 &6259809327400243177
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3820616673172021172}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 7
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!222 &6269919074290176046
 CanvasRenderer:
   m_ObjectHideFlags: 0

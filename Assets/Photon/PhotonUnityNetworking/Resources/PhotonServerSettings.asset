@@ -61,6 +61,7 @@ MonoBehaviour:
   - UpdateCupState
   - SyncAnimatorState
   - UpdateAnimationState
+  - RPC_StartResultSequence
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1
