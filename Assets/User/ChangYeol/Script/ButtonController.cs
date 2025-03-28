@@ -8,11 +8,22 @@ public class ButtonController : MonoBehaviour, IPointerDownHandler, IPointerUpHa
     #endregion
     public void OnPointerDown(PointerEventData eventData)
     {
-        isButton = false;
+        if (TurnManager.instance.IsMyTurn())
+        {
+            isButton = false;
+        }
+       
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        isButton = true;
+        if(TurnManager.instance.IsMyTurn())
+        {
+
+            isButton = true;
+
+        }
+
+        
     }
 }

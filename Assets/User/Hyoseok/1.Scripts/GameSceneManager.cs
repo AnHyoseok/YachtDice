@@ -35,6 +35,12 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
         if (PhotonNetwork.InRoom)
         {
             InitializeScoreboard();
+
+            bool hasTurnIndex = PhotonNetwork.PlayerList.All(p => p.CustomProperties.ContainsKey("TurnIndex"));
+            if (!hasTurnIndex)
+            {
+                AssignTurnIndices();
+            }
         }
         else
         {
@@ -183,7 +189,16 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
             Debug.LogError("TurnManager.instance가 null입니다.");
         }
     }
+    public void AssignTurnIndices()
+    {
+        var sortedPlayers = PhotonNetwork.PlayerList.OrderBy(p => p.ActorNumber).ToList();
 
+        for (int i = 0; i < sortedPlayers.Count; i++)
+        {
+            Player p = sortedPlayers[i];
+            p.SetCustomProperties(new ExitGames.Client.Photon.Hashtable { { "TurnIndex", i } });
+        }
+    }
     public void BroadcastTurn(int playerIndex, int round)
     {
         Debug.Log("BroadcastTurn 호출됨");

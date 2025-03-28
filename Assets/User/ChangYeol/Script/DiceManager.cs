@@ -419,7 +419,17 @@ public class DiceManager : Singleton<DiceManager>
         isDiceArray = true;
 
         //점수 알파 0.5
-        ScoreboardManager.instance.ShowLocalScore();
+        photonView.RPC("RPC_ShowAllScoreboards", RpcTarget.All);
+
+
+    }
+    [PunRPC]
+    public void RPC_ShowAllScoreboards()
+    {
+        foreach (var entry in GameSceneManager.Instance.scoreboardEntries.Values)
+        {
+            entry.ShowAll();
+        }
     }
     [PunRPC]
     void BoxobjectActiveFalse()

@@ -1355,6 +1355,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 97b7b0941fa10264caab79f6346632c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cupController: {fileID: 0}
   currentturnText: {fileID: 6002163824048972396}
   currentPlayerIndex: 0
   currentTurnRound: 0
@@ -9112,7 +9113,6 @@ GameObject:
   - component: {fileID: 3469287836958276108}
   - component: {fileID: 3469287836958276109}
   - component: {fileID: 3469287836958276110}
-  - component: {fileID: 3469287836958276111}
   m_Layer: 0
   m_Name: "\uC218\uC815\uBCF8)\uCEF5"
   m_TagString: Untagged
@@ -11751,6 +11751,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6071cee7c7bb3eb4ba680d6481db4caf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  photonView: {fileID: 0}
   button: {fileID: 1740718681}
   boxGroup: {fileID: 1323024319}
   wall: {fileID: 3325980841883998428}
@@ -11926,38 +11927,10 @@ MonoBehaviour:
   Synchronization: 3
   OwnershipTransfer: 0
   observableSearch: 2
-  ObservedComponents:
-  - {fileID: 3469287836958276111}
+  ObservedComponents: []
   sceneViewId: 1
   InstantiationId: 0
   isRuntimeInstantiated: 0
---- !u!114 &3469287836958276111
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 919132148647358231}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b8c4a61274f60b4ea5fb4299cfdbf14, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowLayerWeightsInspector: 1
-  ShowParameterInspector: 1
-  m_SynchronizeParameters:
-  - Type: 3
-    SynchronizeType: 2
-    Name: DiceCount
-  - Type: 4
-    SynchronizeType: 2
-    Name: IsShake
-  - Type: 4
-    SynchronizeType: 2
-    Name: IsButton
-  m_SynchronizeLayers:
-  - SynchronizeType: 2
-    LayerIndex: 0
 --- !u!114 &3480982906792599028
 MonoBehaviour:
   m_ObjectHideFlags: 0

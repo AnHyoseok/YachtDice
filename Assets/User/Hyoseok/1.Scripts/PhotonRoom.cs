@@ -472,6 +472,7 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
         //현재 방 로비에서 제거 
         PhotonNetwork.CurrentRoom.IsVisible = false; // 방 목록에서 제거
         PhotonNetwork.CurrentRoom.IsOpen = false; //  추가 입장 불가
+
         PhotonNetwork.LoadLevel("GameScene"); //  모든 플레이어가 동시에 이동
 
 

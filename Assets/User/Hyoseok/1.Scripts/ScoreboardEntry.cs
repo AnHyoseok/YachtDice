@@ -129,12 +129,13 @@ public class ScoreboardEntry : MonoBehaviour
         {
             scores[index] = score;
             ClearHighlight();
-      
-            
+
+
             if (scoreTexts.TryGetValue(category, out var textUI))
             {
+                textUI.text = score.ToString(); // 확정 점수 다시 셋팅
                 Color c = textUI.color;
-                c.a = 1f;
+                c.a = 1f;                      //  확정된 점수는 불투명
                 textUI.color = c;
             }
             UpdateScoreUI();
@@ -226,7 +227,7 @@ public class ScoreboardEntry : MonoBehaviour
     public void ShowPreview(Dictionary<string, int> previewScores)
     {
         //Debug.Log(" 점수 미리보기 업데이트 실행됨!");
-
+        ClearHighlight();
         foreach (var scoreEntry in previewScores)
         {
             int index = GetCategoryIndex(scoreEntry.Key);
@@ -235,14 +236,14 @@ public class ScoreboardEntry : MonoBehaviour
                 if (index < upperSectionTexts.Length)
                 {
                     upperSectionTexts[index].text = scoreEntry.Value.ToString();
-                 
-                    
+                    ShowAll();
+
                 }
                 else if (index - 8 < lowerSectionTexts.Length)
                 {
                     lowerSectionTexts[index - 8].text = scoreEntry.Value.ToString();
-                   
-                    
+                    ShowAll();
+
                 }
                 else
                 {
@@ -256,7 +257,7 @@ public class ScoreboardEntry : MonoBehaviour
         }
     }
 
-    private void SetAlpha(TextMeshProUGUI text, float alpha)
+    public void SetAlpha(TextMeshProUGUI text, float alpha)
     {
         Color c = text.color;
         c.a = alpha;

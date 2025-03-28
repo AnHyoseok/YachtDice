@@ -73,6 +73,14 @@ public class ScoreboardManager : MonoBehaviourPunCallbacks
         GetLocalPlayerEntry()?.HideAll();
     }
 
+    public void ShowAllScores()
+    {
+        foreach (var entry in playerEntries.Values)
+        {
+            entry.ShowAll();  // 알파값 0.5 처리 (ShowPreview용)
+        }
+    }
+
     public void ShowLocalScore()
     {
         GetLocalPlayerEntry()?.ShowAll();

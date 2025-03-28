@@ -5,7 +5,7 @@ using Photon.Pun;
 public class CupController : MonoBehaviour
 {
     #region Variables
-    private PhotonView photonView;
+    public PhotonView photonView;
     public ButtonController button;
     public GameObject boxGroup;
     public Transform wall;
@@ -28,36 +28,55 @@ public class CupController : MonoBehaviour
     private void Start()
     {
         photonView = GetComponent<PhotonView>();
+        photonView.OwnershipTransfer = OwnershipOption.Request;
         animator = GetComponent<Animator>();
         diceManager = DiceManager.Instance;
     }
     private void Update()
     {
-        if (diceManager.isDiceArray || diceManager.rollsLeft == 0 || diceManager.isArrays)
+
+        if (!TurnManager.instance.IsMyTurn())
         {
+            Debug.LogWarning("내 턴이 아니라서 조작 불가능!");
             return;
         }
+        else
+        {
+            Debug.Log("내 턴입니다! 조작 가능!");
+        }
+        if (diceManager.isDiceArray || diceManager.rollsLeft == 0 || diceManager.isArrays)
+        {
+            Debug.LogWarning($"주사위 조작 제한: isDiceArray={diceManager.isDiceArray}, rollsLeft={diceManager.rollsLeft}, isArrays={diceManager.isArrays}");
+            return;
+        }
+        Debug.Log($"[흔들기 진입] isShake={isShake}, isButton={button.isButton}, timer={timer}");
+
         isShake = !Input.GetKey(KeyCode.LeftShift);
-        if (!isShake)
+        if (!isShake )
         {
             timer += Time.deltaTime;
+            Debug.Log($"[흔들림 대기] timer={timer}");
             if (timer >= pourOutTime)
             {
                 isShake = true;
                 timer = 0;
+                Debug.Log("[흔들림 강제 시작]");
             }
         }
         else if (!button.isButton)
         {
             timer += Time.deltaTime;
+            Debug.Log($"[버튼 대기] timer={timer}");
             if (timer >= pourOutTime)
             {
                 button.isButton = true;
                 timer = 0;
+                Debug.Log("[버튼 활성화 완료]");
             }
         }
         UpdateCupState();
     }
+  
     void UpdateCupState()
     {
         int ani = selectDice.turnLimit - selectDice.movesThisTurn;
@@ -67,6 +86,7 @@ public class CupController : MonoBehaviour
     }
     public void TryRollDice()
     {
+
         if (TurnManager.instance.IsMyTurn() && DiceManager.Instance.rollsLeft > 0)
         {
             photonView.RPC("RPC_RequestDiceSpawn", RpcTarget.MasterClient);
@@ -75,7 +95,7 @@ public class CupController : MonoBehaviour
     [PunRPC]
     public void RPC_RequestDiceSpawn()
     {
-        if (PhotonNetwork.IsMasterClient)
+        if (!TurnManager.instance.IsMyTurn())
         {
             ObjectInstantiate();
         }
