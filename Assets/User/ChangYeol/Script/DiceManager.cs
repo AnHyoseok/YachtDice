@@ -205,7 +205,7 @@ public class DiceManager : Singleton<DiceManager>
         }
 
         int subtotal = 0;
-int bonus = 0;
+        int bonus = 0;
 
 Player currentPlayer = TurnManager.instance.GetCurrentPlayer();
 if (currentPlayer.CustomProperties.TryGetValue("Score", out object rawScore))

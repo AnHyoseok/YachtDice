@@ -421,7 +421,12 @@ public class ScoreboardEntry : MonoBehaviour
     //점수기록 여부 
     public bool IsAlreadyScored(int index)
     {
-        return scores[index] != 0;
+        if (scoreTexts.TryGetValue(GetCategoryByIndex(index), out var textUI))
+        {
+            return !string.IsNullOrEmpty(textUI.text); // 텍스트가 있으면 이미 기록된 것으로 간주
+        }
+
+        return false;
     }
 
     //선택 초기화
@@ -441,7 +446,7 @@ public class ScoreboardEntry : MonoBehaviour
             }
             else
             {
-                c.a = (scores[index] != 0) ? 1f : 0f;
+                c.a = string.IsNullOrEmpty(kvp.Value.text) ? 0f : 1f;
             }
 
             kvp.Value.color = c;

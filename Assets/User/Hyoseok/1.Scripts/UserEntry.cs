@@ -11,7 +11,7 @@ public class UserEntry : MonoBehaviour
     public TextMeshProUGUI scoreText;
     public Image teamColor;
     public Animator animator;
-    public void Setup(Player player)
+    public void Setup(Player player, bool isWinner)
     {
         // 이름
         playerNameText.text = player.NickName;
@@ -41,15 +41,8 @@ public class UserEntry : MonoBehaviour
         }
 
         // 승리 여부 (임시)
-        bool isWinner = CheckIfWinner(totalScore);
-        if (isWinner)
-        {
-            animator.SetTrigger("IsWin");
-        }
-        else
-        {
-            animator.SetTrigger("IsLose");
-        }
+        animator.SetTrigger(isWinner ? "IsWin" : "IsLose");
+    
     }
 
     private int CalculateTotalScore(int[] scores)

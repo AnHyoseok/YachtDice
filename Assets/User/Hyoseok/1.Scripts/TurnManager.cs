@@ -122,6 +122,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
             Debug.Log($"다음 인덱스{nextIndex}");
             if (nextRound >= MAX_ROUNDS)
             {
+               GameResultManager.Instance.StartResultSequence();
                 Debug.Log("게임 종료!");
                 return;
             }
