@@ -129,8 +129,6 @@ public class DiceManager : Singleton<DiceManager>
         int[] values = GetDiceValues().Concat(GetDiceValue()).ToArray();
         values = values.OrderBy(v => v).ToArray();
 
-        //Debug.Log($"주사위 값: {string.Join(", ", values)}");
-
         int score = 0;
         int[] counts = new int[7];
 
@@ -167,12 +165,11 @@ public class DiceManager : Singleton<DiceManager>
                     score = values.Sum();
                 break;
 
-           
             case "FULL_HOUSE":
                 bool hasThree = counts.Any(c => c == 3);
                 bool hasTwo = counts.Any(c => c == 2);
                 if (hasThree && hasTwo)
-                    score = values.Sum(); 
+                    score = values.Sum();
                 break;
 
             case "SMALL_STRAIGHT":
@@ -189,7 +186,7 @@ public class DiceManager : Singleton<DiceManager>
                 break;
         }
 
-        // 상단 점수 보너스 누적
+        // 상단 점수 누적
         if (category == DiceScore.ONES || category == DiceScore.TWOS || category == DiceScore.THREES
             || category == DiceScore.FOURS || category == DiceScore.FIVES || category == DiceScore.SIXES)
         {
@@ -200,22 +197,44 @@ public class DiceManager : Singleton<DiceManager>
         int subtotal = 0;
         int bonus = 0;
 
-Player currentPlayer = TurnManager.instance.GetCurrentPlayer();
-if (currentPlayer.CustomProperties.TryGetValue("Score", out object rawScore))
-{
-    int[] confirmedScores = (int[])rawScore;
-    for (int i = 0; i <= 5; i++) subtotal += confirmedScores[i];
-    bonus = subtotal >= 63 ? 35 : 0;
-}
+        int actorNumber;
+        Player currentPlayer = TurnManager.instance.GetCurrentPlayer();
+        string aiName = TurnManager.instance.GetCurrentAIName();
 
+        if (currentPlayer != null)
+        {
+            actorNumber = currentPlayer.ActorNumber;
+        }
+        else if (!string.IsNullOrEmpty(aiName))
+        {
+            actorNumber = aiName.GetHashCode();
+        }
+        else
+        {
+            Debug.LogError("[CalculateScore] actorNumber를 식별할 수 없습니다.");
+            return 0;
+        }
+
+        //  AI 및 플레이어 모두 처리 가능하도록
+        if (GameSceneManager.Instance.scoreboardEntries.TryGetValue(actorNumber, out var entry))
+        {
+            for (int i = 0; i <= 5; i++)
+                subtotal += entry.GetScoreByCategoryIndex(i); 
+
+            bonus = subtotal >= 63 ? 35 : 0;
+        }
+        else
+        {
+            Debug.LogWarning($"[CalculateScore] scoreboardEntry 찾기 실패: actorNumber={actorNumber}");
+        }
 
         UpdateScoreboard(DiceScore.SUBTOTAL, subtotal);
         UpdateScoreboard(DiceScore.BONUS, bonus);
-
         UpdateScoreboard(category, score);
+
         return score;
     }
- 
+
     private bool HasStraight(int requiredLength)
     {
         int[] allValues = GetDiceValues().Concat(GetDiceValue()).Distinct().OrderBy(v => v).ToArray();
@@ -239,13 +258,12 @@ if (currentPlayer.CustomProperties.TryGetValue("Score", out object rawScore))
         return maxLength >= requiredLength;
     }
 
-   
+
     // 점수 미리보기 호출 (내가 주사위 던졌을 때 실행)
     public void ShowPreviewScore()
     {
-        if (!isDiceArray ) return;
-        
-       
+        if (!isDiceArray) return;
+
         int[] values = GetDiceValues().Concat(GetDiceValue()).ToArray();
         int[] counts = new int[7];
         foreach (int v in values) counts[v]++;
@@ -257,26 +275,21 @@ if (currentPlayer.CustomProperties.TryGetValue("Score", out object rawScore))
         previewScores[DiceScore.FOURS] = counts[4] * 4;
         previewScores[DiceScore.FIVES] = counts[5] * 5;
         previewScores[DiceScore.SIXES] = counts[6] * 6;
-        // 확정된 점수 가져오기
+
         int subtotal = 0;
         var currentPlayer = TurnManager.instance.GetCurrentPlayer();
+        if (currentPlayer == null) return;
+
         if (currentPlayer.CustomProperties.TryGetValue("Score", out object rawScore))
         {
             int[] confirmedScores = (int[])rawScore;
-
-            // 0~5: ONES~SIXES
-            for (int i = 0; i <= 5; i++)
-            {
-                subtotal += confirmedScores[i];
-            }
+            for (int i = 0; i <= 5; i++) subtotal += confirmedScores[i];
         }
-        previewScores[DiceScore.SUBTOTAL] = subtotal;
 
+        previewScores[DiceScore.SUBTOTAL] = subtotal;
         previewScores[DiceScore.BONUS] = subtotal >= 63 ? 35 : 0;
-     
         previewScores[DiceScore.Choice] = values.Sum();
         previewScores[DiceScore.FOUR_KIND] = counts.Any(c => c >= 4) ? values.Sum() : 0;
-
         bool hasThree = counts.Any(c => c == 3);
         bool hasTwo = counts.Any(c => c == 2);
         previewScores[DiceScore.FULL_HOUSE] = (hasThree && hasTwo) ? values.Sum() : 0;
@@ -284,17 +297,30 @@ if (currentPlayer.CustomProperties.TryGetValue("Score", out object rawScore))
         previewScores[DiceScore.LARGE_STRAIGHT] = HasStraight(values, 5) ? 30 : 0;
         previewScores[DiceScore.YAHTZEE] = counts.Any(c => c == 5) ? 50 : 0;
 
-        // 딕셔너리 -> 배열로 변환 (RPC 전송용)
         string[] keys = previewScores.Keys.ToArray();
         int[] vals = previewScores.Values.ToArray();
 
-        // 모든 유저에게 A의 점수 미리보기 전송
+        int actorNumber;
+        string aiName = TurnManager.instance.GetCurrentAIName();
 
-        PhotonView photonView = GetComponent<PhotonView>();
-        photonView.RPC("RPC_ShowPreviewScore", RpcTarget.All, PhotonNetwork.LocalPlayer.ActorNumber, keys, vals);
+        if (currentPlayer != null)
+        {
+            actorNumber = currentPlayer.ActorNumber;
+        }
+        else if (!string.IsNullOrEmpty(aiName))
+        {
+            actorNumber = aiName.GetHashCode();
+        }
+        else
+        {
+            Debug.LogError("[ShowPreviewScore] actorNumber 계산 실패");
+            return;
+        }
 
-        //Debug.Log($"[Preview 전송] {PhotonNetwork.LocalPlayer.NickName}: {string.Join(", ", previewScores.Select(kv => $"{kv.Key}:{kv.Value}"))}");
+
+        photonView.RPC("RPC_ShowPreviewScore", RpcTarget.All, actorNumber, keys, vals);
     }
+
     private bool HasStraight(int[] values, int requiredLength)
     {
         int[] sorted = values.Distinct().OrderBy(v => v).ToArray();
@@ -320,21 +346,19 @@ if (currentPlayer.CustomProperties.TryGetValue("Score", out object rawScore))
     [PunRPC]
     public void RPC_ShowPreviewScore(int actorNumber, string[] keys, int[] values)
     {
-    
         Dictionary<string, int> previewScores = new Dictionary<string, int>();
         for (int i = 0; i < keys.Length; i++)
-        {
             previewScores[keys[i]] = values[i];
-        }
 
         if (GameSceneManager.Instance.scoreboardEntries.TryGetValue(actorNumber, out var entry))
         {
-
             entry.ShowPreview(previewScores);
-            //Debug.Log($"[모두에게 미리보기 적용됨] 플레이어 {actorNumber}: {string.Join(", ", previewScores.Select(kv => $"{kv.Key}:{kv.Value}"))}");
+        }
+        else
+        {
+            Debug.LogWarning($"[ShowPreviewScore] scoreEntry 못 찾음: actorNumber={actorNumber}");
         }
     }
-
     private void CheckForBoonus()
     {
         if (! boonsGiven && upperSectionScore >= 63)
@@ -344,16 +368,35 @@ if (currentPlayer.CustomProperties.TryGetValue("Score", out object rawScore))
             boonsGiven = true;
         }
     }
+    // DiceManager.cs
     private void UpdateScoreboard(string category, int score)
     {
+        int actorNumber;
         Player currentPlayer = TurnManager.instance.GetCurrentPlayer();
-        int actorNumber = currentPlayer.ActorNumber;
+
+        if (currentPlayer != null)
+        {
+            actorNumber = currentPlayer.ActorNumber;
+        }
+        else
+        {
+            // AI의 경우 AI 이름의 해시코드 사용
+            string aiName = TurnManager.instance.GetCurrentAIName();
+            actorNumber = aiName.GetHashCode();
+        }
 
         if (GameSceneManager.Instance.scoreboardEntries.TryGetValue(actorNumber, out ScoreboardEntry entry))
         {
             entry.UpdateScore(category, score);
         }
+        else
+        {
+            Debug.LogWarning($"[UpdateScoreboard] scoreboardEntry 찾기 실패: actorNumber={actorNumber}, category={category}, score={score}");
+        }
     }
+
+
+
     public int GetUpperSectionScore()
     {
         return upperSectionScore;

@@ -532,7 +532,7 @@ MonoBehaviour:
   originPos: {x: 0, y: 0, z: 0}
   isSelected: 0
   friction: 0.98
-  stopThreshld: 0.1
+  stopThreshld: 0.2
   nudgeForce: 0.5
   index: 0
 --- !u!65 &5304782083198269749

@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using Photon.Realtime;
 using TMPro;
@@ -17,15 +17,15 @@ public class ScoreboardEntry : MonoBehaviour
     public TextMeshProUGUI[] upperSectionTexts;
     public TextMeshProUGUI[] lowerSectionTexts;
     public TextMeshProUGUI totalScoreText;
-    //private string selectedCategory = null; // ÇöÀç ¼±ÅÃ ÁßÀÎ Ä«Å×°í¸®
-    private int[] scores = new int[14]; // Á¡¼ö ÀúÀå ¹è¿­
-    private Player player;
-    private bool isAI = false;
-    private string aiName;
+    //private string selectedCategory = null; // í˜„ì¬ ì„ íƒ ì¤‘ì¸ ì¹´í…Œê³ ë¦¬
+    private int[] scores = new int[14]; // ì ìˆ˜ ì €ì¥ ë°°ì—´
+    public Player player;
+    public bool isAI = false;
+    public string aiName;
     private bool[] isScored = new bool[14];
-    //Á¡¼ö ÀÌ¹ÌÁö 
+    //ì ìˆ˜ ì´ë¯¸ì§€ 
     public Dictionary<string, TextMeshProUGUI> scoreTexts = new Dictionary<string, TextMeshProUGUI>();
-
+    public string AIName => aiName;
 
     void Awake()
     {
@@ -56,16 +56,16 @@ public class ScoreboardEntry : MonoBehaviour
         UpdateScoreData(player.CustomProperties);
         if (player == PhotonNetwork.LocalPlayer)
         {
-            Debug.Log(" ³» Á¡¼öÆÇ »ı¼ºµÊ - Å¬¸¯ Çã¿ë");
-            EnableScoreButtons();  //  Á¡¼ö Ä­ Å¬¸¯ °¡´ÉÇÏ°Ô ¼³Á¤
+            Debug.Log(" ë‚´ ì ìˆ˜íŒ ìƒì„±ë¨ - í´ë¦­ í—ˆìš©");
+            EnableScoreButtons();  //  ì ìˆ˜ ì¹¸ í´ë¦­ ê°€ëŠ¥í•˜ê²Œ ì„¤ì •
         }
         else
         {
-            Debug.Log(" ´Ù¸¥ ÇÃ·¹ÀÌ¾î Á¡¼öÆÇ - Å¬¸¯ Â÷´Ü");
-            DisableScoreButtons(); //  Å¬¸¯ ºÒ°¡´ÉÇÏ°Ô ¼³Á¤
+            Debug.Log(" ë‹¤ë¥¸ í”Œë ˆì´ì–´ ì ìˆ˜íŒ - í´ë¦­ ì°¨ë‹¨");
+            DisableScoreButtons(); //  í´ë¦­ ë¶ˆê°€ëŠ¥í•˜ê²Œ ì„¤ì •
         }
     }
-    //¹öÆ°È°¼ºÈ­
+    //ë²„íŠ¼í™œì„±í™”
     void EnableScoreButtons()
     {
         foreach (var kvp in scoreTexts)
@@ -80,7 +80,7 @@ public class ScoreboardEntry : MonoBehaviour
             }
         }
     }
-    //¹öÆ°ºñÈ°¼ºÈ­
+    //ë²„íŠ¼ë¹„í™œì„±í™”
     void DisableScoreButtons()
     {
         foreach (var kvp in scoreTexts)
@@ -98,8 +98,8 @@ public class ScoreboardEntry : MonoBehaviour
         this.aiName = aiName;
         isAI = true;
         playerNameText.text = aiName + " [AI]";
-
         SetTeamColor(properties);
+
         SetProfileImage(properties, true);
         UpdateScoreData(properties);
     }
@@ -127,35 +127,33 @@ public class ScoreboardEntry : MonoBehaviour
         int index = GetCategoryIndex(category);
         if (index != -1)
         {
+            //  ì ìˆ˜ ì¤‘ë³µ ë°©ì§€
+            if (IsAlreadyScored(index)) return;
+
             scores[index] = score;
             isScored[index] = true;
-            ClearHighlight();
-
-         
 
             if (scoreTexts.TryGetValue(category, out var textUI))
             {
-                textUI.text = score.ToString(); // È®Á¤ Á¡¼ö ´Ù½Ã ¼ÂÆÃ
-                Color c = textUI.color;
-                c.a = 1f;                      //  È®Á¤µÈ Á¡¼ö´Â ºÒÅõ¸í
-                textUI.color = c;
-         
+                textUI.text = score.ToString();
+                SetAlpha(textUI, 1f);  //  í•´ë‹¹ í…ìŠ¤íŠ¸ë§Œ ì•ŒíŒŒ ì ìš©
             }
+
             UpdateSubtotalAndBonus();
             UpdateScoreUI();
-            // ¸ğµç ÇÃ·¹ÀÌ¾î¿¡°Ô Á¡¼ö µ¿±âÈ­
+
+          
             if (player == PhotonNetwork.LocalPlayer)
             {
-              
                 ExitGames.Client.Photon.Hashtable hash = new ExitGames.Client.Photon.Hashtable();
                 hash["Score"] = scores;
                 hash["ScoredFlags"] = isScored;
                 player.SetCustomProperties(hash);
-              
             }
         }
-
     }
+
+
     private void UpdateSubtotalAndBonus()
     {
         int subtotal = 0;
@@ -196,35 +194,43 @@ public class ScoreboardEntry : MonoBehaviour
 
     public void UpdateScoreData(ExitGames.Client.Photon.Hashtable properties)
     {
-        
         if (player != null && !properties.ContainsKey("Score")) return;
-        if (player != null && player.CustomProperties.TryGetValue("Score", out object rawScore))
+
+        if (isAI)
         {
-            if (player != PhotonNetwork.LocalPlayer)
-            {
+            if (properties.TryGetValue("Score", out object rawScore))
                 scores = (int[])rawScore;
 
-                if (properties.TryGetValue("ScoredFlags", out object rawFlags))
-                {
-                    isScored = (bool[])rawFlags;
-                }
-                else
-                {
-                    // fallback - Á¡¼ö °ª ±âÁØ Ãß·Ğ
-                    for (int i = 0; i < scores.Length; i++)
-                    {
-                        isScored[i] = scores[i] != 0;
-                    }
-                }
-
-                UpdateScoreUI();
+            if (properties.TryGetValue("ScoredFlags", out object rawFlags))
+            {
+                isScored = (bool[])rawFlags;
             }
             else
             {
-                Debug.Log("³» Á¡¼öÆÇÀÌ¹Ç·Î UpdateScoreData() ¹«½Ã");
+                // fallback ì œê±°í•˜ê³ , ëª…ì‹œì  ê°’ ì—†ìœ¼ë©´ ëª¨ë“  í•­ëª© false
+                isScored = new bool[scores.Length];
             }
+
+            UpdateScoreUI();
+        }
+        else if (player != PhotonNetwork.LocalPlayer)
+        {
+            if (player.CustomProperties.TryGetValue("Score", out object rawScore))
+                scores = (int[])rawScore;
+
+            if (player.CustomProperties.TryGetValue("ScoredFlags", out object rawFlags))
+            {
+                isScored = (bool[])rawFlags;
+            }
+            else
+            {
+                isScored = new bool[scores.Length];
+            }
+
+            UpdateScoreUI();
         }
     }
+
 
     private void UpdateScoreUI()
     {
@@ -241,7 +247,7 @@ public class ScoreboardEntry : MonoBehaviour
             lowerSectionTexts[i].text = scores[scoreIndex].ToString();
         }
 
-        // ÃÑÇÕ °è»ê
+        // ì´í•© ê³„ì‚°
         int subtotal = 0;
         for (int i = 0; i <= 5; i++) subtotal += scores[i];
         int bonus = scores[7];
@@ -289,14 +295,13 @@ public class ScoreboardEntry : MonoBehaviour
                 if (scoreTexts.TryGetValue(scoreEntry.Key, out var textUI))
                 {
                     textUI.text = scoreEntry.Value.ToString();
-                    textUI.color = new Color(textUI.color.r, textUI.color.g, textUI.color.b, 1f); // Ç×»ó ºÒÅõ¸í
+                    textUI.color = new Color(textUI.color.r, textUI.color.g, textUI.color.b, 1f); // í•­ìƒ ë¶ˆíˆ¬ëª…
                 }
                 continue;
             }
 
 
-            // ÀÌ¹Ì Á¡¼ö°¡ ±â·ÏµÈ Ç×¸ñÀº ¹Ì¸®º¸±â Àû¿ëÇÏÁö ¾ÊÀ½
-            if (IsAlreadyScored(index)) continue;
+          
 
             if (index < upperSectionTexts.Length)
             {
@@ -308,11 +313,11 @@ public class ScoreboardEntry : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning($"[¹Ì¸®º¸±â ½ÇÆĞ] {scoreEntry.Key}´Â ÀÎµ¦½º ¹üÀ§¸¦ ÃÊ°úÇß¾î¿ä.");
+                Debug.LogWarning($"[ë¯¸ë¦¬ë³´ê¸° ì‹¤íŒ¨] {scoreEntry.Key}ëŠ” ì¸ë±ìŠ¤ ë²”ìœ„ë¥¼ ì´ˆê³¼í–ˆì–´ìš”.");
             }
         }
 
-        ShowAll();  // ¾ËÆÄ°ª Àû¿ë (ÀÌ¹Ì ±â·ÏµÈ Ç×¸ñÀº 1f, ¹Ì±â·ÏÀº 0.5f)
+        ShowAll();  // ì•ŒíŒŒê°’ ì ìš© (ì´ë¯¸ ê¸°ë¡ëœ í•­ëª©ì€ 1f, ë¯¸ê¸°ë¡ì€ 0.5f)
     }
 
 
@@ -376,7 +381,7 @@ public class ScoreboardEntry : MonoBehaviour
             }
             else
             {
-                c.a = isScored[index] ? 1f : 0.5f; //  ±âÀÔ ¿©ºÎ·Î ¾ËÆÄ °áÁ¤
+                c.a = isScored[index] ? 1f : 0.5f; //  ê¸°ì… ì—¬ë¶€ë¡œ ì•ŒíŒŒ ê²°ì •
             }
 
             kvp.Value.color = c;
@@ -391,29 +396,29 @@ public class ScoreboardEntry : MonoBehaviour
 
     private IEnumerator DelayedScoreConfirm(string category)
     {
-        yield return new WaitForSeconds(0.2f); //  »ìÂ¦ ±â´Ù¸° ÈÄ ½ÇÇà
+        yield return new WaitForSeconds(0.2f); //  ì‚´ì§ ê¸°ë‹¤ë¦° í›„ ì‹¤í–‰
 
         if (player != PhotonNetwork.LocalPlayer)
         {
-            Debug.LogWarning(" ³» Á¡¼öÆÇ ¾Æ´Ô. Â÷´Ü.");
+            Debug.LogWarning(" ë‚´ ì ìˆ˜íŒ ì•„ë‹˜. ì°¨ë‹¨.");
             yield break;
         }
 
         int index = GetCategoryIndex(category);
         if (IsAlreadyScored(index))
         {
-            Debug.LogWarning(" ÀÌ¹Ì ±â·ÏµÈ Á¡¼öÀÔ´Ï´Ù.");
+            Debug.LogWarning(" ì´ë¯¸ ê¸°ë¡ëœ ì ìˆ˜ì…ë‹ˆë‹¤.");
             yield break;
         }
 
         if (!TurnManager.instance.IsMyTurn())
         {
-            Debug.LogWarning(" ³» ÅÏ ¾Æ´Ô.");
+            Debug.LogWarning(" ë‚´ í„´ ì•„ë‹˜.");
             yield break;
         }
         if (!DiceManager.Instance.isDiceArray)
         {
-            Debug.Log(" ÁÖ»çÀ§ Á¤·ÄÀÌ ³¡³ªÁö ¾Ê¾Æ Á¡¼ö ¼±ÅÃ ºÒ°¡!");
+            Debug.Log(" ì£¼ì‚¬ìœ„ ì •ë ¬ì´ ëë‚˜ì§€ ì•Šì•„ ì ìˆ˜ ì„ íƒ ë¶ˆê°€!");
             yield break;
         }
 
@@ -440,17 +445,16 @@ public class ScoreboardEntry : MonoBehaviour
         }
     }
 
-    //Á¡¼ö±â·Ï ¿©ºÎ 
+    //ì ìˆ˜ê¸°ë¡ ì—¬ë¶€ 
     public bool IsAlreadyScored(int index)
     {
         return isScored[index];
     }
 
-    //¼±ÅÃ ÃÊ±âÈ­
+    //ì„ íƒ ì´ˆê¸°í™”
     public void ClearHighlight()
     {
-        //selectedCategory = null;
-
+       
         foreach (var kvp in scoreTexts)
         {
             string key = kvp.Key;
@@ -468,5 +472,10 @@ public class ScoreboardEntry : MonoBehaviour
 
             kvp.Value.color = c;
         }
+    }
+    public int GetScoreByCategoryIndex(int index)
+    {
+        if (index < 0 || index >= scores.Length) return 0;
+        return scores[index];
     }
 }

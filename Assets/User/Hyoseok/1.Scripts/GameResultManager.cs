@@ -72,48 +72,74 @@ public class GameResultManager : MonoBehaviour
 
     private void ShowResultEntries()
     {
-        List<Player> redTeam = new List<Player>();
-        List<Player> blueTeam = new List<Player>();
+        List<object> redTeam = new List<object>();
+        List<object> blueTeam = new List<object>();
+        Dictionary<object, int> playerScores = new Dictionary<object, int>();
 
-        Dictionary<Player, int> playerScores = new Dictionary<Player, int>();
-
-        foreach (var player in PhotonNetwork.PlayerList)
+        // 점수 및 팀 색상 수집
+        foreach (var kvp in GameSceneManager.Instance.scoreboardEntries)
         {
-            if (player.CustomProperties.TryGetValue("Score", out object rawScore) && rawScore is int[] scores)
-            {
-                int totalScore = CalculateTotalScore(scores);
-                playerScores[player] = totalScore;
+            var entry = kvp.Value;
+            int totalScore = entry.GetScoreByCategoryIndex(6) +  // SUBTOTAL
+                             entry.GetScoreByCategoryIndex(7) +  // BONUS
+                             Enumerable.Range(8, 6).Sum(i => entry.GetScoreByCategoryIndex(i)); // LOWER
 
-                if (player.CustomProperties.TryGetValue("Team", out object team))
-                {
-                    if ((string)team == "Red") redTeam.Add(player);
-                    else blueTeam.Add(player);
-                }
-            }
+            playerScores[kvp.Key] = totalScore;
+
+            if (entry.teamColor.color == Color.red)
+                redTeam.Add(kvp.Key);
+            else
+                blueTeam.Add(kvp.Key);
         }
 
-        int redTotal = redTeam.Sum(p => playerScores[p]);
-        int blueTotal = blueTeam.Sum(p => playerScores[p]);
+        int redTotal = redTeam.Sum(key => playerScores[key]);
+        int blueTotal = blueTeam.Sum(key => playerScores[key]);
         string winningTeam = redTotal >= blueTotal ? "Red" : "Blue";
 
-        // 정렬: 팀 먼저, 점수 내림차순
-        var allPlayers = redTeam.Concat(blueTeam)
-                                .OrderByDescending(p => playerScores[p])
-                                .ToList();
+        var sorted = playerScores.OrderByDescending(kv => kv.Value).ToList();
 
-        foreach (var player in allPlayers)
+        foreach (var kv in sorted)
         {
             GameObject go = Instantiate(userResultPrefab, resultContentParent);
             UserEntry entry = go.GetComponent<UserEntry>();
 
-            bool isWinner = (string)player.CustomProperties["Team"] == winningTeam;
-            entry.Setup(player, isWinner);
+            object key = kv.Key;
+            int score = kv.Value;
 
-            // 최고점수 플레이어 강조 예시
-            if (playerScores[player] == playerScores.Values.Max())
+            bool isWinner = (redTeam.Contains(key) && winningTeam == "Red") ||
+                            (blueTeam.Contains(key) && winningTeam == "Blue");
+
+            int actorNumber = -1;
+
+            if (key is Player p)
             {
-                entry.playerNameText.color = Color.yellow; // 예시: 이름을 노란색으로
-                entry.playerNameText.fontStyle = TMPro.FontStyles.Bold;
+                actorNumber = p.ActorNumber;
+            }
+            else if (key is int hash)
+            {
+                actorNumber = hash;
+            }
+
+            if (GameSceneManager.Instance.scoreboardEntries.TryGetValue(actorNumber, out var sbEntry))
+            {
+                if (sbEntry.isAI)
+                {
+                    entry.SetupAI(sbEntry, isWinner);
+                }
+                else
+                {
+                    entry.Setup(sbEntry.player, isWinner);
+                }
+
+                if (score == sorted.First().Value)
+                {
+                    entry.playerNameText.color = Color.yellow;
+                    entry.playerNameText.fontStyle = TMPro.FontStyles.Bold;
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"[Result] ScoreboardEntry를 찾을 수 없음: {actorNumber}");
             }
         }
     }

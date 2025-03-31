@@ -54,14 +54,21 @@ public class TurnManager : MonoBehaviourPunCallbacks
         playersInRoom = PhotonNetwork.PlayerList
             .OrderBy(p => (int)p.CustomProperties["TurnIndex"])
             .ToList();
-
+        if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("AIPlayers"))
+        {
+            string[] aiNames = (string[])PhotonNetwork.CurrentRoom.CustomProperties["AIPlayers"];
+            foreach (string aiName in aiNames)
+            {
+                playersInRoom.Add(null); // AI는 null 슬롯으로 표시
+            }
+        }
         if (playersInRoom.Count == 0)
         {
-            Debug.LogError("플레이어 리스트를 가져오지 못했습니다.");
+            //Debug.LogError("플레이어 리스트를 가져오지 못했습니다.");
             yield break;
         }
 
-        Debug.Log("TurnManager: TurnIndex 기준으로 플레이어 정렬 완료");
+        //Debug.Log("TurnManager: TurnIndex 기준으로 플레이어 정렬 완료");
 
         if (PhotonNetwork.IsMasterClient)
         {
@@ -79,14 +86,24 @@ public class TurnManager : MonoBehaviourPunCallbacks
         }
         return true;
     }
-
-    public bool IsMyTurn()
+    public bool IsAITurnNow()
     {
         if (playersInRoom == null || playersInRoom.Count == 0)
-        {
-            Debug.LogWarning("아직 플레이어 목록이 준비되지 않았습니다.");
             return false;
-        }
+
+        if (currentPlayerIndex < 0 || currentPlayerIndex >= playersInRoom.Count)
+            return false;
+
+        Player currentPlayer = playersInRoom[currentPlayerIndex];
+
+        // AI는 PhotonNetwork에 없는 유저
+        return currentPlayer == null || !PhotonNetwork.PlayerList.Contains(currentPlayer);
+
+    }
+    public bool IsMyTurn()
+    {
+        if (IsAITurnNow()) return false;
+        if (playersInRoom == null || playersInRoom.Count == 0) return false;
 
         if (currentPlayerIndex < 0 || currentPlayerIndex >= playersInRoom.Count)
         {
@@ -109,7 +126,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
     public void EndMyTurn()
     {
         Debug.Log(" EndMyTurn() 호출됨");
-        Debug.Log($" GameSceneManager.Instance == null ? {GameSceneManager.Instance == null}");
+        //Debug.Log($" GameSceneManager.Instance == null ? {GameSceneManager.Instance == null}");
         //if (!PhotonNetwork.IsMasterClient) return;
         int nextIndex = currentPlayerIndex + 1;
         int nextRound = currentTurnRound;
@@ -134,6 +151,11 @@ public class TurnManager : MonoBehaviourPunCallbacks
         UpdateTurn(nextIndex, nextRound);
         // 전체에 동기화 (RPC는 GameSceneManager에서 관리)
         GameSceneManager.Instance.BroadcastTurn(nextIndex, nextRound);
+        if (IsAITurnNow())
+        {
+            Debug.Log("[AI] 자동 턴 시작");
+            StartCoroutine(AI_TurnRoutine());
+        }
     }
 
     public void UpdateTurn(int playerIndex, int round)
@@ -153,7 +175,11 @@ public class TurnManager : MonoBehaviourPunCallbacks
             Debug.LogWarning("DiceManager.Instance가 null입니다.");
 
         currentturnText.text = $"{currentTurnRound + 1} / {MAX_ROUNDS}";
-
+        if (IsAITurn())
+        {
+            Debug.Log("AI 턴 감지! AI 자동 행동 시작");
+            StartCoroutine(AI_TurnRoutine());
+        }
         foreach (var entry in FindObjectsByType<ScoreboardEntry>(FindObjectsSortMode.None))
         {
             if (entry != null)
@@ -171,6 +197,85 @@ public class TurnManager : MonoBehaviourPunCallbacks
             StartCoroutine(DelayedOwnershipCheck());
         }
         Debug.Log($"현재 턴: {round + 1}턴 - 플레이어: {GetCurrentPlayer()?.NickName}");
+    }
+    public bool IsAITurn()
+    {
+        return !PhotonNetwork.LocalPlayer.IsMasterClient && GetCurrentPlayer() == null;
+    }
+    private IEnumerator AI_TurnRoutine()
+    {
+        Debug.Log("[AI] 턴 시작 - 컵 흔들기 시작");
+
+        cupController.isShake = false;
+        cupController.button.isButton = false;
+        cupController.UpdateCupState();
+
+
+        yield return new WaitForSeconds(5f); // 컵 흔들기 연출
+
+        cupController.isShake = true;
+        cupController.button.isButton = true;
+        cupController.UpdateCupState();
+
+        
+
+        yield return new WaitForSeconds(0.2f);
+
+        //  진짜 주사위 생성 요청 (기존 플레이어와 동일)
+        cupController.photonView.RPC("RPC_RequestDiceSpawn", RpcTarget.MasterClient);
+
+        float waitTime = 0f;
+        while (!DiceManager.Instance.isDiceArray && waitTime < 10f)
+        {
+            waitTime += Time.deltaTime;
+            yield return null;
+        }
+        yield return null;
+
+        DiceManager.Instance.ShowPreviewScore();
+        
+        string bestCategory = FindBestScoreCategory();
+        int score = DiceManager.Instance.CalculateScore(bestCategory);
+
+        string aiName = TurnManager.instance.GetCurrentAIName();
+        int actorNumber = aiName.GetHashCode();
+
+        if (GameSceneManager.Instance.scoreboardEntries.TryGetValue(actorNumber, out var aiEntry))
+        {
+            yield return new WaitForSeconds(3f);
+
+            aiEntry.UpdateScore(bestCategory, score);
+            Debug.Log($"[AI] 점수 선택 완료: {bestCategory} = {score}");
+        }
+        else
+        {
+            Debug.LogWarning($"[AI_TurnRoutine] AI 점수판 못 찾음: {aiName} / hash = {actorNumber}");
+        }
+
+        TurnManager.instance.EndMyTurn();
+    }
+
+    private string FindBestScoreCategory()
+    {
+        var categories = new string[]
+        {
+        "ONES", "TWOS", "THREES", "FOURS", "FIVES", "SIXES",
+        "Choice", "4 of a Kind", "FULL_HOUSE", "SMALL_STRAIGHT",
+        "LARGE_STRAIGHT", "YAHTZEE"
+        };
+
+        string bestCategory = "";
+        int maxScore = 0;
+        foreach (string category in categories)
+        {
+            int score = DiceManager.Instance.CalculateScore(category);
+            if (score > maxScore)
+            {
+                maxScore = score;
+                bestCategory = category;
+            }
+        }
+        return bestCategory;
     }
 
     private IEnumerator DelayedOwnershipCheck()
@@ -196,5 +301,14 @@ public class TurnManager : MonoBehaviourPunCallbacks
         {
             turnAlarm.SetActive(false);
         }
+    }
+    public string GetCurrentAIName()
+    {
+        if (IsAITurnNow())
+        {
+            string[] aiNames = (string[])PhotonNetwork.CurrentRoom.CustomProperties["AIPlayers"];
+            return aiNames[currentPlayerIndex - PhotonNetwork.PlayerList.Length];
+        }
+        return null;
     }
 }

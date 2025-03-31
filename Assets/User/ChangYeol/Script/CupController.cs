@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
+using System.Collections;
 
 public class CupController : MonoBehaviour
 {
@@ -18,13 +19,13 @@ public class CupController : MonoBehaviour
     private GameObject Dice;
     GameObject Forcedice;
     [HideInInspector] public Animator animator;
-    private bool isShake = false;
+    public bool isShake = false;
     private float timer;
     public float pourOutTime = 5;
 
-    private const string DiceCount = "DiceCount";
-    private const string IsShake = "IsShake";
-    private const string IsButton = "IsButton";
+    public const string DiceCount = "DiceCount";
+    public const string IsShake = "IsShake";
+    public const string IsButton = "IsButton";
     #endregion
     private void Start()
     {
@@ -51,7 +52,7 @@ public class CupController : MonoBehaviour
             return;
         }
         //Debug.Log($"[흔들기 진입] isShake={isShake}, isButton={button.isButton}, timer={timer}");
-
+    
         isShake = !Input.GetKey(KeyCode.LeftShift);
         if (!isShake)
         {
@@ -77,9 +78,9 @@ public class CupController : MonoBehaviour
         }
         UpdateCupState();
     }
-    void UpdateCupState()
+   public void UpdateCupState()
     {
-        int ani = selectDice.turnLimit - selectDice.movesThisTurn;
+        int ani = diceManager.dices.Length;
         animator.SetInteger(DiceCount, ani);
         animator.SetBool(IsShake, isShake);
         animator.SetBool(IsButton, button.isButton);
@@ -105,7 +106,7 @@ public class CupController : MonoBehaviour
     [PunRPC]
     public void RPC_RequestDiceSpawn()
     {
-        if (TurnManager.instance.IsMyTurn())
+        if (TurnManager.instance.IsMyTurn() )
         {
             ObjectInstantiate();
         }
@@ -123,7 +124,7 @@ public class CupController : MonoBehaviour
 
     public void ObjectInstantiate()
     {
-        if (!TurnManager.instance.IsMyTurn()) return;
+        if (!TurnManager.instance.IsMyTurn() && !TurnManager.instance.IsAITurnNow()) return;
 
         boxGroup.SetActive(false);
         GetComponent<BoxCollider>().enabled = false;
@@ -176,11 +177,12 @@ public class CupController : MonoBehaviour
     [PunRPC]
     public void RandomDice()
     {
-        if (TurnManager.instance.IsMyTurn())
+        if (TurnManager.instance.IsMyTurn() || TurnManager.instance.IsAITurnNow()) //  AI도 허용
         {
             photonView.RPC("BoxobjectActivetrue", RpcTarget.All);
             boxGroup.SetActive(true);
             GetComponent<BoxCollider>().enabled = true;
+
             for (int i = 0; i < selectDice.turnLimit - selectDice.movesThisTurn; i++)
             {
                 Quaternion randomRot = Quaternion.Euler(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
@@ -189,6 +191,7 @@ public class CupController : MonoBehaviour
             }
         }
     }
+
     [PunRPC]
     void BoxobjectActivetrue()
     {
@@ -206,4 +209,11 @@ public class CupController : MonoBehaviour
             falseDices.Add(dice);
         }
     }
+
+
+
+
+   
+
+
 }
