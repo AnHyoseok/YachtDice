@@ -9,6 +9,7 @@ public class CupController : MonoBehaviour
     public ButtonController button;
     public GameObject boxGroup;
     public Transform wall;
+    public Transform[] SpwanPos;
     public float initialForce = 10f;
     public SelectDice selectDice;
 
@@ -44,8 +45,7 @@ public class CupController : MonoBehaviour
         {
             Debug.Log("내 턴입니다! 조작 가능!");
         }
-
-        if (diceManager.isDiceArray  || diceManager.isArrays)
+        if (diceManager.isDiceArray || diceManager.isArrays)
         {
             Debug.LogWarning($"주사위 조작 제한: isDiceArray={diceManager.isDiceArray}, rollsLeft={diceManager.rollsLeft}, isArrays={diceManager.isArrays}");
             return;
@@ -53,7 +53,7 @@ public class CupController : MonoBehaviour
         Debug.Log($"[흔들기 진입] isShake={isShake}, isButton={button.isButton}, timer={timer}");
 
         isShake = !Input.GetKey(KeyCode.LeftShift);
-        if (!isShake )
+        if (!isShake)
         {
             timer += Time.deltaTime;
             Debug.Log($"[흔들림 대기] timer={timer}");
@@ -77,27 +77,23 @@ public class CupController : MonoBehaviour
         }
         UpdateCupState();
     }
-  
-
     void UpdateCupState()
     {
         int ani = selectDice.turnLimit - selectDice.movesThisTurn;
         animator.SetInteger(DiceCount, ani);
         animator.SetBool(IsShake, isShake);
         animator.SetBool(IsButton, button.isButton);
-      
+
         // 다른 유저한테 동기화
         photonView.RPC("SyncAnimatorState", RpcTarget.Others, ani, isShake, button.isButton);
     }
-
-
     [PunRPC]
-void SyncAnimatorState(int ani, bool shake, bool isBtn)
-{
-    animator.SetInteger("DiceCount", ani);
-    animator.SetBool("IsShake", shake);
-    animator.SetBool("IsButton", isBtn);
-}
+    void SyncAnimatorState(int ani, bool shake, bool isBtn)
+    {
+        animator.SetInteger("DiceCount", ani);
+        animator.SetBool("IsShake", shake);
+        animator.SetBool("IsButton", isBtn);
+    }
     public void TryRollDice()
     {
 
@@ -118,13 +114,13 @@ void SyncAnimatorState(int ani, bool shake, bool isBtn)
     public void DesDiceList(int diceID)
     {
         GameObject dice = PhotonView.Find(diceID).gameObject;
-        if(falseDices.Contains(dice))
+        if (falseDices.Contains(dice))
         {
             PhotonNetwork.Destroy(dice);
         }
     }
     [PunRPC]
- 
+
     public void ObjectInstantiate()
     {
         if (!TurnManager.instance.IsMyTurn()) return;
@@ -145,17 +141,17 @@ void SyncAnimatorState(int ani, bool shake, bool isBtn)
         //  진짜 주사위 생성 및 배열 할당
         for (int i = 0; i < diceManager.dices.Length; i++)
         {
-            Vector3 offset = diceManager.GetUniqueRandomPosition(transform.position.x, transform.position.x + 0.01f);
+            //Vector3 offset = diceManager.GetUniqueRandomPosition(transform.position.x, transform.position.x + 0.01f);
             Quaternion randomRot = Quaternion.Euler(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
 
-            GameObject diceObj = PhotonNetwork.Instantiate("Dice", offset, randomRot);
+            GameObject diceObj = PhotonNetwork.Instantiate("Dice", SpwanPos[i].position, randomRot);
             diceManager.dices[i] = diceObj.GetComponent<Dice>();
             diceObj.name = $"Dice{i}";
 
             Rigidbody dicerb = diceObj.GetComponent<Rigidbody>();
             if (dicerb != null && wall != null)
             {
-                Vector3 forceDirection = (wall.position - offset).normalized;
+                Vector3 forceDirection = (wall.position - SpwanPos[i].position).normalized;
                 dicerb.AddForce(forceDirection * initialForce, ForceMode.Impulse);
             }
         }
@@ -167,15 +163,15 @@ void SyncAnimatorState(int ani, bool shake, bool isBtn)
     }
 
     [PunRPC]
-    void RandomPoition()
+    void RandomPoition(int index)
     {
-        Vector3 offset = diceManager.GetUniqueRandomPosition(transform.position.x, transform.position.x + 0.01f);
+        //Vector3 offset = diceManager.GetUniqueRandomPosition(transform.position.x, transform.position.x + 0.01f);
         Quaternion randomRot = Quaternion.Euler(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
-        Dice = PhotonNetwork.Instantiate("Dice", offset, randomRot);
+        Dice = PhotonNetwork.Instantiate("Dice", SpwanPos[index].position, randomRot);
         Rigidbody dicerb = Dice.GetComponent<Rigidbody>();
         if (dicerb != null && wall != null)
         {
-            Vector3 forceDirection = (wall.position - offset).normalized;
+            Vector3 forceDirection = (wall.position - SpwanPos[index].position).normalized;
             dicerb.AddForce(forceDirection * initialForce, ForceMode.Impulse);
         }
         animator.SetInteger(DiceCount, 0);
@@ -183,16 +179,16 @@ void SyncAnimatorState(int ani, bool shake, bool isBtn)
     [PunRPC]
     public void RandomDice()
     {
-        if(TurnManager.instance.IsMyTurn())
+        if (TurnManager.instance.IsMyTurn())
         {
             photonView.RPC("BoxobjectActivetrue", RpcTarget.All);
             boxGroup.SetActive(true);
             GetComponent<BoxCollider>().enabled = true;
             for (int i = 0; i < selectDice.turnLimit - selectDice.movesThisTurn; i++)
             {
-                Vector3 offset = diceManager.GetUniqueRandomPosition(transform.position.x, transform.position.x + 0.01f);
+                //Vector3 offset = diceManager.GetUniqueRandomPosition(transform.position.x, transform.position.x + 0.01f);
                 Quaternion randomRot = Quaternion.Euler(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
-                Forcedice = PhotonNetwork.Instantiate("Forcedice", offset, randomRot);
+                Forcedice = PhotonNetwork.Instantiate("Forcedice", SpwanPos[i].position, randomRot);
                 photonView.RPC("AddDiceList", RpcTarget.All, Forcedice.GetComponent<PhotonView>().ViewID);
             }
         }
@@ -215,4 +211,3 @@ void SyncAnimatorState(int ani, bool shake, bool isBtn)
         }
     }
 }
-

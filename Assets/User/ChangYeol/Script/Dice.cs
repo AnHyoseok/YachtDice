@@ -11,14 +11,14 @@ public class Dice : MonoBehaviour
     public GameObject[] SelectUICavas;
     public float shakeForce = 2f;
 
-    public Vector3 originPos;
-    public bool isSelected = false;
-    public float friction = 0.98f;
-    public float stopThreshld = 0.05f;
-    public float nudgeForce = 0.5f; // 모서리 닿았을 때 약한 힘 추가
+    [HideInInspector] public Vector3 originPos;
+    [HideInInspector]public bool isSelected = false;
+    private float friction = 0.98f;
+    private float stopThreshld = 0.05f;
+    private float nudgeForce = 0.5f; // 모서리 닿았을 때 약한 힘 추가
 
     private bool isSliding = false;
-    public int index = 0;
+    [HideInInspector]public int index = 0;
     #endregion
 
     private void Awake()

@@ -213,6 +213,7 @@ public class SelectDice : MonoBehaviour
                 if (currentAnimator != null)
                 {
                     currentAnimator.SetBool("IsSelect", false);
+                    currentAnimator.SetInteger("DiceCount", 0);
                 }
             }
 
@@ -238,10 +239,11 @@ public class SelectDice : MonoBehaviour
             if (currentActiveUI != null)
             {
                 currentActiveUI.SetActive(true);
-                currentAnimator = currentActiveUI.GetComponent<Animator>();
+                currentAnimator = dice.GetComponent<Animator>();
                 if (currentAnimator != null)
                 {
                     currentAnimator.SetBool("IsSelect", true);
+                    currentAnimator.SetInteger("DiceCount", diceValue);
                 }
             }
         }
@@ -253,6 +255,7 @@ public class SelectDice : MonoBehaviour
         if (currentAnimator != null)
         {
             currentAnimator.SetBool("IsSelect", false);
+            currentAnimator.SetInteger("DiceCount", 0);
             currentAnimator = null;
         }
         currentActiveUI = null;

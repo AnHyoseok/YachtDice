@@ -423,6 +423,7 @@ GameObject:
   - component: {fileID: 8344263653376756048}
   - component: {fileID: -8998163732096283247}
   - component: {fileID: 772441541648318971}
+  - component: {fileID: 6308730419463179643}
   m_Layer: 0
   m_Name: Dice
   m_TagString: Dice
@@ -531,9 +532,6 @@ MonoBehaviour:
   shakeForce: 2
   originPos: {x: 0, y: 0, z: 0}
   isSelected: 0
-  friction: 0.995
-  stopThreshld: 0.05
-  nudgeForce: 0.2
   index: 0
 --- !u!65 &5304782083198269749
 BoxCollider:
@@ -639,6 +637,28 @@ MonoBehaviour:
   m_SynchronizeRotation: 1
   m_SynchronizeScale: 0
   m_UseLocal: 1
+--- !u!95 &6308730419463179643
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2491154826321782748}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: ee030ba5cc435ca4a9f8efc926fdf035, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &2530853596432772595
 GameObject:
   m_ObjectHideFlags: 0
@@ -860,7 +880,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2448751447623838826}
-  - component: {fileID: 692395561430014333}
   m_Layer: 5
   m_Name: SelectDiceUI (2)
   m_TagString: Untagged
@@ -891,28 +910,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 50, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!95 &692395561430014333
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4886149440930055234}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 0dce97e48ad60e24eb32e6cb619027bc, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 1
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &5162137165107873796
 GameObject:
   m_ObjectHideFlags: 0
@@ -1251,7 +1248,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5141559639328706152}
-  - component: {fileID: 2024076251258635822}
   m_Layer: 5
   m_Name: SelectDiceUI
   m_TagString: Untagged
@@ -1282,28 +1278,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 50, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!95 &2024076251258635822
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7276037235151562820}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: ee030ba5cc435ca4a9f8efc926fdf035, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 1
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &7455438498518559087
 GameObject:
   m_ObjectHideFlags: 0
@@ -1556,7 +1530,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1836557579203137434}
-  - component: {fileID: 8725049784701737625}
   m_Layer: 5
   m_Name: SelectDiceUI (1)
   m_TagString: Untagged
@@ -1587,25 +1560,3 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 50, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!95 &8725049784701737625
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9122120938609298915}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: cbe8a591952d50d43b19c924dbe1b345, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 1
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0

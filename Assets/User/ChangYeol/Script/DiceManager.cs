@@ -68,9 +68,6 @@ public class DiceManager : Singleton<DiceManager>
         //스코어 기록 
         rollsLeftText.text = rollsLeft.ToString() + " left";
         Debug.Log($"[Check] isArray={isArray}, dices length={dices.Length}");
-      
-
-
     }
 
     public Vector3 GetUniqueRandomPosition(float minRangeX, float maxRangeX)
@@ -366,11 +363,11 @@ if (currentPlayer.CustomProperties.TryGetValue("Score", out object rawScore))
     {
         for(int i = 0; i < dices.Length;i++)
         {
-            if (dices[i] == null)
-            {
-                Debug.LogWarning($"[CheckDiceStopped] dice {i} is null");
-                return;
-            }
+            //if (dices[i] == null)
+            //{
+            //    Debug.LogWarning($"[CheckDiceStopped] dice {i} is null");
+            //    return;
+            //}
            
             if (!isArray)
             {
