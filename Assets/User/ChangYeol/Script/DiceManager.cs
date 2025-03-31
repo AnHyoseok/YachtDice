@@ -68,11 +68,8 @@ public class DiceManager : Singleton<DiceManager>
         //스코어 기록 
         rollsLeftText.text = rollsLeft.ToString() + " left";
         Debug.Log($"[Check] isArray={isArray}, dices length={dices.Length}");
-        if (rollsLeft <= 0)
-        {
-            
-            TurnManager.instance.EndMyTurn();
-        }
+      
+
 
     }
 

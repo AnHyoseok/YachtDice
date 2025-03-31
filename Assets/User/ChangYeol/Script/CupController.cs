@@ -44,7 +44,8 @@ public class CupController : MonoBehaviour
         {
             Debug.Log("내 턴입니다! 조작 가능!");
         }
-        if (diceManager.isDiceArray || diceManager.rollsLeft == 0 || diceManager.isArrays)
+
+        if (diceManager.isDiceArray  || diceManager.isArrays)
         {
             Debug.LogWarning($"주사위 조작 제한: isDiceArray={diceManager.isDiceArray}, rollsLeft={diceManager.rollsLeft}, isArrays={diceManager.isArrays}");
             return;
@@ -100,7 +101,7 @@ void SyncAnimatorState(int ani, bool shake, bool isBtn)
     public void TryRollDice()
     {
 
-        if (TurnManager.instance.IsMyTurn() && DiceManager.Instance.rollsLeft > 0)
+        if (TurnManager.instance.IsMyTurn() && DiceManager.Instance.rollsLeft >= 0)
         {
             photonView.RPC("RPC_RequestDiceSpawn", RpcTarget.MasterClient);
         }
