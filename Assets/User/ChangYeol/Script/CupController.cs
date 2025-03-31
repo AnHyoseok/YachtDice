@@ -38,36 +38,36 @@ public class CupController : MonoBehaviour
 
         if (!TurnManager.instance.IsMyTurn())
         {
-            Debug.LogWarning("내 턴이 아니라서 조작 불가능!");
+            //Debug.LogWarning("내 턴이 아니라서 조작 불가능!");
             return;
         }
         else
         {
-            Debug.Log("내 턴입니다! 조작 가능!");
+            //Debug.Log("내 턴입니다! 조작 가능!");
         }
         if (diceManager.isDiceArray || diceManager.isArrays)
         {
-            Debug.LogWarning($"주사위 조작 제한: isDiceArray={diceManager.isDiceArray}, rollsLeft={diceManager.rollsLeft}, isArrays={diceManager.isArrays}");
+            //Debug.LogWarning($"주사위 조작 제한: isDiceArray={diceManager.isDiceArray}, rollsLeft={diceManager.rollsLeft}, isArrays={diceManager.isArrays}");
             return;
         }
-        Debug.Log($"[흔들기 진입] isShake={isShake}, isButton={button.isButton}, timer={timer}");
+        //Debug.Log($"[흔들기 진입] isShake={isShake}, isButton={button.isButton}, timer={timer}");
 
         isShake = !Input.GetKey(KeyCode.LeftShift);
         if (!isShake)
         {
             timer += Time.deltaTime;
-            Debug.Log($"[흔들림 대기] timer={timer}");
+            //Debug.Log($"[흔들림 대기] timer={timer}");
             if (timer >= pourOutTime)
             {
                 isShake = true;
                 timer = 0;
-                Debug.Log("[흔들림 강제 시작]");
+                //Debug.Log("[흔들림 강제 시작]");
             }
         }
         else if (!button.isButton)
         {
             timer += Time.deltaTime;
-            Debug.Log($"[버튼 대기] timer={timer}");
+            //Debug.Log($"[버튼 대기] timer={timer}");
             if (timer >= pourOutTime)
             {
                 button.isButton = true;

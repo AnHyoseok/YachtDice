@@ -176,7 +176,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
     private IEnumerator DelayedOwnershipCheck()
     {
         yield return new WaitForSeconds(0.5f);
-        Debug.Log($"[체크] CupController의 PhotonView 소유권: IsMine = {cupController.photonView.IsMine}, Owner = {cupController.photonView.Owner.NickName}");
+        //Debug.Log($"[체크] CupController의 PhotonView 소유권: IsMine = {cupController.photonView.IsMine}, Owner = {cupController.photonView.Owner.NickName}");
     }
     [PunRPC]
     private void ShowTurnPopupRPC(string playerName)

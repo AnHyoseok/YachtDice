@@ -67,7 +67,7 @@ public class DiceManager : Singleton<DiceManager>
         CheckDiceStopped();
         //스코어 기록 
         rollsLeftText.text = rollsLeft.ToString() + " left";
-        Debug.Log($"[Check] isArray={isArray}, dices length={dices.Length}");
+        //Debug.Log($"[Check] isArray={isArray}, dices length={dices.Length}");
     }
 
     public Vector3 GetUniqueRandomPosition(float minRangeX, float maxRangeX)
@@ -88,7 +88,7 @@ public class DiceManager : Singleton<DiceManager>
     {
         if (newdicelist == null || newdicelist.Length == 0)
         {
-            Debug.LogError(" GetDiceValues() - newdicelist가 비어 있음! 주사위가 추가되지 않음.");
+            //Debug.LogError(" GetDiceValues() - newdicelist가 비어 있음! 주사위가 추가되지 않음.");
             return new int[0];  // 빈 배열 반환 (오류 방지)
         }
 
@@ -105,7 +105,7 @@ public class DiceManager : Singleton<DiceManager>
     {
         if (dices == null || dices.Length == 0)
         {
-            Debug.LogError(" GetDiceValues() - dices가 비어 있음! 주사위가 추가되지 않음.");
+            //Debug.LogError(" GetDiceValues() - dices가 비어 있음! 주사위가 추가되지 않음.");
             return new int[0];  // 빈 배열 반환 (오류 방지)
         }
 
@@ -130,7 +130,7 @@ public class DiceManager : Singleton<DiceManager>
         int[] values = GetDiceValues().Concat(GetDiceValue()).ToArray();
         values = values.OrderBy(v => v).ToArray();
 
-        Debug.Log($"주사위 값: {string.Join(", ", values)}");
+        //Debug.Log($"주사위 값: {string.Join(", ", values)}");
 
         int score = 0;
         int[] counts = new int[7];
@@ -294,7 +294,7 @@ if (currentPlayer.CustomProperties.TryGetValue("Score", out object rawScore))
         PhotonView photonView = GetComponent<PhotonView>();
         photonView.RPC("RPC_ShowPreviewScore", RpcTarget.All, PhotonNetwork.LocalPlayer.ActorNumber, keys, vals);
 
-        Debug.Log($"[Preview 전송] {PhotonNetwork.LocalPlayer.NickName}: {string.Join(", ", previewScores.Select(kv => $"{kv.Key}:{kv.Value}"))}");
+        //Debug.Log($"[Preview 전송] {PhotonNetwork.LocalPlayer.NickName}: {string.Join(", ", previewScores.Select(kv => $"{kv.Key}:{kv.Value}"))}");
     }
     private bool HasStraight(int[] values, int requiredLength)
     {
@@ -332,7 +332,7 @@ if (currentPlayer.CustomProperties.TryGetValue("Score", out object rawScore))
         {
 
             entry.ShowPreview(previewScores);
-            Debug.Log($"[모두에게 미리보기 적용됨] 플레이어 {actorNumber}: {string.Join(", ", previewScores.Select(kv => $"{kv.Key}:{kv.Value}"))}");
+            //Debug.Log($"[모두에게 미리보기 적용됨] 플레이어 {actorNumber}: {string.Join(", ", previewScores.Select(kv => $"{kv.Key}:{kv.Value}"))}");
         }
     }
 
@@ -363,12 +363,12 @@ if (currentPlayer.CustomProperties.TryGetValue("Score", out object rawScore))
     {
         for(int i = 0; i < dices.Length;i++)
         {
-            //if (dices[i] == null)
-            //{
-            //    Debug.LogWarning($"[CheckDiceStopped] dice {i} is null");
-            //    return;
-            //}
-           
+            if (dices[i] == null)
+            {
+                Debug.LogWarning($"[CheckDiceStopped] dice {i} is null");
+                return;
+            }
+
             if (!isArray)
             {
                 bool allStopped = System.Array.TrueForAll(dices, dice => dice != null && dice.GetComponent<Rigidbody>().linearVelocity.magnitude < 0.1f
