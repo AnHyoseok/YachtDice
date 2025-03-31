@@ -302,5 +302,7 @@ public class SelectDice : MonoBehaviour
     void EscKeySetActive(bool isEsc)
     {
         escbutton.gameObject.SetActive(isEsc);
+        DiceManager.Instance.scoreText.gameObject.SetActive(isEsc);
+        DiceManager.Instance.scoreText.text = "";
     }
 }

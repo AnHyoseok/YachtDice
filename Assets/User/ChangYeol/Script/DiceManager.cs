@@ -42,10 +42,11 @@ public class DiceManager : Singleton<DiceManager>
     public float maxRange = 0.5f;
     public float minRangeY = 1f;
     public float maxRangeY = 2f;
-    public int rollsLeft = 3;  //ÃÖ´ë 3¹ø ±¼¸± ¼ö ÀÖÀ½
+    public int rollsLeft = 3;  //ìµœëŒ€ 3ë²ˆ êµ´ë¦´ ìˆ˜ ìˆìŒ
     public TextMeshProUGUI rollsLeftText;
+    public TextMeshProUGUI scoreText;
 
-    private HashSet<float> usedYValues = new HashSet<float>(); // Áßº¹ ¹æÁö¿ë Y°ª ÀúÀå
+    private HashSet<float> usedYValues = new HashSet<float>(); // ì¤‘ë³µ ë°©ì§€ìš© Yê°’ ì €ì¥
     private int upperSectionScore = 0;
     private bool boonsGiven = false;
     [HideInInspector] public bool isArray = false;
@@ -64,7 +65,7 @@ public class DiceManager : Singleton<DiceManager>
     private void Update()
     {
         CheckDiceStopped();
-        //½ºÄÚ¾î ±â·Ï 
+        //ìŠ¤ì½”ì–´ ê¸°ë¡ 
         rollsLeftText.text = rollsLeft.ToString() + " left";
         //Debug.Log($"[Check] isArray={isArray}, dices length={dices.Length}");
     }
@@ -77,9 +78,9 @@ public class DiceManager : Singleton<DiceManager>
         do
         {
             x = Random.Range(minRangeX, maxRangeX);
-        } while (usedYValues.Contains(y)); // Y °ªÀÌ Áßº¹µÇÁö ¾ÊÀ» ¶§±îÁö ¹İº¹
+        } while (usedYValues.Contains(y)); // Y ê°’ì´ ì¤‘ë³µë˜ì§€ ì•Šì„ ë•Œê¹Œì§€ ë°˜ë³µ
 
-        usedYValues.Add(y); // »ç¿ëÇÑ Y °ª ÀúÀå
+        usedYValues.Add(y); // ì‚¬ìš©í•œ Y ê°’ ì €ì¥
 
         return new Vector3(x, y, z);
     }
@@ -87,8 +88,8 @@ public class DiceManager : Singleton<DiceManager>
     {
         if (newdicelist == null || newdicelist.Length == 0)
         {
-            //Debug.LogError(" GetDiceValues() - newdicelist°¡ ºñ¾î ÀÖÀ½! ÁÖ»çÀ§°¡ Ãß°¡µÇÁö ¾ÊÀ½.");
-            return new int[0];  // ºó ¹è¿­ ¹İÈ¯ (¿À·ù ¹æÁö)
+            //Debug.LogError(" GetDiceValues() - newdicelistê°€ ë¹„ì–´ ìˆìŒ! ì£¼ì‚¬ìœ„ê°€ ì¶”ê°€ë˜ì§€ ì•ŠìŒ.");
+            return new int[0];  // ë¹ˆ ë°°ì—´ ë°˜í™˜ (ì˜¤ë¥˜ ë°©ì§€)
         }
 
         int[] values = new int[newdicelist.Length];
@@ -97,15 +98,15 @@ public class DiceManager : Singleton<DiceManager>
             values[i] = newdicelist[i].GetDiceValue();
         }
 
-        Debug.Log(" ÁÖ»çÀ§ °ª ¸®½ºÆ®: " + string.Join(", ", values));
+        Debug.Log(" ì£¼ì‚¬ìœ„ ê°’ ë¦¬ìŠ¤íŠ¸: " + string.Join(", ", values));
         return values;
     }
     public int[] GetDiceValue()
     {
         if (dices == null || dices.Length == 0)
         {
-            //Debug.LogError(" GetDiceValues() - dices°¡ ºñ¾î ÀÖÀ½! ÁÖ»çÀ§°¡ Ãß°¡µÇÁö ¾ÊÀ½.");
-            return new int[0];  // ºó ¹è¿­ ¹İÈ¯ (¿À·ù ¹æÁö)
+            //Debug.LogError(" GetDiceValues() - dicesê°€ ë¹„ì–´ ìˆìŒ! ì£¼ì‚¬ìœ„ê°€ ì¶”ê°€ë˜ì§€ ì•ŠìŒ.");
+            return new int[0];  // ë¹ˆ ë°°ì—´ ë°˜í™˜ (ì˜¤ë¥˜ ë°©ì§€)
         }
 
         int[] values = new int[dices.Length];
@@ -121,7 +122,7 @@ public class DiceManager : Singleton<DiceManager>
             values[i] = dices[i].GetDiceValue();
         }
 
-        Debug.Log(" ÁÖ»çÀ§ °ª ¸®½ºÆ®: " + string.Join(", ", values));
+        Debug.Log(" ì£¼ì‚¬ìœ„ ê°’ ë¦¬ìŠ¤íŠ¸: " + string.Join(", ", values));
         return values;
     }
     public int CalculateScore(string category)
@@ -186,7 +187,7 @@ public class DiceManager : Singleton<DiceManager>
                 break;
         }
 
-        // »ó´Ü Á¡¼ö ´©Àû
+        // ìƒë‹¨ ì ìˆ˜ ëˆ„ì 
         if (category == DiceScore.ONES || category == DiceScore.TWOS || category == DiceScore.THREES
             || category == DiceScore.FOURS || category == DiceScore.FIVES || category == DiceScore.SIXES)
         {
@@ -211,11 +212,11 @@ public class DiceManager : Singleton<DiceManager>
         }
         else
         {
-            Debug.LogError("[CalculateScore] actorNumber¸¦ ½Äº°ÇÒ ¼ö ¾ø½À´Ï´Ù.");
+            Debug.LogError("[CalculateScore] actorNumberë¥¼ ì‹ë³„í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
             return 0;
         }
 
-        //  AI ¹× ÇÃ·¹ÀÌ¾î ¸ğµÎ Ã³¸® °¡´ÉÇÏµµ·Ï
+        //  AI ë° í”Œë ˆì´ì–´ ëª¨ë‘ ì²˜ë¦¬ ê°€ëŠ¥í•˜ë„ë¡
         if (GameSceneManager.Instance.scoreboardEntries.TryGetValue(actorNumber, out var entry))
         {
             for (int i = 0; i <= 5; i++)
@@ -225,7 +226,7 @@ public class DiceManager : Singleton<DiceManager>
         }
         else
         {
-            Debug.LogWarning($"[CalculateScore] scoreboardEntry Ã£±â ½ÇÆĞ: actorNumber={actorNumber}");
+            Debug.LogWarning($"[CalculateScore] scoreboardEntry ì°¾ê¸° ì‹¤íŒ¨: actorNumber={actorNumber}");
         }
 
         UpdateScoreboard(DiceScore.SUBTOTAL, subtotal);
@@ -259,7 +260,7 @@ public class DiceManager : Singleton<DiceManager>
     }
 
 
-    // Á¡¼ö ¹Ì¸®º¸±â È£Ãâ (³»°¡ ÁÖ»çÀ§ ´øÁ³À» ¶§ ½ÇÇà)
+    // ì ìˆ˜ ë¯¸ë¦¬ë³´ê¸° í˜¸ì¶œ (ë‚´ê°€ ì£¼ì‚¬ìœ„ ë˜ì¡Œì„ ë•Œ ì‹¤í–‰)
     public void ShowPreviewScore()
     {
         if (!isDiceArray) return;
@@ -313,7 +314,7 @@ public class DiceManager : Singleton<DiceManager>
         }
         else
         {
-            Debug.LogError("[ShowPreviewScore] actorNumber °è»ê ½ÇÆĞ");
+            Debug.LogError("[ShowPreviewScore] actorNumber ê³„ì‚° ì‹¤íŒ¨");
             return;
         }
 
@@ -356,14 +357,14 @@ public class DiceManager : Singleton<DiceManager>
         }
         else
         {
-            Debug.LogWarning($"[ShowPreviewScore] scoreEntry ¸ø Ã£À½: actorNumber={actorNumber}");
+            Debug.LogWarning($"[ShowPreviewScore] scoreEntry ëª» ì°¾ìŒ: actorNumber={actorNumber}");
         }
     }
     private void CheckForBoonus()
     {
         if (! boonsGiven && upperSectionScore >= 63)
         {
-            Debug.Log("º¸³Ê½º Á¡¼ö È¹µæ");
+            Debug.Log("ë³´ë„ˆìŠ¤ ì ìˆ˜ íšë“");
             upperSectionScore += 35;
             boonsGiven = true;
         }
@@ -380,7 +381,7 @@ public class DiceManager : Singleton<DiceManager>
         }
         else
         {
-            // AIÀÇ °æ¿ì AI ÀÌ¸§ÀÇ ÇØ½ÃÄÚµå »ç¿ë
+            // AIì˜ ê²½ìš° AI ì´ë¦„ì˜ í•´ì‹œì½”ë“œ ì‚¬ìš©
             string aiName = TurnManager.instance.GetCurrentAIName();
             actorNumber = aiName.GetHashCode();
         }
@@ -391,12 +392,32 @@ public class DiceManager : Singleton<DiceManager>
         }
         else
         {
-            Debug.LogWarning($"[UpdateScoreboard] scoreboardEntry Ã£±â ½ÇÆĞ: actorNumber={actorNumber}, category={category}, score={score}");
+            Debug.LogWarning($"[UpdateScoreboard] scoreboardEntry ì°¾ê¸° ì‹¤íŒ¨: actorNumber={actorNumber}, category={category}, score={score}");
+        }
+        if(category != DiceScore.ONES && category != DiceScore.TWOS && category != DiceScore.THREES && category != DiceScore.FOURS && category != DiceScore.FIVES && category != DiceScore.SIXES)
+        {
+            if (category == DiceScore.FOUR_KIND)
+            {
+                if (category == DiceScore.YAHTZEE)
+                {
+                    ScoreText(category);
+                }
+                ScoreText(category);
+            }
+            if(category == DiceScore.SMALL_STRAIGHT)
+            {
+                if(category == DiceScore.LARGE_STRAIGHT)
+                {
+                    ScoreText(category);
+                }
+                ScoreText(category);
+            }
+            if (category == DiceScore.FULL_HOUSE)
+            {
+                ScoreText(category);
+            }
         }
     }
-
-
-
     public int GetUpperSectionScore()
     {
         return upperSectionScore;
@@ -418,7 +439,7 @@ public class DiceManager : Singleton<DiceManager>
 
                 if (allStopped && dices.Length > 0)
                 {
-                    Debug.Log(" ¸ğµç ÁÖ»çÀ§ ¸ØÃã - Dicearray() ½ÇÇà");
+                    Debug.Log(" ëª¨ë“  ì£¼ì‚¬ìœ„ ë©ˆì¶¤ - Dicearray() ì‹¤í–‰");
                     Dicearray();
                     DiceManager.Instance.ShowPreviewScore();
                 }
@@ -427,7 +448,7 @@ public class DiceManager : Singleton<DiceManager>
     }
     public void DiceArrays()
     {
-        //SelectUI°¡ º¸ÀÌ°Ô ÇÏ±â
+        //SelectUIê°€ ë³´ì´ê²Œ í•˜ê¸°
         if (isArrays) return;
         isArrays = true;
         System.Array.Sort(dices,(a, b) => a.GetDiceValue().CompareTo(b.GetDiceValue()));
@@ -442,9 +463,9 @@ public class DiceManager : Singleton<DiceManager>
         isArrays = true;
         System.Array.Sort(dices,(a, b) => a.GetDiceValue().CompareTo(b.GetDiceValue()));
         StartCoroutine(MoveDiceToSortedPosition());
-        //Á¡¼ö º¸ÀÌ°Ô ÇÏ±â
+        //ì ìˆ˜ ë³´ì´ê²Œ í•˜ê¸°
         
-        //SelectUI°¡ º¸ÀÌ°Ô ÇÏ±â
+        //SelectUIê°€ ë³´ì´ê²Œ í•˜ê¸°
     }
     private IEnumerator MoveDiceToSortedPosition()
     {
@@ -457,7 +478,7 @@ public class DiceManager : Singleton<DiceManager>
         for (int i = 0; i < diceCount; i++)
         {
             GameObject dice = dices[i].gameObject;
-            Rigidbody rb = dice.GetComponent<Rigidbody>(); // Rigidbody °¡Á®¿À±â
+            Rigidbody rb = dice.GetComponent<Rigidbody>(); // Rigidbody ê°€ì ¸ì˜¤ê¸°
 
             int faceValue = dice.GetComponent<Dice>().GetDiceValue();
             Quaternion targetRotation = GetTargetRotation(faceValue);
@@ -480,17 +501,15 @@ public class DiceManager : Singleton<DiceManager>
         
             if (rb != null)
             {
-                rb.isKinematic = true; // ¿ÏÀüÈ÷ ¸ØÃßµµ·Ï ¼³Á¤
+                rb.isKinematic = true; // ì™„ì „íˆ ë©ˆì¶”ë„ë¡ ì„¤ì •
             }
         }
         photonView.RPC("BoxobjectActiveFalse", RpcTarget.All);
         isArrays = false;
         isDiceArray = true;
 
-        //Á¡¼ö ¾ËÆÄ 0.5
+        //ì ìˆ˜ ì•ŒíŒŒ 0.5
         photonView.RPC("RPC_ShowAllScoreboards", RpcTarget.All);
-
-
     }
     [PunRPC]
     public void RPC_ShowAllScoreboards()
@@ -507,6 +526,7 @@ public class DiceManager : Singleton<DiceManager>
         {
             boxobject[i].SetActive(false);
         }
+        scoreText.gameObject.SetActive(true);
     }
     private Quaternion GetTargetRotation(int faceValue)
     {
@@ -520,5 +540,9 @@ public class DiceManager : Singleton<DiceManager>
             case 6: return Quaternion.Euler(0f, 0f, 0f);
         }
         return Quaternion.identity;
+    }
+    void ScoreText(string text)
+    {
+        scoreText.text = text;
     }
 }
