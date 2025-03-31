@@ -411,6 +411,11 @@ public class ScoreboardEntry : MonoBehaviour
             Debug.LogWarning(" 내 턴 아님.");
             yield break;
         }
+        if (!DiceManager.Instance.isDiceArray)
+        {
+            Debug.Log(" 주사위 정렬이 끝나지 않아 점수 선택 불가!");
+            yield break;
+        }
 
         int score = DiceManager.Instance.CalculateScore(category);
       
