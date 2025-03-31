@@ -2,10 +2,11 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
+/// <summary> </summary>
 public class RawImageHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    public RawImage rawImage; // ´ë»ó RawImage
-    public Animator animator; // ¿¬°áµÈ ¾Ö´Ï¸ŞÀÌÅÍ
+    public RawImage rawImage; // ëŒ€ìƒ RawImage
+    public Animator animator; // ì—°ê²°ëœ ì• ë‹ˆë©”ì´í„°
 
     private void Start()
     {
@@ -15,21 +16,21 @@ public class RawImageHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
             animator = GetComponent<Animator>();
     }
 
-    // ¸¶¿ì½º°¡ RawImage À§¿¡ ¿Ã·ÁÁ³À» ¶§
+    // ë§ˆìš°ìŠ¤ê°€ RawImage ìœ„ì— ì˜¬ë ¤ì¡Œì„ ë•Œ
     public void OnPointerEnter(PointerEventData eventData)
     {
         if (animator != null)
         {
-            animator.SetBool("IsHovered", true); // ¾Ö´Ï¸ŞÀÌ¼Ç ½ÃÀÛ
+            animator.SetBool("IsHovered", true); // ì• ë‹ˆë©”ì´ì…˜ ì‹œì‘
         }
     }
 
-    // ¸¶¿ì½º°¡ RawImage¿¡¼­ ¹ş¾î³µÀ» ¶§
+    // ë§ˆìš°ìŠ¤ê°€ RawImageì—ì„œ ë²—ì–´ë‚¬ì„ ë•Œ
     public void OnPointerExit(PointerEventData eventData)
     {
         if (animator != null)
         {
-            animator.SetBool("IsHovered", false); // ¾Ö´Ï¸ŞÀÌ¼Ç Á¾·á
+            animator.SetBool("IsHovered", false); // ì• ë‹ˆë©”ì´ì…˜ ì¢…ë£Œ
         }
     }
 }

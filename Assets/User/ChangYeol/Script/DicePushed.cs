@@ -1,5 +1,6 @@
 using UnityEngine;
 
+/// <summary> </summary>
 public class DicePushed : MonoBehaviour
 {
     private void OnTriggerEnter(Collider other)

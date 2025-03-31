@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+/// <summary> </summary>
 public class ButtonController : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
     #region Variables

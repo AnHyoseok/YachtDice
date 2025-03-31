@@ -12,9 +12,9 @@ public class Dice : MonoBehaviour
 
     [HideInInspector] public Vector3 originPos;
     [HideInInspector]public bool isSelected = false;
-    public float friction = 0.98f;
-    public float stopThreshld = 0.05f;
-    public float nudgeForce = 0.5f; // �𼭸� ����� �� ���� �� �߰�
+    private float friction = 0.98f;
+    private float stopThreshld = 0.1f;
+    private float nudgeForce = 0.5f;
 
     private bool isSliding = false;
     [HideInInspector]public int index = 0;
@@ -28,21 +28,26 @@ public class Dice : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        //photonView.RPC("SyncDice", RpcTarget.All, transform.position, transform.rotation);
+        SlidingDice();
+        NudgeDice();
+    }
+    /// <summary>주사위가 멈춰졌는지 확인하는 함수 </summary>
+    void SlidingDice()
+    {
         if (isSliding && !rb.isKinematic)
         {
             rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, Vector3.zero, (1 - friction) * Time.deltaTime);
             rb.angularVelocity = Vector3.Lerp(rb.angularVelocity, Vector3.zero, (1 - friction) * Time.deltaTime);
-            if(rb.linearVelocity.magnitude < 0.2f && rb.linearVelocity.magnitude > stopThreshld)
+            if (rb.linearVelocity.magnitude < 0.2f && rb.linearVelocity.magnitude > stopThreshld)
             {
                 rb.AddForce(Random.onUnitSphere * nudgeForce, ForceMode.Impulse);
             }
-            if(rb.linearVelocity.magnitude < stopThreshld)
+            if (rb.linearVelocity.magnitude < stopThreshld)
             {
                 rb.linearVelocity = Vector3.zero;
                 rb.angularVelocity = Vector3.zero;
                 isSliding = false;
-                if(!photonView.IsMine)
+                if (!photonView.IsMine)
                 {
                     Debug.Log("IsMine");
                     rb.isKinematic = true;
@@ -50,8 +55,8 @@ public class Dice : MonoBehaviour
                 //Debug.Log(GetDiceValue() + "ddd");
             }
         }
-        NudgeDice();
     }
+    /// <summary>주사위의 눈 값 구하는 함수 </summary>
     public int GetDiceValue()
     {
         Transform upside = null;
@@ -66,6 +71,7 @@ public class Dice : MonoBehaviour
         if (upside != null) return int.Parse(upside.name);
         return 1;
     }
+    /// <summary>Rigidbody 초기 셋팅 </summary>
     void SetupDicePhysics(Rigidbody rb)
     {
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
@@ -73,6 +79,7 @@ public class Dice : MonoBehaviour
         rb.linearDamping = 0.02f;
         rb.angularDamping = 0.02f;
     }
+    /// <summary>주사위가 모서리로 되어 있으면 조금씩 움직여서 주사위의 한 쪽면과 바닥이 온전히 붙어있게 만들어줌 </summary>
     public void NudgeDice()
     {
         if (rb.linearVelocity.magnitude > 0.05f || rb.angularVelocity.magnitude > 0.05f) return;
@@ -105,8 +112,8 @@ public class Dice : MonoBehaviour
     {
         if(collision.gameObject.CompareTag("Ground"))
         {
+            //주사위가 미끄러지듯이 이동하는 함수
             isSliding = true;
-            //Debug.Log("�̲�����");
         }
     }
 }

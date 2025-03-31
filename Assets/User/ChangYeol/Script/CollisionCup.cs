@@ -1,5 +1,6 @@
 using UnityEngine;
 
+/// <summary> </summary>
 public class CollisionCup : MonoBehaviour
 {
     public float maxForce = 5f;
@@ -22,7 +23,7 @@ public class CollisionCup : MonoBehaviour
                 rb.linearVelocity = rb.linearVelocity.normalized * maxVelocity;
             }
 
-            //Debug.Log("º®¿¡ ºÎ‹HÈû");
+            //Debug.Log("ë²½ì— ë¶€ë”«í˜");
         }
     }
 }

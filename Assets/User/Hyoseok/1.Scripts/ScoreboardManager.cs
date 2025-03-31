@@ -3,10 +3,21 @@ using Photon.Pun;
 using ExitGames.Client.Photon;
 using Photon.Realtime;
 using System.Collections.Generic;
+using UnityEngine.UI;
+using System.Collections;
+
 public class ScoreboardManager : MonoBehaviourPunCallbacks
 {
     public RectTransform scoreboardBackground;  
-    public RectTransform scoreboardOutline;   
+    public RectTransform scoreboardOutline;
+
+    public RectTransform scoreboardPanel;
+    public Vector3 targetPosition;
+    private Vector3 originalPosition;
+    public Button scoreboardButton;
+    private bool isAtTarget = false; // í˜„ì¬ ëª©í‘œ ìœ„ì¹˜ ì—¬ë¶€
+    public float moveSpeed = 5f; // ì´ë™ ì†ë„
+    private bool isMoving = false; // ì´ë™ ì¤‘ì¸ì§€ ì²´í¬
 
     private int gameMode;
     public static ScoreboardManager instance;
@@ -20,27 +31,30 @@ public class ScoreboardManager : MonoBehaviourPunCallbacks
 
     void Start()
     {
+        originalPosition = scoreboardPanel.anchoredPosition;
         if (PhotonNetwork.InRoom)
         {
-           
             gameMode = (int)PhotonNetwork.CurrentRoom.CustomProperties["GameMode"];
             AdjustScoreboardSize();
         }
     }
 
-    //»çÀÌÁîÁ¶Àı
+    //ì‚¬ì´ì¦ˆì¡°ì ˆ
     void AdjustScoreboardSize()
     {
-        if (gameMode == 1) // 1:1 ¸ğµå
+        if (gameMode == 1) // 1:1 ëª¨ë“œ
         {
+            scoreboardButton.gameObject.SetActive(false);
             scoreboardBackground.anchoredPosition = new Vector2(0, scoreboardBackground.anchoredPosition.y);
             scoreboardBackground.sizeDelta = new Vector2(540, scoreboardBackground.sizeDelta.y);
 
             scoreboardOutline.anchoredPosition = new Vector2(0, scoreboardOutline.anchoredPosition.y);
             scoreboardOutline.sizeDelta = new Vector2(520, scoreboardOutline.sizeDelta.y);
         }
-        else if (gameMode == 2) // 2:2 ¸ğµå 
+        else if (gameMode == 2) // 2:2 ëª¨ë“œ 
         {
+            scoreboardButton.gameObject.SetActive(true);
+            scoreboardButton.onClick.AddListener(() => ToggleMoveUI());
             scoreboardBackground.anchoredPosition = new Vector2(123, scoreboardBackground.anchoredPosition.y);
             scoreboardBackground.sizeDelta = new Vector2(782, scoreboardBackground.sizeDelta.y); 
 
@@ -77,7 +91,7 @@ public class ScoreboardManager : MonoBehaviourPunCallbacks
     {
         foreach (var entry in playerEntries.Values)
         {
-            entry.ShowAll();  // ¾ËÆÄ°ª 0.5 Ã³¸® (ShowPreview¿ë)
+            entry.ShowAll();  // ì•ŒíŒŒê°’ 0.5 ì²˜ë¦¬ (ShowPreviewìš©)
         }
     }
 
@@ -91,8 +105,8 @@ public class ScoreboardManager : MonoBehaviourPunCallbacks
         GetLocalPlayerEntry()?.HighlightScore(category);
     }
 
-    //Á¡¼öµ¿±âÈ­
-    public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+    //ì ìˆ˜ë™ê¸°í™”
+    public override void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
     {
         if (changedProps.ContainsKey("Score"))
         {
@@ -100,12 +114,41 @@ public class ScoreboardManager : MonoBehaviourPunCallbacks
             if (entry != null)
             {
                 entry.UpdateScoreData(targetPlayer.CustomProperties);
-                Debug.Log($"[µ¿±âÈ­] {targetPlayer.NickName} Á¡¼ö ¾÷µ¥ÀÌÆ®µÊ!");
+                Debug.Log($"[ë™ê¸°í™”] {targetPlayer.NickName} ì ìˆ˜ ì—…ë°ì´íŠ¸ë¨!");
             }
             else
             {
-                Debug.LogWarning($"[µ¿±âÈ­ ½ÇÆĞ] {targetPlayer.NickName}ÀÇ ScoreboardEntry¸¦ Ã£Áö ¸øÇÔ");
+                Debug.LogWarning($"[ë™ê¸°í™” ì‹¤íŒ¨] {targetPlayer.NickName}ì˜ ScoreboardEntryë¥¼ ì°¾ì§€ ëª»í•¨");
             }
         }
     }
+
+    void ToggleMoveUI()
+    {
+        if (isMoving) return;
+        isAtTarget = !isAtTarget;
+        Coroutine coroutine = null;
+        Vector3 destination = isAtTarget ? targetPosition : originalPosition;
+        if (coroutine != null)
+        {
+            StopCoroutine(coroutine);
+        }
+        coroutine = StartCoroutine(MoveUI(destination));
+    }
+    IEnumerator MoveUI(Vector3 destination)
+    {
+        isMoving = true;
+        float duration = 0.5f;
+        float elapsedTime = 0f;
+        Vector3 startPos = scoreboardPanel.anchoredPosition;
+        while(elapsedTime < duration)
+        {
+            scoreboardPanel.anchoredPosition = Vector3.Lerp(startPos, destination, elapsedTime / duration);
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+        scoreboardPanel.anchoredPosition = destination;
+        isMoving = false; // ì´ë™ ì™„ë£Œ
+    }
+
 }

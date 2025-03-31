@@ -68,6 +68,7 @@ public class SelectDice : MonoBehaviour
         }
     }
     #region SelectDice
+    /// <summary> </summary>
     void DiceSelect()
     {
         if(movesThisTurn >= turnLimit)
@@ -127,6 +128,7 @@ public class SelectDice : MonoBehaviour
             }
         }
     }
+    /// <summary> </summary>
     IEnumerator MoveDiceToNextTartget(GameObject dice, Vector3 destination)
     {
         if (dice == null || targetPositions.Length == 0) yield break;
@@ -150,7 +152,7 @@ public class SelectDice : MonoBehaviour
         }
         isGoMove = false;
     }
-
+    /// <summary> </summary>
     public void MoveDiceBetweenArrays(Dice selectedDice,Dice[] dices, Dice[] newdicelist)
     {
         int index = System.Array.FindIndex(dices, d => d == selectedDice);
@@ -181,6 +183,7 @@ public class SelectDice : MonoBehaviour
     }
     #endregion
     #region SelectedDiceUI
+    /// <summary> </summary>
     void MoveUItoMousePosition()
     {
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
@@ -201,6 +204,7 @@ public class SelectDice : MonoBehaviour
             RPC_SelectUI();
         }
     }
+    /// <summary> </summary>
     [PunRPC]
     void SelectDiceUISwich(Dice dice)
     {
@@ -248,6 +252,7 @@ public class SelectDice : MonoBehaviour
             }
         }
     }
+    /// <summary> </summary>
     [PunRPC]
     void RPC_SelectUI()
     {
@@ -261,6 +266,7 @@ public class SelectDice : MonoBehaviour
         currentActiveUI = null;
     }
     #endregion
+    /// <summary> </summary>
     public void OnTurnEnd()
     {
         movesThisTurn = 0;
@@ -269,6 +275,7 @@ public class SelectDice : MonoBehaviour
         //ScoreboardEntry.HighlightScore 호출
         //ScoreboardManager.instance.HighlightLocalScore("고른카테고리"); 
     }
+    /// <summary> </summary>
     void OnClickEscButton()
     {
         ScoreboardManager.instance.HideLocalScore();
@@ -290,6 +297,7 @@ public class SelectDice : MonoBehaviour
         DiceManager.Instance.isDiceArray = false;
         photon.RPC("EscKeySetActive", RpcTarget.All, DiceManager.Instance.isDiceArray); 
     }
+    /// <summary> </summary>
     [PunRPC]
     void EscKeySetActive(bool isEsc)
     {

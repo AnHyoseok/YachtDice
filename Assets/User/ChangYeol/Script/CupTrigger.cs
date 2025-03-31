@@ -1,5 +1,6 @@
 using UnityEngine;
 
+/// <summary> </summary>
 public class CupTrigger : MonoBehaviour
 {
     public float forcePower = 5;
@@ -11,7 +12,7 @@ public class CupTrigger : MonoBehaviour
             if (rb != null)
             {
                 Vector3 pushDirection = (other.transform.position - transform.position).normalized;
-                rb.AddForce(pushDirection * forcePower, ForceMode.Impulse); // ÁÖ»çÀ§¸¦ ¸Ö¸® º¸³»±â
+                rb.AddForce(pushDirection * forcePower, ForceMode.Impulse); // ì£¼ì‚¬ìœ„ë¥¼ ë©€ë¦¬ ë³´ë‚´ê¸°
             }
         }
     }
