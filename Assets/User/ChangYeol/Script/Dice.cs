@@ -9,13 +9,12 @@ public class Dice : MonoBehaviour
     private Rigidbody rb;
     public Transform[] diceSides;
     public GameObject[] SelectUICavas;
-    public float shakeForce = 2f;
 
     [HideInInspector] public Vector3 originPos;
     [HideInInspector]public bool isSelected = false;
-    private float friction = 0.98f;
-    private float stopThreshld = 0.05f;
-    private float nudgeForce = 0.5f; // ¸ð¼­¸® ´ê¾ÒÀ» ¶§ ¾àÇÑ Èû Ãß°¡
+    public float friction = 0.98f;
+    public float stopThreshld = 0.05f;
+    public float nudgeForce = 0.5f; // ï¿½ð¼­¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ß°ï¿½
 
     private bool isSliding = false;
     [HideInInspector]public int index = 0;
@@ -45,10 +44,10 @@ public class Dice : MonoBehaviour
                 isSliding = false;
                 if(!photonView.IsMine)
                 {
-                    Debug.Log(123);
+                    Debug.Log("IsMine");
                     rb.isKinematic = true;
                 }
-                Debug.Log(GetDiceValue());
+                //Debug.Log(GetDiceValue() + "ddd");
             }
         }
         NudgeDice();
@@ -104,10 +103,10 @@ public class Dice : MonoBehaviour
     }
     private void OnCollisionEnter(Collision collision)
     {
-        if(collision.gameObject.CompareTag("Ground") || collision.gameObject.CompareTag("Dice"))
+        if(collision.gameObject.CompareTag("Ground"))
         {
             isSliding = true;
-            //Debug.Log("¹Ì²ô·¯Áü");
+            //Debug.Log("ï¿½Ì²ï¿½ï¿½ï¿½ï¿½ï¿½");
         }
     }
 }

@@ -528,9 +528,11 @@ MonoBehaviour:
   - {fileID: 7276037235151562820}
   - {fileID: 9122120938609298915}
   - {fileID: 4886149440930055234}
-  shakeForce: 2
   originPos: {x: 0, y: 0, z: 0}
   isSelected: 0
+  friction: 0.98
+  stopThreshld: 0.05
+  nudgeForce: 0.5
   index: 0
 --- !u!65 &5304782083198269749
 BoxCollider:

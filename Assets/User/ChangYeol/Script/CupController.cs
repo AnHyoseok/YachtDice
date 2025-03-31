@@ -72,7 +72,7 @@ public class CupController : MonoBehaviour
             {
                 button.isButton = true;
                 timer = 0;
-                Debug.Log("[버튼 활성화 완료]");
+                //Debug.Log("[버튼 활성화 완료]");
             }
         }
         UpdateCupState();
@@ -141,7 +141,6 @@ public class CupController : MonoBehaviour
         //  진짜 주사위 생성 및 배열 할당
         for (int i = 0; i < diceManager.dices.Length; i++)
         {
-            //Vector3 offset = diceManager.GetUniqueRandomPosition(transform.position.x, transform.position.x + 0.01f);
             Quaternion randomRot = Quaternion.Euler(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
 
             GameObject diceObj = PhotonNetwork.Instantiate("Dice", SpwanPos[i].position, randomRot);
@@ -158,14 +157,12 @@ public class CupController : MonoBehaviour
 
         // 상태 초기화
         diceManager.isArray = false;
-        diceManager.isRotat = false;
         diceManager.rollsLeft--;
     }
 
     [PunRPC]
     void RandomPoition(int index)
     {
-        //Vector3 offset = diceManager.GetUniqueRandomPosition(transform.position.x, transform.position.x + 0.01f);
         Quaternion randomRot = Quaternion.Euler(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
         Dice = PhotonNetwork.Instantiate("Dice", SpwanPos[index].position, randomRot);
         Rigidbody dicerb = Dice.GetComponent<Rigidbody>();
@@ -186,7 +183,6 @@ public class CupController : MonoBehaviour
             GetComponent<BoxCollider>().enabled = true;
             for (int i = 0; i < selectDice.turnLimit - selectDice.movesThisTurn; i++)
             {
-                //Vector3 offset = diceManager.GetUniqueRandomPosition(transform.position.x, transform.position.x + 0.01f);
                 Quaternion randomRot = Quaternion.Euler(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
                 Forcedice = PhotonNetwork.Instantiate("Forcedice", SpwanPos[i].position, randomRot);
                 photonView.RPC("AddDiceList", RpcTarget.All, Forcedice.GetComponent<PhotonView>().ViewID);

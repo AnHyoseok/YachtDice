@@ -50,7 +50,6 @@ public class DiceManager : Singleton<DiceManager>
     private bool boonsGiven = false;
     [HideInInspector] public bool isArray = false;
     [HideInInspector] public bool isArrays = false;
-    [HideInInspector] public bool isRotat = false;
     public bool isDiceArray = false;
     #endregion
     protected override void Awake()
@@ -371,8 +370,8 @@ if (currentPlayer.CustomProperties.TryGetValue("Score", out object rawScore))
 
             if (!isArray)
             {
-                bool allStopped = System.Array.TrueForAll(dices, dice => dice != null && dice.GetComponent<Rigidbody>().linearVelocity.magnitude < 0.1f
-                && dice.GetComponent<Rigidbody>().angularVelocity.magnitude < 0.1f);
+                bool allStopped = System.Array.TrueForAll(dices, dice => dice != null && dice.GetComponent<Rigidbody>().linearVelocity.magnitude < 0.2f
+                && dice.GetComponent<Rigidbody>().angularVelocity.magnitude < 0.2f);
 
                 if (allStopped && dices.Length > 0)
                 {
@@ -427,11 +426,7 @@ if (currentPlayer.CustomProperties.TryGetValue("Score", out object rawScore))
             while (elapsedTime < 1f)
             {
                 dice.transform.position = Vector3.Lerp(initaialPosition, targetPosition, elapsedTime);
-                if(!isRotat)
-                {
-                    dice.transform.rotation = Quaternion.Lerp(initialRotation, targetRotation, elapsedTime);
-                    isRotat = true;
-                }
+                dice.transform.rotation = Quaternion.Lerp(initialRotation, targetRotation, elapsedTime);
                 elapsedTime += Time.deltaTime * moveSpeed;
 
                 yield return null;
