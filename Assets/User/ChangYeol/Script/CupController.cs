@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using System.Collections;
+using Unity.VisualScripting;
 
 public class CupController : MonoBehaviour
 {
@@ -39,41 +40,41 @@ public class CupController : MonoBehaviour
 
         if (!TurnManager.instance.IsMyTurn())
         {
-            //Debug.LogWarning("³» ÅÏÀÌ ¾Æ´Ï¶ó¼­ Á¶ÀÛ ºÒ°¡´É!");
+            //Debug.LogWarning("ë‚´ í„´ì´ ì•„ë‹ˆë¼ì„œ ì¡°ì‘ ë¶ˆê°€ëŠ¥!");
             return;
         }
         else
         {
-            //Debug.Log("³» ÅÏÀÔ´Ï´Ù! Á¶ÀÛ °¡´É!");
+            //Debug.Log("ë‚´ í„´ì…ë‹ˆë‹¤! ì¡°ì‘ ê°€ëŠ¥!");
         }
         if (diceManager.isDiceArray || diceManager.isArrays)
         {
-            //Debug.LogWarning($"ÁÖ»çÀ§ Á¶ÀÛ Á¦ÇÑ: isDiceArray={diceManager.isDiceArray}, rollsLeft={diceManager.rollsLeft}, isArrays={diceManager.isArrays}");
+            //Debug.LogWarning($"ì£¼ì‚¬ìœ„ ì¡°ì‘ ì œí•œ: isDiceArray={diceManager.isDiceArray}, rollsLeft={diceManager.rollsLeft}, isArrays={diceManager.isArrays}");
             return;
         }
-        //Debug.Log($"[Èçµé±â ÁøÀÔ] isShake={isShake}, isButton={button.isButton}, timer={timer}");
+        //Debug.Log($"[í”ë“¤ê¸° ì§„ì…] isShake={isShake}, isButton={button.isButton}, timer={timer}");
     
         isShake = !Input.GetKey(KeyCode.LeftShift);
         if (!isShake)
         {
             timer += Time.deltaTime;
-            //Debug.Log($"[Èçµé¸² ´ë±â] timer={timer}");
+            //Debug.Log($"[í”ë“¤ë¦¼ ëŒ€ê¸°] timer={timer}");
             if (timer >= pourOutTime)
             {
                 isShake = true;
                 timer = 0;
-                //Debug.Log("[Èçµé¸² °­Á¦ ½ÃÀÛ]");
+                //Debug.Log("[í”ë“¤ë¦¼ ê°•ì œ ì‹œì‘]");
             }
         }
         else if (!button.isButton)
         {
             timer += Time.deltaTime;
-            //Debug.Log($"[¹öÆ° ´ë±â] timer={timer}");
+            //Debug.Log($"[ë²„íŠ¼ ëŒ€ê¸°] timer={timer}");
             if (timer >= pourOutTime)
             {
                 button.isButton = true;
                 timer = 0;
-                //Debug.Log("[¹öÆ° È°¼ºÈ­ ¿Ï·á]");
+                //Debug.Log("[ë²„íŠ¼ í™œì„±í™” ì™„ë£Œ]");
             }
         }
         UpdateCupState();
@@ -85,7 +86,7 @@ public class CupController : MonoBehaviour
         animator.SetBool(IsShake, isShake);
         animator.SetBool(IsButton, button.isButton);
 
-        // ´Ù¸¥ À¯ÀúÇÑÅ× µ¿±âÈ­
+        // ë‹¤ë¥¸ ìœ ì €í•œí…Œ ë™ê¸°í™”
         photonView.RPC("SyncAnimatorState", RpcTarget.Others, ani, isShake, button.isButton);
     }
     [PunRPC]
@@ -94,6 +95,15 @@ public class CupController : MonoBehaviour
         animator.SetInteger("DiceCount", ani);
         animator.SetBool("IsShake", shake);
         animator.SetBool("IsButton", isBtn);
+    }
+    public void StartCupState(bool isStart)
+    {
+        animator.SetBool("IsStart", isStart);
+        photonView.RPC("StartSyncAnimatorState", RpcTarget.Others , isStart);
+    }
+    void StartSyncAnimatorState(bool isStart)
+    {
+        animator.SetBool("IsStart", isStart);
     }
     public void TryRollDice()
     {
@@ -129,7 +139,7 @@ public class CupController : MonoBehaviour
         boxGroup.SetActive(false);
         GetComponent<BoxCollider>().enabled = false;
 
-        //  °¡Â¥ ÁÖ»çÀ§ ¸ÕÀú Á¤¸®
+        //  ê°€ì§œ ì£¼ì‚¬ìœ„ ë¨¼ì € ì •ë¦¬
         for (int i = 0; i < falseDices.Count; i++)
         {
             if (falseDices[i] != null)
@@ -139,7 +149,7 @@ public class CupController : MonoBehaviour
         }
         falseDices.Clear();
 
-        //  ÁøÂ¥ ÁÖ»çÀ§ »ı¼º ¹× ¹è¿­ ÇÒ´ç
+        //  ì§„ì§œ ì£¼ì‚¬ìœ„ ìƒì„± ë° ë°°ì—´ í• ë‹¹
         for (int i = 0; i < diceManager.dices.Length; i++)
         {
             Quaternion randomRot = Quaternion.Euler(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
@@ -156,8 +166,9 @@ public class CupController : MonoBehaviour
             }
         }
 
-        // »óÅÂ ÃÊ±âÈ­
+        // ìƒíƒœ ì´ˆê¸°í™”
         diceManager.isArray = false;
+        StartCupState(false);
         diceManager.rollsLeft--;
     }
 
@@ -177,7 +188,7 @@ public class CupController : MonoBehaviour
     [PunRPC]
     public void RandomDice()
     {
-        if (TurnManager.instance.IsMyTurn() || TurnManager.instance.IsAITurnNow()) //  AIµµ Çã¿ë
+        if (TurnManager.instance.IsMyTurn() || TurnManager.instance.IsAITurnNow()) //  AIë„ í—ˆìš©
         {
             photonView.RPC("BoxobjectActivetrue", RpcTarget.All);
             boxGroup.SetActive(true);

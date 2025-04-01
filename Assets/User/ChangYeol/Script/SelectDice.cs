@@ -295,7 +295,8 @@ public class SelectDice : MonoBehaviour
             }
         }
         DiceManager.Instance.isDiceArray = false;
-        photon.RPC("EscKeySetActive", RpcTarget.All, DiceManager.Instance.isDiceArray); 
+        photon.RPC("EscKeySetActive", RpcTarget.All, DiceManager.Instance.isDiceArray);
+        DiceManager.Instance.cupController.StartCupState(true);
     }
     /// <summary> </summary>
     [PunRPC]

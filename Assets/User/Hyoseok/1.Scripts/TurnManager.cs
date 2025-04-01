@@ -44,10 +44,10 @@ public class TurnManager : MonoBehaviourPunCallbacks
             yield return null;
         }
 
-        //  TurnIndex°¡ ¸ğµç ÇÃ·¹ÀÌ¾î¿¡°Ô ÇÒ´çµÉ ¶§±îÁö ´ë±â
+        //  TurnIndexê°€ ëª¨ë“  í”Œë ˆì´ì–´ì—ê²Œ í• ë‹¹ë  ë•Œê¹Œì§€ ëŒ€ê¸°
         while (!AllPlayersHaveTurnIndex())
         {
-            Debug.Log("TurnIndex°¡ ¾ÆÁ÷ ¾È µé¾î¿Â ÇÃ·¹ÀÌ¾î°¡ ÀÖ½À´Ï´Ù. ´ë±â Áß...");
+            Debug.Log("TurnIndexê°€ ì•„ì§ ì•ˆ ë“¤ì–´ì˜¨ í”Œë ˆì´ì–´ê°€ ìˆìŠµë‹ˆë‹¤. ëŒ€ê¸° ì¤‘...");
             yield return null;
         }
 
@@ -59,16 +59,16 @@ public class TurnManager : MonoBehaviourPunCallbacks
             string[] aiNames = (string[])PhotonNetwork.CurrentRoom.CustomProperties["AIPlayers"];
             foreach (string aiName in aiNames)
             {
-                playersInRoom.Add(null); // AI´Â null ½½·ÔÀ¸·Î Ç¥½Ã
+                playersInRoom.Add(null); // AIëŠ” null ìŠ¬ë¡¯ìœ¼ë¡œ í‘œì‹œ
             }
         }
         if (playersInRoom.Count == 0)
         {
-            //Debug.LogError("ÇÃ·¹ÀÌ¾î ¸®½ºÆ®¸¦ °¡Á®¿ÀÁö ¸øÇß½À´Ï´Ù.");
+            //Debug.LogError("í”Œë ˆì´ì–´ ë¦¬ìŠ¤íŠ¸ë¥¼ ê°€ì ¸ì˜¤ì§€ ëª»í–ˆìŠµë‹ˆë‹¤.");
             yield break;
         }
 
-        //Debug.Log("TurnManager: TurnIndex ±âÁØÀ¸·Î ÇÃ·¹ÀÌ¾î Á¤·Ä ¿Ï·á");
+        //Debug.Log("TurnManager: TurnIndex ê¸°ì¤€ìœ¼ë¡œ í”Œë ˆì´ì–´ ì •ë ¬ ì™„ë£Œ");
 
         if (PhotonNetwork.IsMasterClient)
         {
@@ -96,7 +96,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
 
         Player currentPlayer = playersInRoom[currentPlayerIndex];
 
-        // AI´Â PhotonNetwork¿¡ ¾ø´Â À¯Àú
+        // AIëŠ” PhotonNetworkì— ì—†ëŠ” ìœ ì €
         return currentPlayer == null || !PhotonNetwork.PlayerList.Contains(currentPlayer);
 
     }
@@ -107,12 +107,12 @@ public class TurnManager : MonoBehaviourPunCallbacks
 
         if (currentPlayerIndex < 0 || currentPlayerIndex >= playersInRoom.Count)
         {
-            Debug.LogWarning($"currentPlayerIndex({currentPlayerIndex})°¡ ÇÃ·¹ÀÌ¾î ¼ö({playersInRoom.Count})¸¦ ¹ş¾î³µ½À´Ï´Ù.");
+            Debug.LogWarning($"currentPlayerIndex({currentPlayerIndex})ê°€ í”Œë ˆì´ì–´ ìˆ˜({playersInRoom.Count})ë¥¼ ë²—ì–´ë‚¬ìŠµë‹ˆë‹¤.");
             return false;
         }
 
         var current = playersInRoom[currentPlayerIndex];
-        Debug.Log($"³» ÀÌ¸§: {PhotonNetwork.LocalPlayer.NickName}, ÇöÀç ÅÏ ÇÃ·¹ÀÌ¾î: {current.NickName}");
+        Debug.Log($"ë‚´ ì´ë¦„: {PhotonNetwork.LocalPlayer.NickName}, í˜„ì¬ í„´ í”Œë ˆì´ì–´: {current.NickName}");
 
         return PhotonNetwork.LocalPlayer == current;
 
@@ -125,42 +125,42 @@ public class TurnManager : MonoBehaviourPunCallbacks
 
     public void EndMyTurn()
     {
-        Debug.Log(" EndMyTurn() È£ÃâµÊ");
+        Debug.Log(" EndMyTurn() í˜¸ì¶œë¨");
         //Debug.Log($" GameSceneManager.Instance == null ? {GameSceneManager.Instance == null}");
         //if (!PhotonNetwork.IsMasterClient) return;
         int nextIndex = currentPlayerIndex + 1;
         int nextRound = currentTurnRound;
-        Debug.Log($"ÇöÀç ÀÎµ¦½º{nextIndex-1}");
+        Debug.Log($"í˜„ì¬ ì¸ë±ìŠ¤{nextIndex-1}");
         if (nextIndex >= playersInRoom.Count)
         {
             nextIndex = 0;
             nextRound++;
 
-            Debug.Log($"´ÙÀ½ ÀÎµ¦½º{nextIndex}");
+            Debug.Log($"ë‹¤ìŒ ì¸ë±ìŠ¤{nextIndex}");
             if (nextRound >= MAX_ROUNDS)
             {
                GameResultManager.Instance.StartResultSequence();
-                Debug.Log("°ÔÀÓ Á¾·á!");
+                Debug.Log("ê²Œì„ ì¢…ë£Œ!");
                 return;
             }
 
-            Debug.Log($"´ÙÀ½ ¶ó¿îµå ½ÃÀÛ: {nextRound + 1}ÅÏÂ°");
+            Debug.Log($"ë‹¤ìŒ ë¼ìš´ë“œ ì‹œì‘: {nextRound + 1}í„´ì§¸");
         }
 
-        // º»ÀÎ¸¸ Áï½Ã Àû¿ë
+        // ë³¸ì¸ë§Œ ì¦‰ì‹œ ì ìš©
         UpdateTurn(nextIndex, nextRound);
-        // ÀüÃ¼¿¡ µ¿±âÈ­ (RPC´Â GameSceneManager¿¡¼­ °ü¸®)
+        // ì „ì²´ì— ë™ê¸°í™” (RPCëŠ” GameSceneManagerì—ì„œ ê´€ë¦¬)
         GameSceneManager.Instance.BroadcastTurn(nextIndex, nextRound);
         if (IsAITurnNow())
         {
-            Debug.Log("[AI] ÀÚµ¿ ÅÏ ½ÃÀÛ");
+            Debug.Log("[AI] ìë™ í„´ ì‹œì‘");
             StartCoroutine(AI_TurnRoutine());
         }
     }
 
     public void UpdateTurn(int playerIndex, int round)
     {
-        Debug.Log("UpdateTurn() È£ÃâµÊ");
+        Debug.Log("UpdateTurn() í˜¸ì¶œë¨");
 
         currentPlayerIndex = playerIndex;
         currentTurnRound = round;
@@ -170,14 +170,15 @@ public class TurnManager : MonoBehaviourPunCallbacks
             DiceManager.Instance.rollsLeft = 3;
             DiceManager.Instance.isDiceArray = false;
             DiceManager.Instance.isArrays = false;
+            cupController.StartCupState(true);
         }
         else
-            Debug.LogWarning("DiceManager.Instance°¡ nullÀÔ´Ï´Ù.");
+            Debug.LogWarning("DiceManager.Instanceê°€ nullì…ë‹ˆë‹¤.");
 
         currentturnText.text = $"{currentTurnRound + 1} / {MAX_ROUNDS}";
         if (IsAITurn())
         {
-            Debug.Log("AI ÅÏ °¨Áö! AI ÀÚµ¿ Çàµ¿ ½ÃÀÛ");
+            Debug.Log("AI í„´ ê°ì§€! AI ìë™ í–‰ë™ ì‹œì‘");
             StartCoroutine(AI_TurnRoutine());
         }
         foreach (var entry in FindObjectsByType<ScoreboardEntry>(FindObjectsSortMode.None))
@@ -186,17 +187,17 @@ public class TurnManager : MonoBehaviourPunCallbacks
                 entry.ClearHighlight();
         }
 
-        // ¾Ë¸²Àº RPC·Î ½ÇÇà
+        // ì•Œë¦¼ì€ RPCë¡œ ì‹¤í–‰
         if (PhotonNetwork.LocalPlayer == TurnManager.instance.GetCurrentPlayer())
         {
-            Debug.Log($"{PhotonNetwork.LocalPlayer}=ÇöÀç À¯Àú ");
+            Debug.Log($"{PhotonNetwork.LocalPlayer}=í˜„ì¬ ìœ ì € ");
 
             cupController.photonView.RequestOwnership();
-            Debug.Log($"[¿äÃ»] CupController ¼ÒÀ¯±Ç ¿äÃ»: {PhotonNetwork.LocalPlayer.NickName}");
+            Debug.Log($"[ìš”ì²­] CupController ì†Œìœ ê¶Œ ìš”ì²­: {PhotonNetwork.LocalPlayer.NickName}");
 
             StartCoroutine(DelayedOwnershipCheck());
         }
-        Debug.Log($"ÇöÀç ÅÏ: {round + 1}ÅÏ - ÇÃ·¹ÀÌ¾î: {GetCurrentPlayer()?.NickName}");
+        Debug.Log($"í˜„ì¬ í„´: {round + 1}í„´ - í”Œë ˆì´ì–´: {GetCurrentPlayer()?.NickName}");
     }
     public bool IsAITurn()
     {
@@ -204,14 +205,14 @@ public class TurnManager : MonoBehaviourPunCallbacks
     }
     private IEnumerator AI_TurnRoutine()
     {
-        Debug.Log("[AI] ÅÏ ½ÃÀÛ - ÄÅ Èçµé±â ½ÃÀÛ");
+        Debug.Log("[AI] í„´ ì‹œì‘ - ì»µ í”ë“¤ê¸° ì‹œì‘");
 
         cupController.isShake = false;
         cupController.button.isButton = false;
         cupController.UpdateCupState();
 
 
-        yield return new WaitForSeconds(5f); // ÄÅ Èçµé±â ¿¬Ãâ
+        yield return new WaitForSeconds(5f); // ì»µ í”ë“¤ê¸° ì—°ì¶œ
 
         cupController.isShake = true;
         cupController.button.isButton = true;
@@ -221,7 +222,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
 
         yield return new WaitForSeconds(0.2f);
 
-        //  ÁøÂ¥ ÁÖ»çÀ§ »ı¼º ¿äÃ» (±âÁ¸ ÇÃ·¹ÀÌ¾î¿Í µ¿ÀÏ)
+        //  ì§„ì§œ ì£¼ì‚¬ìœ„ ìƒì„± ìš”ì²­ (ê¸°ì¡´ í”Œë ˆì´ì–´ì™€ ë™ì¼)
         cupController.photonView.RPC("RPC_RequestDiceSpawn", RpcTarget.MasterClient);
 
         float waitTime = 0f;
@@ -245,11 +246,11 @@ public class TurnManager : MonoBehaviourPunCallbacks
             yield return new WaitForSeconds(3f);
 
             aiEntry.UpdateScore(bestCategory, score);
-            Debug.Log($"[AI] Á¡¼ö ¼±ÅÃ ¿Ï·á: {bestCategory} = {score}");
+            Debug.Log($"[AI] ì ìˆ˜ ì„ íƒ ì™„ë£Œ: {bestCategory} = {score}");
         }
         else
         {
-            Debug.LogWarning($"[AI_TurnRoutine] AI Á¡¼öÆÇ ¸ø Ã£À½: {aiName} / hash = {actorNumber}");
+            Debug.LogWarning($"[AI_TurnRoutine] AI ì ìˆ˜íŒ ëª» ì°¾ìŒ: {aiName} / hash = {actorNumber}");
         }
 
         TurnManager.instance.EndMyTurn();
@@ -281,7 +282,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
     private IEnumerator DelayedOwnershipCheck()
     {
         yield return new WaitForSeconds(0.5f);
-        //Debug.Log($"[Ã¼Å©] CupControllerÀÇ PhotonView ¼ÒÀ¯±Ç: IsMine = {cupController.photonView.IsMine}, Owner = {cupController.photonView.Owner.NickName}");
+        //Debug.Log($"[ì²´í¬] CupControllerì˜ PhotonView ì†Œìœ ê¶Œ: IsMine = {cupController.photonView.IsMine}, Owner = {cupController.photonView.Owner.NickName}");
     }
     [PunRPC]
     private void ShowTurnPopupRPC(string playerName)

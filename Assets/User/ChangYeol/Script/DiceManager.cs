@@ -30,6 +30,7 @@ public class DiceManager : Singleton<DiceManager>
     #region Vaiables
     [HideInInspector]public ScoreboardEntry scoreboardEntry;
     private PhotonView photonView;
+    public CupController cupController;
     public GameObject[] boxobject;
     public Transform dicetrans;
     public float spacing = 0.8f;
@@ -507,7 +508,6 @@ public class DiceManager : Singleton<DiceManager>
         photonView.RPC("BoxobjectActiveFalse", RpcTarget.All);
         isArrays = false;
         isDiceArray = true;
-
         //점수 알파 0.5
         photonView.RPC("RPC_ShowAllScoreboards", RpcTarget.All);
     }

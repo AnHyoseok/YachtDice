@@ -6861,7 +6861,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Full House
+  m_text: Text
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1d63651ea490f6747be58e992e564a1c, type: 2}
   m_sharedMaterial: {fileID: 1905771355083818549, guid: 1d63651ea490f6747be58e992e564a1c, type: 2}
@@ -13345,6 +13345,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   scoreboardEntry: {fileID: 0}
+  cupController: {fileID: 3469287836958276106}
   boxobject:
   - {fileID: 2572634891964758409}
   - {fileID: 7199433625416611415}
