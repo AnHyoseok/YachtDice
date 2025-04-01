@@ -37,7 +37,6 @@ public class CupController : MonoBehaviour
     }
     private void Update()
     {
-
         if (!TurnManager.instance.IsMyTurn())
         {
             //Debug.LogWarning("내 턴이 아니라서 조작 불가능!");
@@ -53,20 +52,7 @@ public class CupController : MonoBehaviour
             return;
         }
         //Debug.Log($"[흔들기 진입] isShake={isShake}, isButton={button.isButton}, timer={timer}");
-    
-        isShake = !Input.GetKey(KeyCode.LeftShift);
-        if (!isShake)
-        {
-            timer += Time.deltaTime;
-            //Debug.Log($"[흔들림 대기] timer={timer}");
-            if (timer >= pourOutTime)
-            {
-                isShake = true;
-                timer = 0;
-                //Debug.Log("[흔들림 강제 시작]");
-            }
-        }
-        else if (!button.isButton)
+        if (!button.isButton)
         {
             timer += Time.deltaTime;
             //Debug.Log($"[버튼 대기] timer={timer}");
@@ -83,17 +69,15 @@ public class CupController : MonoBehaviour
     {
         int ani = diceManager.dices.Length;
         animator.SetInteger(DiceCount, ani);
-        animator.SetBool(IsShake, isShake);
         animator.SetBool(IsButton, button.isButton);
 
         // 다른 유저한테 동기화
-        photonView.RPC("SyncAnimatorState", RpcTarget.Others, ani, isShake, button.isButton);
+        photonView.RPC("SyncAnimatorState", RpcTarget.Others, ani, button.isButton);
     }
     [PunRPC]
-    void SyncAnimatorState(int ani, bool shake, bool isBtn)
+    void SyncAnimatorState(int ani, bool isBtn)
     {
         animator.SetInteger("DiceCount", ani);
-        animator.SetBool("IsShake", shake);
         animator.SetBool("IsButton", isBtn);
     }
     public void StartCupState(bool isStart)
@@ -169,6 +153,7 @@ public class CupController : MonoBehaviour
         // 상태 초기화
         diceManager.isArray = false;
         StartCupState(false);
+        isShake = false;
         diceManager.rollsLeft--;
     }
 
@@ -211,6 +196,7 @@ public class CupController : MonoBehaviour
             diceManager.boxobject[i].SetActive(true);
         }
     }
+
     [PunRPC]
     public void AddDiceList(int diceID)
     {
@@ -220,11 +206,8 @@ public class CupController : MonoBehaviour
             falseDices.Add(dice);
         }
     }
-
-
-
-
-   
-
-
+    public void IsShaked()
+    {
+        isShake = true;
+    }
 }

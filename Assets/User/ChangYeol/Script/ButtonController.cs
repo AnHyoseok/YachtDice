@@ -9,22 +9,17 @@ public class ButtonController : MonoBehaviour, IPointerDownHandler, IPointerUpHa
     #endregion
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (TurnManager.instance.IsMyTurn())
+        if (TurnManager.instance.IsMyTurn() && DiceManager.Instance.cupController.isShake)
         {
             isButton = false;
         }
-       
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        if(TurnManager.instance.IsMyTurn())
+        if(TurnManager.instance.IsMyTurn() && DiceManager.Instance.cupController.isShake)
         {
-
             isButton = true;
-
         }
-
-        
     }
 }
