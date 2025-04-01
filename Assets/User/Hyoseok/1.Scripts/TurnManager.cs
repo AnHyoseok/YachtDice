@@ -207,14 +207,14 @@ public class TurnManager : MonoBehaviourPunCallbacks
     {
         Debug.Log("[AI] 턴 시작 - 컵 흔들기 시작");
 
-        cupController.isShake = false;
+        //cupController.isShake = false;
         cupController.button.isButton = false;
         cupController.UpdateCupState();
 
 
         yield return new WaitForSeconds(5f); // 컵 흔들기 연출
 
-        cupController.isShake = true;
+        //cupController.isShake = true;
         cupController.button.isButton = true;
         cupController.UpdateCupState();
 
@@ -232,9 +232,11 @@ public class TurnManager : MonoBehaviourPunCallbacks
             yield return null;
         }
         yield return null;
-
-        DiceManager.Instance.ShowPreviewScore();
+        yield return new WaitForSeconds(2f);
+       
         
+        DiceManager.Instance.ShowPreviewScore();
+       
         string bestCategory = FindBestScoreCategory();
         int score = DiceManager.Instance.CalculateScore(bestCategory);
 
@@ -246,6 +248,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
             yield return new WaitForSeconds(3f);
 
             aiEntry.UpdateScore(bestCategory, score);
+            aiEntry.ClearHighlight();
             Debug.Log($"[AI] 점수 선택 완료: {bestCategory} = {score}");
         }
         else

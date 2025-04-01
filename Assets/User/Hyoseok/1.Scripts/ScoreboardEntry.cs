@@ -45,7 +45,7 @@ public class ScoreboardEntry : MonoBehaviour
             scoreTexts[categories[i + upperSectionTexts.Length]] = lowerSectionTexts[i];
         }
     }
-
+ 
     public void SetPlayerData(Player player)
     {
         this.player = player;
@@ -474,7 +474,7 @@ public class ScoreboardEntry : MonoBehaviour
             }
             else
             {
-                c.a = isScored[index] ? 1f : 0.5f;
+                c.a = isScored[index] ? 1f : 0f; //  선택 안된 건 완전 투명
             }
 
             kvp.Value.color = c;
