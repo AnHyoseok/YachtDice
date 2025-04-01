@@ -38,7 +38,7 @@ public class SelectDice : MonoBehaviour
             if (isPut)
             {
                 //점수판 ui 알파값 0 
-                ScoreboardManager.instance.HideLocalScore();
+                DiceManager.Instance.ShowPreviewScore();
 
                 foreach (Dice dice in DiceManager.Instance.dices)
                 {
@@ -278,7 +278,7 @@ public class SelectDice : MonoBehaviour
     /// <summary> </summary>
     void OnClickEscButton()
     {
-        ScoreboardManager.instance.HideLocalScore();
+        GameSceneManager.Instance.ShowOnlyScoredForCurrentPlayer();
 
         foreach (Dice dice in DiceManager.Instance.dices)
         {

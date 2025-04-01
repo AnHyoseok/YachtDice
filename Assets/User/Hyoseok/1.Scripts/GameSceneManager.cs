@@ -176,14 +176,20 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
 
     public override void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable propertiesThatChanged)
     {
-        if (propertiesThatChanged.ContainsKey("AIPlayers"))
+        if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue("AIPlayers", out object rawAIList) && rawAIList is string[] aiNames)
         {
-            string[] aiNames = (string[])PhotonNetwork.CurrentRoom.CustomProperties["AIPlayers"];
             foreach (string aiName in aiNames)
             {
-                if (PhotonNetwork.CurrentRoom.CustomProperties[aiName] is ExitGames.Client.Photon.Hashtable aiProps)
+                if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue(aiName, out object rawProps) && rawProps is ExitGames.Client.Photon.Hashtable aiProps)
                 {
-                    if (!scoreboardEntries.ContainsKey(aiName.GetHashCode()))
+                    int actorKey = aiName.GetHashCode();
+
+                    if (scoreboardEntries.TryGetValue(actorKey, out var entry))
+                    {
+                        
+                        entry.UpdateAIScore(aiProps);
+                    }
+                    else
                     {
                         AddAIToScoreboard(aiName, aiProps);
                     }
@@ -191,7 +197,18 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
             }
         }
     }
+    public void ShowOnlyScoredForCurrentPlayer()
+    {
+        string aiName = TurnManager.instance.GetCurrentAIName();
+        Player currentPlayer = TurnManager.instance.GetCurrentPlayer();
 
+        int key = currentPlayer != null ? currentPlayer.ActorNumber : aiName.GetHashCode();
+
+        if (scoreboardEntries.TryGetValue(key, out var entry))
+        {
+            entry.ShowOnlyScored();
+        }
+    }
     public List<Player> GetSortedPlayers()
     {
         Player[] players = PhotonNetwork.PlayerList;

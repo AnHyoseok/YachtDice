@@ -126,7 +126,7 @@ public class DiceManager : Singleton<DiceManager>
         Debug.Log(" 주사위 값 리스트: " + string.Join(", ", values));
         return values;
     }
-    public int CalculateScore(string category)
+    public int CalculateScore(string category, bool previewOnly = false)
     {
         int[] values = GetDiceValues().Concat(GetDiceValue()).ToArray();
         values = values.OrderBy(v => v).ToArray();
@@ -187,7 +187,7 @@ public class DiceManager : Singleton<DiceManager>
                     score = 50;
                 break;
         }
-
+        if (previewOnly) return score;
         // 상단 점수 누적
         if (category == DiceScore.ONES || category == DiceScore.TWOS || category == DiceScore.THREES
             || category == DiceScore.FOURS || category == DiceScore.FIVES || category == DiceScore.SIXES)
@@ -229,11 +229,12 @@ public class DiceManager : Singleton<DiceManager>
         {
             Debug.LogWarning($"[CalculateScore] scoreboardEntry 찾기 실패: actorNumber={actorNumber}");
         }
-
-        UpdateScoreboard(DiceScore.SUBTOTAL, subtotal);
-        UpdateScoreboard(DiceScore.BONUS, bonus);
-        UpdateScoreboard(category, score);
-
+        if (!previewOnly)
+        {
+            UpdateScoreboard(DiceScore.SUBTOTAL, subtotal);
+            UpdateScoreboard(DiceScore.BONUS, bonus);
+            UpdateScoreboard(category, score);
+        }
         return score;
     }
 
@@ -317,11 +318,24 @@ public class DiceManager : Singleton<DiceManager>
         previewScores[DiceScore.SMALL_STRAIGHT] = HasStraight(values, 4) ? 15 : 0;
         previewScores[DiceScore.LARGE_STRAIGHT] = HasStraight(values, 5) ? 30 : 0;
         previewScores[DiceScore.YAHTZEE] = counts.Any(c => c == 5) ? 50 : 0;
+        if (GameSceneManager.Instance.scoreboardEntries.TryGetValue(actorNumber, out var entry))
+        {
+            Dictionary<string, int> filteredPreview = new Dictionary<string, int>();
 
-        string[] keys = previewScores.Keys.ToArray();
-        int[] vals = previewScores.Values.ToArray();
+            foreach (var kvp in previewScores)
+            {
+                int index = entry.GetCategoryIndex(kvp.Key);
+                if (index != -1 && !entry.IsAlreadyScored(index))
+                {
+                    filteredPreview[kvp.Key] = kvp.Value;
+                }
+            }
 
-        photonView.RPC("RPC_ShowPreviewScore", RpcTarget.All, actorNumber, keys, vals);
+            string[] keys = filteredPreview.Keys.ToArray();
+            int[] vals = filteredPreview.Values.ToArray();
+
+            photonView.RPC("RPC_ShowPreviewScore", RpcTarget.All, actorNumber, keys, vals);
+        }
     }
 
 

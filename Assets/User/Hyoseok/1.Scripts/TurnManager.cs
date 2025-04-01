@@ -176,6 +176,22 @@ public class TurnManager : MonoBehaviourPunCallbacks
             Debug.LogWarning("DiceManager.Instance가 null입니다.");
 
         currentturnText.text = $"{currentTurnRound + 1} / {MAX_ROUNDS}";
+
+        if (IsAITurnNow())
+        {
+            string aiName = GetCurrentAIName();
+            int actorNumber = aiName.GetHashCode();
+
+            if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue(aiName, out object rawProps)
+                && rawProps is ExitGames.Client.Photon.Hashtable aiProps)
+            {
+                if (GameSceneManager.Instance.scoreboardEntries.TryGetValue(actorNumber, out var aiEntry))
+                {
+                    aiEntry.UpdateScoreData(aiProps);
+                    Debug.Log($"[AI] 점수 복원 완료: {aiName}");
+                }
+            }
+        }
         if (IsAITurn())
         {
             Debug.Log("AI 턴 감지! AI 자동 행동 시작");
@@ -206,15 +222,17 @@ public class TurnManager : MonoBehaviourPunCallbacks
     private IEnumerator AI_TurnRoutine()
     {
         Debug.Log("[AI] 턴 시작 - 컵 흔들기 시작");
+        cupController.isShake = true;
+        yield return new WaitForSeconds(2f);
+        if(cupController.isShake)
+        { 
+            cupController.button.isButton = false;
+            cupController.UpdateCupState();
+        }
 
-        //cupController.isShake = false;
-        cupController.button.isButton = false;
-        cupController.UpdateCupState();
 
+        yield return new WaitForSeconds(2f); // 컵 흔들기 연출
 
-        yield return new WaitForSeconds(5f); // 컵 흔들기 연출
-
-        //cupController.isShake = true;
         cupController.button.isButton = true;
         cupController.UpdateCupState();
 
@@ -238,15 +256,18 @@ public class TurnManager : MonoBehaviourPunCallbacks
         DiceManager.Instance.ShowPreviewScore();
        
         string bestCategory = FindBestScoreCategory();
-        int score = DiceManager.Instance.CalculateScore(bestCategory);
-
+    
+        int score = DiceManager.Instance.CalculateScore(bestCategory, previewOnly: true);
+      
+        yield return new WaitForSeconds(1f);
+        
         string aiName = TurnManager.instance.GetCurrentAIName();
         int actorNumber = aiName.GetHashCode();
 
         if (GameSceneManager.Instance.scoreboardEntries.TryGetValue(actorNumber, out var aiEntry))
         {
-            yield return new WaitForSeconds(3f);
-
+            yield return new WaitForSeconds(0.5f);
+            
             aiEntry.UpdateScore(bestCategory, score);
             aiEntry.ClearHighlight();
             Debug.Log($"[AI] 점수 선택 완료: {bestCategory} = {score}");
@@ -268,20 +289,36 @@ public class TurnManager : MonoBehaviourPunCallbacks
         "LARGE_STRAIGHT", "YAHTZEE"
         };
 
+        string aiName = TurnManager.instance.GetCurrentAIName();
+        int actorNumber = aiName.GetHashCode();
+
+        if (!GameSceneManager.Instance.scoreboardEntries.TryGetValue(actorNumber, out var aiEntry))
+        {
+            Debug.LogWarning($"[FindBestScoreCategory] AI 점수판을 찾을 수 없음: {aiName}");
+            return "Choice"; // 기본값
+        }
+
         string bestCategory = "";
-        int maxScore = 0;
+        int maxScore = -1;
+
         foreach (string category in categories)
         {
-            int score = DiceManager.Instance.CalculateScore(category);
+            int index = aiEntry.GetCategoryIndex(category);
+
+            // 이미 기입된 항목은 스킵
+            if (index != -1 && aiEntry.IsAlreadyScored(index))
+                continue;
+
+            int score = DiceManager.Instance.CalculateScore(category, previewOnly: true);
             if (score > maxScore)
             {
                 maxScore = score;
                 bestCategory = category;
             }
         }
+
         return bestCategory;
     }
-
     private IEnumerator DelayedOwnershipCheck()
     {
         yield return new WaitForSeconds(0.5f);

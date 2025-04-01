@@ -133,7 +133,7 @@ public class ScoreboardEntry : MonoBehaviour
         int index = GetCategoryIndex(category);
         if (index != -1)
         {
-            //  점수 중복 방지
+            // 점수 중복 방지
             if (IsAlreadyScored(index)) return;
 
             scores[index] = score;
@@ -142,19 +142,32 @@ public class ScoreboardEntry : MonoBehaviour
             if (scoreTexts.TryGetValue(category, out var textUI))
             {
                 textUI.text = score.ToString();
-                SetAlpha(textUI, 1f);  //  해당 텍스트만 알파 적용
+                SetAlpha(textUI, 1f); // 해당 텍스트만 알파 적용
             }
 
             UpdateSubtotalAndBonus();
             UpdateScoreUI();
 
-          
+            // 플레이어일 경우
             if (player == PhotonNetwork.LocalPlayer)
             {
                 ExitGames.Client.Photon.Hashtable hash = new ExitGames.Client.Photon.Hashtable();
                 hash["Score"] = scores;
                 hash["ScoredFlags"] = isScored;
                 player.SetCustomProperties(hash);
+            }
+
+            // AI일 경우
+            else if (isAI)
+            {
+                ExitGames.Client.Photon.Hashtable aiData = new ExitGames.Client.Photon.Hashtable();
+                aiData["Score"] = scores;
+                aiData["ScoredFlags"] = isScored;
+
+                PhotonNetwork.CurrentRoom.SetCustomProperties(new ExitGames.Client.Photon.Hashtable
+            {
+                { aiName, aiData }
+            });
             }
         }
     }
@@ -484,5 +497,23 @@ public class ScoreboardEntry : MonoBehaviour
     {
         if (index < 0 || index >= scores.Length) return 0;
         return scores[index];
+    }
+
+    public void ShowOnlyScored()
+    {
+        foreach (var kvp in scoreTexts)
+        {
+            int index = GetCategoryIndex(kvp.Key);
+            if (index == -1) continue;
+
+            if (isScored != null && index < isScored.Length && isScored[index])
+            {
+                SetAlpha(kvp.Value, 1f); // 기록된 점수는 보이게
+            }
+            else
+            {
+                SetAlpha(kvp.Value, 0f); // 기록 안 된 점수는 숨김
+            }
+        }
     }
 }
