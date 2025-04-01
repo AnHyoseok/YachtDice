@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
+using Photon.Pun;
 
 public class ScoreboardHoverAnimation : MonoBehaviour
 {
@@ -22,17 +23,28 @@ public class ScoreboardHoverAnimation : MonoBehaviour
     private void Start()
     {
         scoreboardTurnActivator = GetComponent<ScoreboardTurnActivator>(); // ScoreboardTurnActivator.cs 참조
-        // Categories 내부의 "SelectImage" 를 모두 찾아 리스트에 저장
+        // Categories 내부의 "SelectImage"를 모두 찾아 리스트에 저장
         FindSelectImage(categories, selectImages);
-        // Player_A,B,C,D 내부의 "Line_{i}"를 찾아 리스트에 저장
-        if (scoreboardTurnActivator.playerA == null) return;
-        FindRectTransforms(scoreboardTurnActivator.playerA, playerARectTransforms);
+        // Player_A,B,C,D 내부의 RectTransform들을 찾아 리스트에 저장
+        Debug.Log($"{scoreboardTurnActivator.playerA}++++++");
+        if (scoreboardTurnActivator.playerA == null)
+        {
+            FindRectTransforms(scoreboardTurnActivator.playerA, playerARectTransforms);
+            Debug.Log($"{scoreboardTurnActivator.playerA}");
+            return;
+        }
+        Debug.Log($"{scoreboardTurnActivator.playerA}");
         if (scoreboardTurnActivator.playerB == null) return;
         FindRectTransforms(scoreboardTurnActivator.playerB, playerBRectTransforms);
         if (scoreboardTurnActivator.playerC == null) return;
         FindRectTransforms(scoreboardTurnActivator.playerC, playerCRectTransforms);
         if (scoreboardTurnActivator.playerD == null) return;
         FindRectTransforms(scoreboardTurnActivator.playerD, playerDRectTransforms);
+
+        foreach (RectTransform rect in playerARectTransforms)
+        {
+            Debug.Log("저장된 RectTransform: " + rect.gameObject.name);
+        }
     }
 
     private void Update()
@@ -62,32 +74,12 @@ public class ScoreboardHoverAnimation : MonoBehaviour
         }
     }
 
-    private void FindRectTransforms(GameObject player, List<RectTransform> rectTransforms)
-    {
-        RectTransform[] rects = player.GetComponentsInChildren<RectTransform>(true);
-        int upperCount = 0; // "Upper Section" 태그의 개수를 추적
-        int lowerCount = 0; // "Lower Section" 태그의 개수를 추적
-
-        foreach (RectTransform rect in rects)
-        {
-            if (upperCount >= 6 && lowerCount >= 6) break; // "Upper Section"과 "Lower Section" 각각 6개까지만 추가
-
-            if (rect.CompareTag("Upper Section") && upperCount < 6)
-            {
-                rectTransforms.Add(rect);
-                upperCount++; // "Upper Section" 태그 추가
-            }
-
-            if (rect.CompareTag("Lower Section") && lowerCount < 6)
-            {
-                rectTransforms.Add(rect);
-                lowerCount++; // "Lower Section" 태그 추가
-            }
-        }
-    }
-
     private void FindSelectImage(GameObject categories, List<Image> selectImages)
     {
+       if(PhotonNetwork.IsMasterClient) // 본인일때 
+        {
+
+        }
         if (categories == null) return;
 
         Image[] images = categories.GetComponentsInChildren<Image>(true);
@@ -95,7 +87,46 @@ public class ScoreboardHoverAnimation : MonoBehaviour
         {
             if (img.gameObject.name == "SelectImage")
             {
-                selectImages.Add(img); // TurnImage를 리스트에 추가
+                selectImages.Add(img); // "SelectImage"들을 리스트에 추가
+            }
+        }
+    }
+
+    // 매개변수 player의 자식인 "Upper Section"과 "Lower Section"을 이름으로 찾는다
+    // "Upper Section" 자식의 RectTransform을 "Upper Section"이 가지고있는 자식의 수 만큼 반복하여 매개변수 rectTransforms에 차례대로 저장한다
+    // "Lower Section" 자식의 RectTransform을 "Lower` Section"이 가지고있는 자식의 수 만큼 반복하여 매개변수 rectTransforms에 차례대로 저장한다(위에서 저장한 rectTransforms에 이어서)
+    private void FindRectTransforms(GameObject player, List<RectTransform> rectTransforms)
+    {
+        // player의 모든 RectTransform들을 가져오기
+        RectTransform[] rects = player.GetComponentsInChildren<RectTransform>(true);
+
+        Debug.Log($"{rects[0]},{rects.Length}");
+
+        // Upper Section 태그를 가진 RectTransform 자식들을 먼저 처리
+        foreach (RectTransform rect in rects)
+        {
+            if (rect.CompareTag("Upper Section"))  // 태그로 Upper Section 찾기
+            {
+                // Upper Section의 자식들을 rectTransforms 리스트에 추가
+                foreach (RectTransform child in rect)
+                {
+                    rectTransforms.Add(child);
+                }
+                break; // Upper Section 처리 후 더 이상 반복하지 않도록 종료
+            }
+        }
+
+        // Lower Section 태그를 가진 RectTransform 자식들을 처리
+        foreach (RectTransform rect in rects)
+        {
+            if (rect.CompareTag("Lower Section"))  // 태그로 Lower Section 찾기
+            {
+                // Lower Section의 자식들을 rectTransforms 리스트에 추가
+                foreach (RectTransform child in rect)
+                {
+                    rectTransforms.Add(child);
+                }
+                break; // Lower Section 처리 후 더 이상 반복하지 않도록 종료
             }
         }
     }

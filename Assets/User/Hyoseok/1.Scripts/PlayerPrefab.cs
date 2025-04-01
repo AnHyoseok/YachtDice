@@ -20,12 +20,12 @@ public class PlayerPrefab : MonoBehaviour
 
     public Button removeAIButton;
     private string aiName;
-
+    PhotonView PhotonView;
     void Awake()
     {
         InitializeProfiles();
     }
-
+ 
     //  프로필 초기화 (게임 시작 시 실행되도록 추가)
     public static void InitializeProfiles()
     {
@@ -40,6 +40,7 @@ public class PlayerPrefab : MonoBehaviour
                     ProfileSprites = instance.profileSprites;
                     ProfileCount = instance.profileSprites.Length;
                     Debug.Log($" ProfileSprites 초기화 완료! 총 {ProfileCount}개 프로필 사용 가능");
+                    
                 }
             }
         }

@@ -28,9 +28,9 @@ public class ScoreboardTurnActivator : MonoBehaviour
     {
         // 자식중에 Player를 모두찾아 저장하기
         FindPlayersWithTag();
-        // Player 내부의 "TurnImage"를 모두 찾아 리스트에 저장
-        if (playerA == null) return;
-        FindTurnImages(playerA, playerATurnImages);
+
+        if (playerA == null) return; // Player가 없으면 리턴
+        FindTurnImages(playerA, playerATurnImages); // Player 내부의 "TurnImage"(이름)를 모두 찾아 리스트에 저장
         if (playerB == null) return;
         FindTurnImages(playerB, playerBTurnImages);
         if (playerC == null) return;
@@ -61,12 +61,13 @@ public class ScoreboardTurnActivator : MonoBehaviour
     // "TurnImage" 이름를 가진 자식 오브젝트들을 리스트에 저장하는 메서드
     private void FindTurnImages(GameObject player, List<Image> turnImages)
     {
-        if (player == null) return;
+        if (player == null) return; // Player가 없으면 리턴
 
         Image[] images = player.GetComponentsInChildren<Image>(true);
+
         foreach (Image img in images)
         {
-            if (img.gameObject.name == "TurnImage")
+            if (img.gameObject.name == "TurnImage") // 오브젝트 이름으로 찾기
             {
                 turnImages.Add(img); // TurnImage를 리스트에 추가
             }
