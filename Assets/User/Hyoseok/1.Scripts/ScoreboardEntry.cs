@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using Photon.Realtime;
 using TMPro;
@@ -45,6 +45,7 @@ public class ScoreboardEntry : MonoBehaviour
             scoreTexts[categories[i + upperSectionTexts.Length]] = lowerSectionTexts[i];
         }
     }
+
     public void SetPlayerData(Player player)
     {
         this.player = player;
@@ -95,12 +96,17 @@ public class ScoreboardEntry : MonoBehaviour
     }
     public void SetAIData(string aiName, ExitGames.Client.Photon.Hashtable properties)
     {
+        Debug.Log($"[SetAIData] 호출됨: aiName={aiName}");
         this.aiName = aiName;
         isAI = true;
         playerNameText.text = aiName + " [AI]";
         SetTeamColor(properties);
 
         SetProfileImage(properties, true);
+        if (!properties.ContainsKey("ScoredFlags"))
+        {
+            isScored = new bool[14];
+        }
         UpdateScoreData(properties);
     }
 
@@ -283,6 +289,7 @@ public class ScoreboardEntry : MonoBehaviour
 
     public void ShowPreview(Dictionary<string, int> previewScores)
     {
+        Debug.Log($"[ShowPreview] 호출됨 - isAI={isAI}, aiName={aiName}");
         ClearHighlight();
 
         foreach (var scoreEntry in previewScores)
@@ -295,30 +302,30 @@ public class ScoreboardEntry : MonoBehaviour
                 if (scoreTexts.TryGetValue(scoreEntry.Key, out var textUI))
                 {
                     textUI.text = scoreEntry.Value.ToString();
-                    textUI.color = new Color(textUI.color.r, textUI.color.g, textUI.color.b, 1f); // 항상 불투명
+                    SetAlpha(textUI, 1f);
                 }
                 continue;
             }
 
+            if (scoreTexts.TryGetValue(scoreEntry.Key, out var text))
+            {
+                text.text = scoreEntry.Value.ToString();
 
-          
+                if (isScored != null && index < isScored.Length && isScored[index])
+                {
+                    SetAlpha(text, 1f);
+                }
+                else
+                {
+                    SetAlpha(text, 0.5f); 
+                }
+            }
 
-            if (index < upperSectionTexts.Length)
-            {
-                upperSectionTexts[index].text = scoreEntry.Value.ToString();
-            }
-            else if (index - 8 < lowerSectionTexts.Length)
-            {
-                lowerSectionTexts[index - 8].text = scoreEntry.Value.ToString();
-            }
-            else
-            {
-                Debug.LogWarning($"[미리보기 실패] {scoreEntry.Key}는 인덱스 범위를 초과했어요.");
-            }
+
         }
-
-        ShowAll();  // 알파값 적용 (이미 기록된 항목은 1f, 미기록은 0.5f)
     }
+
+
 
 
     public void SetAlpha(TextMeshProUGUI text, float alpha)

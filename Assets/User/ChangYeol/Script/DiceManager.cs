@@ -23,12 +23,12 @@ public class DiceScore
     public const string SMALL_STRAIGHT = "SMALL_STRAIGHT";
     public const string LARGE_STRAIGHT = "LARGE_STRAIGHT";
     public const string YAHTZEE = "YAHTZEE";
-   
+
 }
 public class DiceManager : Singleton<DiceManager>
 {
     #region Vaiables
-    [HideInInspector]public ScoreboardEntry scoreboardEntry;
+    [HideInInspector] public ScoreboardEntry scoreboardEntry;
     private PhotonView photonView;
     public CupController cupController;
     public GameObject[] boxobject;
@@ -113,10 +113,10 @@ public class DiceManager : Singleton<DiceManager>
         int[] values = new int[dices.Length];
         for (int i = 0; i < dices.Length; i++)
         {
-            if (dices[i] == null) 
+            if (dices[i] == null)
             {
-              
-                values[i] = 0; 
+
+                values[i] = 0;
                 continue;
             }
 
@@ -221,7 +221,7 @@ public class DiceManager : Singleton<DiceManager>
         if (GameSceneManager.Instance.scoreboardEntries.TryGetValue(actorNumber, out var entry))
         {
             for (int i = 0; i <= 5; i++)
-                subtotal += entry.GetScoreByCategoryIndex(i); 
+                subtotal += entry.GetScoreByCategoryIndex(i);
 
             bonus = subtotal >= 63 ? 35 : 0;
         }
@@ -264,6 +264,9 @@ public class DiceManager : Singleton<DiceManager>
     // 점수 미리보기 호출 (내가 주사위 던졌을 때 실행)
     public void ShowPreviewScore()
     {
+        Debug.Log("[ShowPreviewScore] 호출됨 - 턴 주인: " +
+            (TurnManager.instance.IsAITurnNow() ? "AI" : "Player"));
+
         if (!isDiceArray) return;
 
         int[] values = GetDiceValues().Concat(GetDiceValue()).ToArray();
@@ -279,13 +282,29 @@ public class DiceManager : Singleton<DiceManager>
         previewScores[DiceScore.SIXES] = counts[6] * 6;
 
         int subtotal = 0;
-        var currentPlayer = TurnManager.instance.GetCurrentPlayer();
-        if (currentPlayer == null) return;
 
-        if (currentPlayer.CustomProperties.TryGetValue("Score", out object rawScore))
+        //  여기서 AI 먼저 체크
+        int actorNumber;
+        string aiName = TurnManager.instance.GetCurrentAIName();
+
+        if (TurnManager.instance.IsAITurnNow() && !string.IsNullOrEmpty(aiName))
         {
-            int[] confirmedScores = (int[])rawScore;
-            for (int i = 0; i <= 5; i++) subtotal += confirmedScores[i];
+            actorNumber = aiName.GetHashCode();
+            Debug.Log($"[ShowPreviewScore] AI actorNumber={actorNumber}");
+        }
+        else
+        {
+            var currentPlayer = TurnManager.instance.GetCurrentPlayer();
+            if (currentPlayer == null) return;
+
+            if (currentPlayer.CustomProperties.TryGetValue("Score", out object rawScore))
+            {
+                int[] confirmedScores = (int[])rawScore;
+                for (int i = 0; i <= 5; i++) subtotal += confirmedScores[i];
+            }
+
+            actorNumber = currentPlayer.ActorNumber;
+            Debug.Log($"[ShowPreviewScore] Player actorNumber={actorNumber}");
         }
 
         previewScores[DiceScore.SUBTOTAL] = subtotal;
@@ -302,26 +321,9 @@ public class DiceManager : Singleton<DiceManager>
         string[] keys = previewScores.Keys.ToArray();
         int[] vals = previewScores.Values.ToArray();
 
-        int actorNumber;
-        string aiName = TurnManager.instance.GetCurrentAIName();
-
-        if (currentPlayer != null)
-        {
-            actorNumber = currentPlayer.ActorNumber;
-        }
-        else if (!string.IsNullOrEmpty(aiName))
-        {
-            actorNumber = aiName.GetHashCode();
-        }
-        else
-        {
-            Debug.LogError("[ShowPreviewScore] actorNumber 계산 실패");
-            return;
-        }
-
-
         photonView.RPC("RPC_ShowPreviewScore", RpcTarget.All, actorNumber, keys, vals);
     }
+
 
     private bool HasStraight(int[] values, int requiredLength)
     {
@@ -354,16 +356,52 @@ public class DiceManager : Singleton<DiceManager>
 
         if (GameSceneManager.Instance.scoreboardEntries.TryGetValue(actorNumber, out var entry))
         {
+            Debug.Log($"[RPC_ShowPreviewScore] entry 찾음: actorNumber={actorNumber}, isAI={entry.isAI}");
             entry.ShowPreview(previewScores);
         }
         else
         {
             Debug.LogWarning($"[ShowPreviewScore] scoreEntry 못 찾음: actorNumber={actorNumber}");
         }
+
+        for (int i = 0; i < keys.Length; i++)
+        {
+            string key = keys[i];
+            int value = values[i];
+
+            if (value <= 0) continue;
+
+            if (key != DiceScore.ONES && key != DiceScore.TWOS &&
+                key != DiceScore.THREES && key != DiceScore.FOURS &&
+                key != DiceScore.FIVES && key != DiceScore.SIXES)
+            {
+                switch (key)
+                {
+                    case DiceScore.YAHTZEE:
+                        ScoreText(DiceScore.YAHTZEE);
+                        break;
+                    case DiceScore.FOUR_KIND:
+                        ScoreText(DiceScore.FOUR_KIND);
+                        break;
+                    case DiceScore.LARGE_STRAIGHT:
+                        ScoreText(DiceScore.LARGE_STRAIGHT);
+                        break;
+                    case DiceScore.SMALL_STRAIGHT:
+                        ScoreText(DiceScore.SMALL_STRAIGHT);
+                        break;
+                    case DiceScore.FULL_HOUSE:
+                        ScoreText(DiceScore.FULL_HOUSE);
+                        break;
+                    case DiceScore.Choice:
+                        ScoreText(DiceScore.Choice);
+                        break;
+                }
+            }
+        }
     }
     private void CheckForBoonus()
     {
-        if (! boonsGiven && upperSectionScore >= 63)
+        if (!boonsGiven && upperSectionScore >= 63)
         {
             Debug.Log("보너스 점수 획득");
             upperSectionScore += 35;
@@ -395,7 +433,7 @@ public class DiceManager : Singleton<DiceManager>
         {
             Debug.LogWarning($"[UpdateScoreboard] scoreboardEntry 찾기 실패: actorNumber={actorNumber}, category={category}, score={score}");
         }
-        if(category != DiceScore.ONES && category != DiceScore.TWOS && category != DiceScore.THREES && category != DiceScore.FOURS && category != DiceScore.FIVES && category != DiceScore.SIXES)
+        if (category != DiceScore.ONES && category != DiceScore.TWOS && category != DiceScore.THREES && category != DiceScore.FOURS && category != DiceScore.FIVES && category != DiceScore.SIXES)
         {
             if (category == DiceScore.FOUR_KIND)
             {
@@ -405,9 +443,9 @@ public class DiceManager : Singleton<DiceManager>
                 }
                 ScoreText(category);
             }
-            if(category == DiceScore.SMALL_STRAIGHT)
+            if (category == DiceScore.SMALL_STRAIGHT)
             {
-                if(category == DiceScore.LARGE_STRAIGHT)
+                if (category == DiceScore.LARGE_STRAIGHT)
                 {
                     ScoreText(category);
                 }
@@ -425,7 +463,7 @@ public class DiceManager : Singleton<DiceManager>
     }
     void CheckDiceStopped()
     {
-        for(int i = 0; i < dices.Length;i++)
+        for (int i = 0; i < dices.Length; i++)
         {
             if (dices[i] == null)
             {
@@ -452,7 +490,7 @@ public class DiceManager : Singleton<DiceManager>
         //SelectUI가 보이게 하기
         if (isArrays) return;
         isArrays = true;
-        System.Array.Sort(dices,(a, b) => a.GetDiceValue().CompareTo(b.GetDiceValue()));
+        System.Array.Sort(dices, (a, b) => a.GetDiceValue().CompareTo(b.GetDiceValue()));
         StartCoroutine(MoveDiceToSortedPosition());
 
     }
@@ -462,10 +500,10 @@ public class DiceManager : Singleton<DiceManager>
         if (isArray || isArrays) return;
         isArray = true;
         isArrays = true;
-        System.Array.Sort(dices,(a, b) => a.GetDiceValue().CompareTo(b.GetDiceValue()));
+        System.Array.Sort(dices, (a, b) => a.GetDiceValue().CompareTo(b.GetDiceValue()));
         StartCoroutine(MoveDiceToSortedPosition());
         //점수 보이게 하기
-        
+
         //SelectUI가 보이게 하기
     }
     private IEnumerator MoveDiceToSortedPosition()
@@ -499,7 +537,7 @@ public class DiceManager : Singleton<DiceManager>
             dice.transform.position = targetPosition;
             dice.transform.rotation = targetRotation;
             dice.GetComponent<Dice>().originPos = dice.transform.position;
-        
+
             if (rb != null)
             {
                 rb.isKinematic = true; // 완전히 멈추도록 설정
@@ -508,6 +546,7 @@ public class DiceManager : Singleton<DiceManager>
         photonView.RPC("BoxobjectActiveFalse", RpcTarget.All);
         isArrays = false;
         isDiceArray = true;
+
         //점수 알파 0.5
         photonView.RPC("RPC_ShowAllScoreboards", RpcTarget.All);
     }
@@ -530,7 +569,7 @@ public class DiceManager : Singleton<DiceManager>
     }
     private Quaternion GetTargetRotation(int faceValue)
     {
-        switch(faceValue)
+        switch (faceValue)
         {
             case 1: return Quaternion.Euler(-180f, 0f, 0f);
             case 2: return Quaternion.Euler(0f, 0f, -90f);

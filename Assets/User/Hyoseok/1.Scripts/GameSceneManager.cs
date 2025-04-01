@@ -49,13 +49,13 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
         }
         else
         {
-            Debug.LogError("PhotonNetwork.InRoomÀÌ falseÀÔ´Ï´Ù. ¹æ¿¡ ÀÔÀåÇÑ »óÅÂÀÎÁö È®ÀÎÇÏ¼¼¿ä.");
+            Debug.LogError("PhotonNetwork.InRoomì´ falseì…ë‹ˆë‹¤. ë°©ì— ì…ì¥í•œ ìƒíƒœì¸ì§€ í™•ì¸í•˜ì„¸ìš”.");
         }
     }
 
     void Update()
     {
-        // ¸Å ÇÁ·¹ÀÓ ¹Ì¸®º¸±â °è»êÇÏÁö ¾Êµµ·Ï Á¶°Ç °Ë»ç
+        // ë§¤ í”„ë ˆì„ ë¯¸ë¦¬ë³´ê¸° ê³„ì‚°í•˜ì§€ ì•Šë„ë¡ ì¡°ê±´ ê²€ì‚¬
         if (DiceManager.Instance != null && DiceManager.Instance.isDiceArray)
         {
             DiceManager.Instance.ShowPreviewScore();
@@ -66,11 +66,16 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
     {
         scoreboardEntries.Clear();
 
+    
         foreach (Player player in PhotonNetwork.PlayerList)
         {
+            
+            if (IsAIPlayer(player)) continue;
+
             AddPlayerToScoreboard(player);
         }
 
+        // 2. AIëŠ” ë³„ë„ë¡œ ë“±ë¡
         if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("AIPlayers"))
         {
             string[] aiPlayers = (string[])PhotonNetwork.CurrentRoom.CustomProperties["AIPlayers"];
@@ -88,6 +93,14 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
             }
         }
     }
+    private bool IsAIPlayer(Player player)
+    {
+        if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue("AIPlayers", out object aiRaw) && aiRaw is string[] aiNames)
+        {
+            return aiNames.Contains(player.NickName);
+        }
+        return false;
+    }
 
     void AddPlayerToScoreboard(Player player)
     {
@@ -98,6 +111,7 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
 
     void AddAIToScoreboard(string aiName, ExitGames.Client.Photon.Hashtable properties)
     {
+        Debug.Log($"[AI ë“±ë¡] {aiName} â†’ í•´ì‹œ: {aiName.GetHashCode()}");
         ScoreboardEntry entry = CreateScoreboardEntry();
         entry.SetAIData(aiName, properties);
         scoreboardEntries[aiName.GetHashCode()] = entry;
@@ -130,7 +144,7 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
 
     public override void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
     {
-        Debug.Log($"[º¯°æ °¨Áö] {targetPlayer.NickName} ¡æ {string.Join(", ", changedProps.Keys.Cast<object>())}");
+        Debug.Log($"[ë³€ê²½ ê°ì§€] {targetPlayer.NickName} â†’ {string.Join(", ", changedProps.Keys.Cast<object>())}");
         if (changedProps.ContainsKey("PreviewScore") && changedProps["PreviewScore"] is ExitGames.Client.Photon.Hashtable previewTable)
         {
             Dictionary<string, int> previewScores = new Dictionary<string, int>();
@@ -148,14 +162,14 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
                 }
                 else
                 {
-                    Debug.LogWarning($"PreviewScore º¯È¯ ½ÇÆĞ: {entry.Key} = {entry.Value} ({entry.Value?.GetType()})");
+                    Debug.LogWarning($"PreviewScore ë³€í™˜ ì‹¤íŒ¨: {entry.Key} = {entry.Value} ({entry.Value?.GetType()})");
                 }
             }
 
             if (scoreboardEntries.ContainsKey(targetPlayer.ActorNumber))
             {
                 scoreboardEntries[targetPlayer.ActorNumber].ShowPreview(previewScores);
-                Debug.Log($"[Preview ¼ö½Å] {targetPlayer.NickName}: {string.Join(", ", previewScores.Select(kv => $"{kv.Key}:{kv.Value}"))}");
+                Debug.Log($"[Preview ìˆ˜ì‹ ] {targetPlayer.NickName}: {string.Join(", ", previewScores.Select(kv => $"{kv.Key}:{kv.Value}"))}");
             }
         }
     }
@@ -188,14 +202,14 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
     [PunRPC]
     public void RPC_UpdateTurn(int playerIndex, int round)
     {
-        Debug.Log("RPC_UpdateTurn È£ÃâµÊ ");
+        Debug.Log("RPC_UpdateTurn í˜¸ì¶œë¨ ");
         if (TurnManager.instance != null)
         {
             TurnManager.instance.UpdateTurn(playerIndex, round);
         }
         else
         {
-            Debug.LogError("TurnManager.instance°¡ nullÀÔ´Ï´Ù.");
+            Debug.LogError("TurnManager.instanceê°€ nullì…ë‹ˆë‹¤.");
         }
     }
     public void AssignTurnIndices()
@@ -210,7 +224,7 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
     }
     public void BroadcastTurn(int playerIndex, int round)
     {
-        Debug.Log("BroadcastTurn È£ÃâµÊ");
+        Debug.Log("BroadcastTurn í˜¸ì¶œë¨");
 
         if (photonView != null)
         {
@@ -236,7 +250,7 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
         }
         else
         {
-            Debug.LogError("photonView°¡ nullÀÔ´Ï´Ù. BroadcastTurn ½ÇÆĞ");
+            Debug.LogError("photonViewê°€ nullì…ë‹ˆë‹¤. BroadcastTurn ì‹¤íŒ¨");
         }
     }
 }
