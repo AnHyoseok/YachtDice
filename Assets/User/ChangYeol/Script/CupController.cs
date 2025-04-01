@@ -37,22 +37,13 @@ public class CupController : MonoBehaviour
     }
     private void Update()
     {
-        if (!TurnManager.instance.IsMyTurn())
-        {
-            //Debug.LogWarning("내 턴이 아니라서 조작 불가능!");
-            return;
-        }
-        else
-        {
-            //Debug.Log("내 턴입니다! 조작 가능!");
-        }
-        if (diceManager.isDiceArray || diceManager.isArrays)
+        if (diceManager.isDiceArray || diceManager.isArrays || diceManager.rollsLeft == 0)
         {
             //Debug.LogWarning($"주사위 조작 제한: isDiceArray={diceManager.isDiceArray}, rollsLeft={diceManager.rollsLeft}, isArrays={diceManager.isArrays}");
             return;
         }
         //Debug.Log($"[흔들기 진입] isShake={isShake}, isButton={button.isButton}, timer={timer}");
-        if (!button.isButton)
+        if (!button.isButton && TurnManager.instance.IsMyTurn())
         {
             timer += Time.deltaTime;
             //Debug.Log($"[버튼 대기] timer={timer}");

@@ -32,7 +32,7 @@ public class SelectDice : MonoBehaviour
     {
         if (currentTargetIndex >= 0 && TurnManager.instance.IsMyTurn())
         {
-            photon.RPC("EscKeySetActive", RpcTarget.All, DiceManager.Instance.isDiceArray);
+            photon.RPC("EscKeySetActive", RpcTarget.All, DiceManager.Instance.newdicelist.Length != 5);
             escbutton.onClick.AddListener(() => OnClickEscButton());
             isPut = Input.GetKey(KeyCode.Escape);
             if (isPut)
