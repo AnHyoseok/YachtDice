@@ -333,7 +333,8 @@ public class TurnManager : MonoBehaviourPunCallbacks
                 3 => DiceScore.THREES,
                 4 => DiceScore.FOURS,
                 5 => DiceScore.FIVES,
-                6 => DiceScore.SIXES
+                6 => DiceScore.SIXES,
+                _ => DiceScore.ONES //기본값 처리추가
             };
 
             int index = aiEntry.GetCategoryIndex(category);
