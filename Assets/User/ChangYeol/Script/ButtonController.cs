@@ -11,7 +11,7 @@ public class ButtonController : MonoBehaviour, IPointerDownHandler, IPointerUpHa
     {
         if (TurnManager.instance.IsMyTurn() && DiceManager.Instance.cupController.isShake)
         {
-            AudioController.instance.PlayCupShake();
+        
             isButton = false;
         }
     }

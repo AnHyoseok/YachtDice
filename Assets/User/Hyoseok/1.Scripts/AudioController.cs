@@ -4,7 +4,9 @@ public class AudioController : MonoBehaviour
 {
     public static AudioController instance;
 
-    public AudioSource audioSource;
+    public AudioSource sfxSource;
+    public AudioSource bgmSource;
+    public AudioClip bgmClip;
     public AudioClip cupShakeSound;
     public AudioClip diceRollSound;
     public AudioClip selectDiceSound;
@@ -50,21 +52,22 @@ public class AudioController : MonoBehaviour
         switch (category)
         {
             case DiceScore.YAHTZEE:
-                audioSource.PlayOneShot(scoreTextSound[0]);
+                sfxSource.PlayOneShot(scoreTextSound[0]);
                 break;
             case DiceScore.FOUR_KIND:
-                audioSource.PlayOneShot(scoreTextSound[1]);
+                sfxSource.PlayOneShot(scoreTextSound[1]);
                 break;
             case DiceScore.LARGE_STRAIGHT:
-                audioSource.PlayOneShot(scoreTextSound[2]); 
+                sfxSource.PlayOneShot(scoreTextSound[2]); 
                 break;
             case DiceScore.SMALL_STRAIGHT:
-                audioSource.PlayOneShot(scoreTextSound[3]); 
+                sfxSource.PlayOneShot(scoreTextSound[3]); 
                 break;
             case DiceScore.FULL_HOUSE:
-                audioSource.PlayOneShot(scoreTextSound[4]); 
+                sfxSource.PlayOneShot(scoreTextSound[4]); 
                 break;
         }
+        lastPlayedCategory = category;
     }
 
     //페이드
@@ -74,10 +77,11 @@ public class AudioController : MonoBehaviour
     }
     private void PlayClip(AudioClip clip)
     {
-        if (clip == null || audioSource == null) return;
-
-        audioSource.Stop(); 
-        audioSource.clip = clip;
-        audioSource.Play();
+     
+        sfxSource.PlayOneShot(clip);
+    }
+    public void ResetScoreSoundCategory()
+    {
+        lastPlayedCategory = ""; // 점수 텍스트 초기화할 때 호출
     }
 }

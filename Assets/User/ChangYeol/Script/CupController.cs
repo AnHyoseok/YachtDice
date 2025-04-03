@@ -56,11 +56,16 @@ public class CupController : MonoBehaviour
             }
         }
         UpdateCupState();
+
+       
+           
+        
     }
    public void UpdateCupState()
     {
         if (TurnManager.instance.IsMyTurn() || TurnManager.instance.IsAITurnNow())
         {
+            
             int ani = selectDice.turnLimit - selectDice.movesThisTurn;
             photonView.RPC("SyncAnimatorState", RpcTarget.All, ani, button.isButton);
         }
@@ -75,6 +80,7 @@ public class CupController : MonoBehaviour
     {
         if (TurnManager.instance.IsMyTurn() || TurnManager.instance.IsAITurnNow())
         {
+       
             DiceManager.Instance.scoreText.text = "";
             photonView.RPC("StartSyncAnimatorState", RpcTarget.All, isStart);
         }

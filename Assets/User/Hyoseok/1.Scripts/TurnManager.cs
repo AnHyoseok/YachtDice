@@ -236,6 +236,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
         { 
             cupController.button.isButton = false;
             cupController.UpdateCupState();
+            AudioController.instance.PlayCupShake();
         }
 
 
@@ -259,8 +260,8 @@ public class TurnManager : MonoBehaviourPunCallbacks
         }
         yield return null;
         yield return new WaitForSeconds(2f);
-       
-        
+
+        AudioController.instance.PlayarrayDice(); 
         DiceManager.Instance.ShowPreviewScore();
        
         string bestCategory = FindBestScoreCategory();
@@ -279,6 +280,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
             aiEntry.UpdateScore(bestCategory, score);
             aiEntry.ClearHighlight();
             Debug.Log($"[AI] 점수 선택 완료: {bestCategory} = {score}");
+            AudioController.instance.PlayselectScore();
         }
         else
         {
