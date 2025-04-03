@@ -389,7 +389,8 @@ public class DiceManager : Singleton<DiceManager>
 
             if (key != DiceScore.ONES && key != DiceScore.TWOS &&
                 key != DiceScore.THREES && key != DiceScore.FOURS &&
-                key != DiceScore.FIVES && key != DiceScore.SIXES)
+                key != DiceScore.FIVES && key != DiceScore.SIXES
+                && key != DiceScore.Choice)
             {
                 switch (key)
                 {
@@ -408,9 +409,7 @@ public class DiceManager : Singleton<DiceManager>
                     case DiceScore.FULL_HOUSE:
                         ScoreText(DiceScore.FULL_HOUSE);
                         break;
-                    case DiceScore.Choice:
-                        ScoreText(DiceScore.Choice);
-                        break;
+                   
                 }
             }
         }

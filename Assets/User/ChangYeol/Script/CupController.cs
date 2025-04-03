@@ -73,6 +73,7 @@ public class CupController : MonoBehaviour
     {
         if (TurnManager.instance.IsMyTurn() || TurnManager.instance.IsAITurnNow())
         {
+            DiceManager.Instance.scoreText.text = "";
             photonView.RPC("StartSyncAnimatorState", RpcTarget.All, isStart);
         }
     }
