@@ -64,6 +64,7 @@ public class SelectDice : MonoBehaviour
         {
             if (isGoMove || DiceManager.Instance.isArrays) return;
             DiceSelect();
+            AudioController.instance.PlayselectDice();
 
         }
         if(DiceManager.Instance.isDiceArray && TurnManager.instance.IsMyTurn())

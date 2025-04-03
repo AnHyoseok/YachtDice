@@ -49,8 +49,10 @@ public class CupController : MonoBehaviour
             if (timer >= pourOutTime)
             {
                 button.isButton = true;
+               
                 timer = 0;
                 //Debug.Log("[버튼 활성화 완료]");
+
             }
         }
         UpdateCupState();
@@ -123,6 +125,8 @@ public class CupController : MonoBehaviour
             }
         }
         falseDices.Clear();
+        //주사위굴리기사운드
+        AudioController.instance.PlayDiceRoll();
 
         //  진짜 주사위 생성 및 배열 할당
         for (int i = 0; i < diceManager.dices.Length; i++)
@@ -200,5 +204,6 @@ public class CupController : MonoBehaviour
     public void IsShaked()
     {
         isShake = true;
+        
     }
 }

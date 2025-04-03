@@ -527,6 +527,7 @@ public class DiceManager : Singleton<DiceManager>
 
                 yield return null;
             }
+
             dice.transform.position = targetPosition;
             dice.transform.rotation = targetRotation;
             dice.GetComponent<Dice>().originPos = dice.transform.position;
@@ -542,6 +543,7 @@ public class DiceManager : Singleton<DiceManager>
 
         //점수 알파 0.5
         photonView.RPC("RPC_ShowAllScoreboards", RpcTarget.All);
+        AudioController.instance.PlayarrayDice();
     }
     [PunRPC]
     public void RPC_ShowAllScoreboards()
@@ -574,6 +576,8 @@ public class DiceManager : Singleton<DiceManager>
     }
     void ScoreText(string text)
     {
+
         scoreText.text = text;
+        AudioController.instance.PlayScoreTextSound(text);
     }
 }

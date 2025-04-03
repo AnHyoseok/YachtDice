@@ -17,12 +17,17 @@ public class CameraMove : MonoBehaviour
     public bool isStop = false;
     private bool isMoveingToTarget = false;
     private bool uiMoved = false; // UI 이동 여부
+
+    public GameObject fadeInObject;
     #endregion
     private void Start()
     {
         moveCanvas = UICanvas[1].GetComponent<RectTransform>();
         UICanvas[0].SetActive(isStop);
         UICanvas[1].SetActive(isStop);
+        fadeInObject.SetActive(true); 
+
+        StartCoroutine(DelayStartAfterFade());
     }
     private void Update()
     {
@@ -36,6 +41,14 @@ public class CameraMove : MonoBehaviour
                 StartCoroutine(MoveToTarget());
             }
         }
+    }
+
+    private IEnumerator DelayStartAfterFade()
+    {
+        AudioController.instance.Playfadein();
+        yield return new WaitForSeconds(1.5f); 
+        fadeInObject.SetActive(false);     
+        isMoveingToTarget = false;           
     }
     IEnumerator MoveToTarget()
     {

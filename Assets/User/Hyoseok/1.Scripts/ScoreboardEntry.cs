@@ -443,7 +443,7 @@ public class ScoreboardEntry : MonoBehaviour
         }
 
         int score = DiceManager.Instance.CalculateScore(category);
-      
+        AudioController.instance.PlayselectDice();
         UpdateScore(category, score);
 
 
