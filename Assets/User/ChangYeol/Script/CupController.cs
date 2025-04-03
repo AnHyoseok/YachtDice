@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
-using System.Collections;
-using Unity.VisualScripting;
 
 public class CupController : MonoBehaviour
 {
@@ -18,14 +16,14 @@ public class CupController : MonoBehaviour
     private DiceManager diceManager;
     private List<GameObject> falseDices = new List<GameObject>();
     private GameObject Dice;
-    GameObject Forcedice;
+    private GameObject Forcedice;
     [HideInInspector] public Animator animator;
     public bool isShake = false;
     private float timer;
     public float pourOutTime = 5;
+    private CameraMove cameraMove;
 
     public const string DiceCount = "DiceCount";
-    public const string IsShake = "IsShake";
     public const string IsButton = "IsButton";
     #endregion
     private void Start()
@@ -34,16 +32,17 @@ public class CupController : MonoBehaviour
         photonView.OwnershipTransfer = OwnershipOption.Request;
         animator = GetComponent<Animator>();
         diceManager = DiceManager.Instance;
+        cameraMove = Camera.main.GetComponent<CameraMove>();
+        if (photonView.IsMine && cameraMove.isStop)
+        {
+            UpdateCupState(); // 게임 시작 시 초기 상태 동기화
+        }
     }
     private void Update()
     {
-        if (diceManager.isDiceArray || diceManager.isArrays || diceManager.rollsLeft == 0)
-        {
-            //Debug.LogWarning($"주사위 조작 제한: isDiceArray={diceManager.isDiceArray}, rollsLeft={diceManager.rollsLeft}, isArrays={diceManager.isArrays}");
-            return;
-        }
+        if (diceManager.isDiceArray || diceManager.isArrays || diceManager.rollsLeft == 0 || !cameraMove.isStop) return;
         //Debug.Log($"[흔들기 진입] isShake={isShake}, isButton={button.isButton}, timer={timer}");
-        if (!button.isButton && TurnManager.instance.IsMyTurn())
+        if (!button.isButton)
         {
             timer += Time.deltaTime;
             //Debug.Log($"[버튼 대기] timer={timer}");
@@ -58,31 +57,32 @@ public class CupController : MonoBehaviour
     }
    public void UpdateCupState()
     {
-        int ani = diceManager.dices.Length;
-        animator.SetInteger(DiceCount, ani);
-        animator.SetBool(IsButton, button.isButton);
-
-        // 다른 유저한테 동기화
-        photonView.RPC("SyncAnimatorState", RpcTarget.Others, ani, button.isButton);
+        if (TurnManager.instance.IsMyTurn() || TurnManager.instance.IsAITurnNow())
+        {
+            int ani = selectDice.turnLimit - selectDice.movesThisTurn;
+            photonView.RPC("SyncAnimatorState", RpcTarget.All, ani, button.isButton);
+        }
     }
     [PunRPC]
     void SyncAnimatorState(int ani, bool isBtn)
     {
-        animator.SetInteger("DiceCount", ani);
-        animator.SetBool("IsButton", isBtn);
+        animator.SetInteger(DiceCount, ani);
+        animator.SetBool(IsButton, isBtn);
     }
     public void StartCupState(bool isStart)
     {
-        animator.SetBool("IsStart", isStart);
-        photonView.RPC("StartSyncAnimatorState", RpcTarget.Others , isStart);
+        if (TurnManager.instance.IsMyTurn() || TurnManager.instance.IsAITurnNow())
+        {
+            photonView.RPC("StartSyncAnimatorState", RpcTarget.All, isStart);
+        }
     }
+    [PunRPC]
     void StartSyncAnimatorState(bool isStart)
     {
         animator.SetBool("IsStart", isStart);
     }
     public void TryRollDice()
     {
-
         if (TurnManager.instance.IsMyTurn() && DiceManager.Instance.rollsLeft >= 0)
         {
             photonView.RPC("RPC_RequestDiceSpawn", RpcTarget.MasterClient);
@@ -106,7 +106,6 @@ public class CupController : MonoBehaviour
         }
     }
     [PunRPC]
-
     public void ObjectInstantiate()
     {
         if (!TurnManager.instance.IsMyTurn() && !TurnManager.instance.IsAITurnNow()) return;

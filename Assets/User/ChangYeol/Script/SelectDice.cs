@@ -16,10 +16,11 @@ public class SelectDice : MonoBehaviour
     private Camera mainCamera;
     private GameObject currentActiveUI = null;
     private Animator currentAnimator = null;
-    private GameObject selectDiceObject = null;
-    [HideInInspector]public int currentTargetIndex = 0;
+    public GameObject selectDiceObject = null;
+    public int currentTargetIndex = 0;
     public int movesThisTurn = 0;
     private bool isGoMove = false;
+    public bool foundEmptyPosition;
     public bool isPut = false;
     #endregion
 
@@ -32,9 +33,10 @@ public class SelectDice : MonoBehaviour
     {
         if (currentTargetIndex >= 0 && TurnManager.instance.IsMyTurn())
         {
-            photon.RPC("EscKeySetActive", RpcTarget.All, DiceManager.Instance.newdicelist.Length != 5);
+            photon.RPC("EscKeySetActive", RpcTarget.All, DiceManager.Instance.newdicelist.Length != 5 && DiceManager.Instance.isDiceArray);
+            photon.RPC("SetActiveScoreText", RpcTarget.All, DiceManager.Instance.isDiceArray);
             escbutton.onClick.AddListener(() => OnClickEscButton());
-            isPut = Input.GetKey(KeyCode.Escape);
+            isPut = Input.GetKey(KeyCode.R);
             if (isPut)
             {
                 //점수판 ui 알파값 0 
@@ -60,7 +62,9 @@ public class SelectDice : MonoBehaviour
         }
         if (Input.GetMouseButtonDown(0) && TurnManager.instance.IsMyTurn())
         {
+            if (isGoMove || DiceManager.Instance.isArrays) return;
             DiceSelect();
+
         }
         if(DiceManager.Instance.isDiceArray && TurnManager.instance.IsMyTurn())
         {
@@ -71,13 +75,6 @@ public class SelectDice : MonoBehaviour
     /// <summary> </summary>
     void DiceSelect()
     {
-        if(movesThisTurn >= turnLimit)
-        {
-            Debug.Log("이동 횟수 초과");
-            OnTurnEnd();
-            return;
-        }
-        if (isGoMove || DiceManager.Instance.isArrays) return;
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
         if(Physics.Raycast(ray,out hit))
@@ -93,7 +90,6 @@ public class SelectDice : MonoBehaviour
                     if (!selectedDice.isSelected)
                     {
                         // false인 위치 찾기
-                        bool foundEmptyPosition = false;
                         for (int i = 0; i < isTarget.Length; i++)
                         {
                             if (!isTarget[i])
@@ -117,6 +113,7 @@ public class SelectDice : MonoBehaviour
                     }
                     else if(selectedDice.isSelected)
                     {
+                        Debug.Log("selectedDice");
                         StartCoroutine(MoveDiceToNextTartget(selectDiceObject, selectedDice.originPos));
                         MoveDiceBetweenArrays(selectedDice, DiceManager.Instance.newdicelist, DiceManager.Instance.dices);
                         movesThisTurn--;
@@ -145,11 +142,6 @@ public class SelectDice : MonoBehaviour
         }
         dice.transform.position = destination;
 
-        if(movesThisTurn >= turnLimit)
-        {
-            OnTurnEnd();
-            yield break;
-        }
         isGoMove = false;
     }
     /// <summary> </summary>
@@ -296,14 +288,12 @@ public class SelectDice : MonoBehaviour
         }
         DiceManager.Instance.isDiceArray = false;
         photon.RPC("EscKeySetActive", RpcTarget.All, DiceManager.Instance.isDiceArray);
+        photon.RPC("SetActiveScoreText", RpcTarget.All, DiceManager.Instance.isDiceArray);
         DiceManager.Instance.cupController.StartCupState(true);
     }
     /// <summary> </summary>
     [PunRPC]
-    void EscKeySetActive(bool isEsc)
-    {
-        escbutton.gameObject.SetActive(isEsc);
-        DiceManager.Instance.scoreText.gameObject.SetActive(isEsc);
-        DiceManager.Instance.scoreText.text = "";
-    }
+    void EscKeySetActive(bool isEsc) => escbutton.gameObject.SetActive(isEsc);
+    [PunRPC]
+    void SetActiveScoreText(bool SetActive) => DiceManager.Instance.scoreText.gameObject.SetActive(SetActive);
 }

@@ -171,6 +171,14 @@ public class TurnManager : MonoBehaviourPunCallbacks
             DiceManager.Instance.isDiceArray = false;
             DiceManager.Instance.isArrays = false;
             cupController.StartCupState(true);
+            DiceManager.Instance.selectDice.movesThisTurn = 0;
+            DiceManager.Instance.selectDice.currentTargetIndex = 0;
+            DiceManager.Instance.selectDice.selectDiceObject = null;
+            DiceManager.Instance.selectDice.foundEmptyPosition = false;
+            for (int i = 0; i < DiceManager.Instance.selectDice.isTarget.Length; i++)
+            {
+                DiceManager.Instance.selectDice.isTarget[i] = false;
+            }
         }
         else
             Debug.LogWarning("DiceManager.Instance가 null입니다.");

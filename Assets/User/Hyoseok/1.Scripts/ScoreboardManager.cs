@@ -12,8 +12,7 @@ public class ScoreboardManager : MonoBehaviourPunCallbacks
     public RectTransform scoreboardOutline;
 
     public RectTransform scoreboardPanel;
-    public Vector3 targetPosition;
-    private Vector3 originalPosition;
+    public Vector3[] targetPosition;
     public Button scoreboardButton;
     private bool isAtTarget = false; // 현재 목표 위치 여부
     public float moveSpeed = 5f; // 이동 속도
@@ -31,7 +30,6 @@ public class ScoreboardManager : MonoBehaviourPunCallbacks
 
     void Start()
     {
-        originalPosition = scoreboardPanel.anchoredPosition;
         if (PhotonNetwork.InRoom)
         {
             gameMode = (int)PhotonNetwork.CurrentRoom.CustomProperties["GameMode"];
@@ -44,6 +42,7 @@ public class ScoreboardManager : MonoBehaviourPunCallbacks
     {
         if (gameMode == 1) // 1:1 모드
         {
+            scoreboardPanel.anchoredPosition = targetPosition[2];
             scoreboardButton.gameObject.SetActive(false);
             scoreboardBackground.anchoredPosition = new Vector2(0, scoreboardBackground.anchoredPosition.y);
             scoreboardBackground.sizeDelta = new Vector2(540, scoreboardBackground.sizeDelta.y);
@@ -53,6 +52,7 @@ public class ScoreboardManager : MonoBehaviourPunCallbacks
         }
         else if (gameMode == 2) // 2:2 모드 
         {
+            scoreboardPanel.anchoredPosition = targetPosition[3];
             scoreboardButton.gameObject.SetActive(true);
             scoreboardButton.onClick.AddListener(() => ToggleMoveUI());
             scoreboardBackground.anchoredPosition = new Vector2(123, scoreboardBackground.anchoredPosition.y);
@@ -128,19 +128,19 @@ public class ScoreboardManager : MonoBehaviourPunCallbacks
         if (isMoving) return;
         isAtTarget = !isAtTarget;
         Coroutine coroutine = null;
-        Vector3 destination = isAtTarget ? targetPosition : originalPosition;
+        Vector3 destination = isAtTarget ? targetPosition[1] : targetPosition[0];
         if (coroutine != null)
         {
             StopCoroutine(coroutine);
         }
-        coroutine = StartCoroutine(MoveUI(destination));
+        coroutine = StartCoroutine(MoveUI(scoreboardPanel.anchoredPosition , destination));
     }
-    IEnumerator MoveUI(Vector3 destination)
+    IEnumerator MoveUI(Vector3 originPos ,Vector3 destination)
     {
         isMoving = true;
         float duration = 0.5f;
         float elapsedTime = 0f;
-        Vector3 startPos = scoreboardPanel.anchoredPosition;
+        Vector3 startPos = originPos;
         while(elapsedTime < duration)
         {
             scoreboardPanel.anchoredPosition = Vector3.Lerp(startPos, destination, elapsedTime / duration);

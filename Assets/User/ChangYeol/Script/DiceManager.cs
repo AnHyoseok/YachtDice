@@ -31,6 +31,7 @@ public class DiceManager : Singleton<DiceManager>
     [HideInInspector] public ScoreboardEntry scoreboardEntry;
     private PhotonView photonView;
     public CupController cupController;
+    public SelectDice selectDice;
     public GameObject[] boxobject;
     public Transform dicetrans;
     public float spacing = 0.8f;
@@ -50,8 +51,8 @@ public class DiceManager : Singleton<DiceManager>
     private HashSet<float> usedYValues = new HashSet<float>(); // 중복 방지용 Y값 저장
     private int upperSectionScore = 0;
     private bool boonsGiven = false;
-    [HideInInspector] public bool isArray = false;
-    [HideInInspector] public bool isArrays = false;
+    public bool isArray = false;
+    public bool isArrays = false;
     public bool isDiceArray = false;
     #endregion
     protected override void Awake()
@@ -106,6 +107,7 @@ public class DiceManager : Singleton<DiceManager>
     {
         if (dices == null || dices.Length == 0)
         {
+            isArrays = false;
             //Debug.LogError(" GetDiceValues() - dices가 비어 있음! 주사위가 추가되지 않음.");
             return new int[0];  // 빈 배열 반환 (오류 방지)
         }
@@ -447,29 +449,6 @@ public class DiceManager : Singleton<DiceManager>
         {
             Debug.LogWarning($"[UpdateScoreboard] scoreboardEntry 찾기 실패: actorNumber={actorNumber}, category={category}, score={score}");
         }
-        if (category != DiceScore.ONES && category != DiceScore.TWOS && category != DiceScore.THREES && category != DiceScore.FOURS && category != DiceScore.FIVES && category != DiceScore.SIXES)
-        {
-            if (category == DiceScore.FOUR_KIND)
-            {
-                if (category == DiceScore.YAHTZEE)
-                {
-                    ScoreText(category);
-                }
-                ScoreText(category);
-            }
-            if (category == DiceScore.SMALL_STRAIGHT)
-            {
-                if (category == DiceScore.LARGE_STRAIGHT)
-                {
-                    ScoreText(category);
-                }
-                ScoreText(category);
-            }
-            if (category == DiceScore.FULL_HOUSE)
-            {
-                ScoreText(category);
-            }
-        }
     }
     public int GetUpperSectionScore()
     {
@@ -484,7 +463,6 @@ public class DiceManager : Singleton<DiceManager>
                 Debug.LogWarning($"[CheckDiceStopped] dice {i} is null");
                 return;
             }
-
             if (!isArray)
             {
                 bool allStopped = System.Array.TrueForAll(dices, dice => dice != null && dice.GetComponent<Rigidbody>().linearVelocity.magnitude < 0.2f
@@ -504,9 +482,11 @@ public class DiceManager : Singleton<DiceManager>
         //SelectUI가 보이게 하기
         if (isArrays) return;
         isArrays = true;
-        System.Array.Sort(dices, (a, b) => a.GetDiceValue().CompareTo(b.GetDiceValue()));
-        StartCoroutine(MoveDiceToSortedPosition());
-
+        if (dices != null)
+        {
+            System.Array.Sort(dices, (a, b) => a.GetDiceValue().CompareTo(b.GetDiceValue()));
+            StartCoroutine(MoveDiceToSortedPosition());
+        }
     }
     void Dicearray()
     {
@@ -579,7 +559,6 @@ public class DiceManager : Singleton<DiceManager>
         {
             boxobject[i].SetActive(false);
         }
-        scoreText.gameObject.SetActive(true);
     }
     private Quaternion GetTargetRotation(int faceValue)
     {

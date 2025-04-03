@@ -11,7 +11,7 @@ public class Dice : MonoBehaviour
     public GameObject[] SelectUICavas;
 
     [HideInInspector] public Vector3 originPos;
-    [HideInInspector]public bool isSelected = false;
+    public bool isSelected = false;
     private float friction = 0.98f;
     private float stopThreshld = 0.1f;
     private float nudgeForce = 0.5f;
