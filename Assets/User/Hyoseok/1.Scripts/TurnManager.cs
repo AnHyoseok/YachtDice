@@ -284,9 +284,10 @@ public class TurnManager : MonoBehaviourPunCallbacks
     {
         var categories = new string[]
         {
-        "ONES", "TWOS", "THREES", "FOURS", "FIVES", "SIXES",
-        "Choice", "4 of a Kind", "FULL_HOUSE", "SMALL_STRAIGHT",
-        "LARGE_STRAIGHT", "YAHTZEE"
+        DiceScore.ONES, DiceScore.TWOS, DiceScore.THREES, DiceScore.FOURS,
+        DiceScore.FIVES, DiceScore.SIXES,
+        DiceScore.Choice, DiceScore.FOUR_KIND, DiceScore.FULL_HOUSE,
+        DiceScore.SMALL_STRAIGHT, DiceScore.LARGE_STRAIGHT, DiceScore.YAHTZEE
         };
 
         string aiName = TurnManager.instance.GetCurrentAIName();
@@ -295,19 +296,55 @@ public class TurnManager : MonoBehaviourPunCallbacks
         if (!GameSceneManager.Instance.scoreboardEntries.TryGetValue(actorNumber, out var aiEntry))
         {
             Debug.LogWarning($"[FindBestScoreCategory] AI 점수판을 찾을 수 없음: {aiName}");
-            return "Choice"; // 기본값
+            return DiceScore.Choice;
         }
 
+        // 주사위 값 분석
+        int[] values = DiceManager.Instance.GetDiceValues().Concat(DiceManager.Instance.GetDiceValue()).ToArray();
+        int[] counts = new int[7];
+        foreach (int v in values) counts[v]++;
+
+        int maxCount = counts.Max();
+        int maxValue = System.Array.IndexOf(counts, maxCount);
+
+        //  전략 1: 야추 각이면 무조건 노려보기
+        if (maxCount >= 4 && !aiEntry.IsAlreadyScored(aiEntry.GetCategoryIndex(DiceScore.YAHTZEE)))
+        {
+            return DiceScore.YAHTZEE;
+        }
+
+        //  전략 2: 보너스 유도 - 가장 많이 나온 상단 숫자 (1~6) 중 기록 안 된 것
+        string bestUpper = "";
+        int mostCount = 0;
+        for (int i = 1; i <= 6; i++)
+        {
+            string category = i switch
+            {
+                1 => DiceScore.ONES,
+                2 => DiceScore.TWOS,
+                3 => DiceScore.THREES,
+                4 => DiceScore.FOURS,
+                5 => DiceScore.FIVES,
+                6 => DiceScore.SIXES
+            };
+
+            int index = aiEntry.GetCategoryIndex(category);
+            if (!aiEntry.IsAlreadyScored(index) && counts[i] > mostCount)
+            {
+                mostCount = counts[i];
+                bestUpper = category;
+            }
+        }
+
+        if (mostCount >= 2) // 두 개 이상 나온 경우만 기록할 가치 있음
+            return bestUpper;
+        //  전략 3: 기존처럼 가장 점수 높은 미기입 카테고리
         string bestCategory = "";
         int maxScore = -1;
-
         foreach (string category in categories)
         {
             int index = aiEntry.GetCategoryIndex(category);
-
-            // 이미 기입된 항목은 스킵
-            if (index != -1 && aiEntry.IsAlreadyScored(index))
-                continue;
+            if (index != -1 && aiEntry.IsAlreadyScored(index)) continue;
 
             int score = DiceManager.Instance.CalculateScore(category, previewOnly: true);
             if (score > maxScore)
@@ -319,6 +356,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
 
         return bestCategory;
     }
+
     private IEnumerator DelayedOwnershipCheck()
     {
         yield return new WaitForSeconds(0.5f);
