@@ -288,6 +288,15 @@ public class DiceManager : Singleton<DiceManager>
         {
             actorNumber = aiName.GetHashCode();
             Debug.Log($"[ShowPreviewScore] AI actorNumber={actorNumber}");
+
+            //total 체크
+            if (GameSceneManager.Instance.scoreboardEntries.TryGetValue(actorNumber, out var aiEntry))
+            {
+                for (int i = 0; i <= 5; i++)
+                {
+                    subtotal += aiEntry.GetScoreByCategoryIndex(i);
+                }
+            }
         }
         else
         {
@@ -330,8 +339,10 @@ public class DiceManager : Singleton<DiceManager>
             string[] keys = filteredPreview.Keys.ToArray();
             int[] vals = filteredPreview.Values.ToArray();
 
+   
             photonView.RPC("RPC_ShowPreviewScore", RpcTarget.All, actorNumber, keys, vals);
         }
+
     }
 
 
@@ -374,6 +385,9 @@ public class DiceManager : Singleton<DiceManager>
             Debug.LogWarning($"[ShowPreviewScore] scoreEntry 못 찾음: actorNumber={actorNumber}");
         }
 
+        bool hasYahtzee = keys.Contains(DiceScore.YAHTZEE);
+        bool hasLargeStraight = keys.Contains(DiceScore.LARGE_STRAIGHT);
+
         for (int i = 0; i < keys.Length; i++)
         {
             string key = keys[i];
@@ -383,8 +397,8 @@ public class DiceManager : Singleton<DiceManager>
 
             if (key != DiceScore.ONES && key != DiceScore.TWOS &&
                 key != DiceScore.THREES && key != DiceScore.FOURS &&
-                key != DiceScore.FIVES && key != DiceScore.SIXES
-                && key != DiceScore.Choice)
+                key != DiceScore.FIVES && key != DiceScore.SIXES &&
+                key != DiceScore.Choice)
             {
                 switch (key)
                 {
@@ -392,18 +406,19 @@ public class DiceManager : Singleton<DiceManager>
                         ScoreText(DiceScore.YAHTZEE);
                         break;
                     case DiceScore.FOUR_KIND:
-                        ScoreText(DiceScore.FOUR_KIND);
+                        if (!hasYahtzee)
+                            ScoreText(DiceScore.FOUR_KIND);
+                        break;
+                    case DiceScore.SMALL_STRAIGHT:
+                        if (!hasLargeStraight) 
+                            ScoreText(DiceScore.SMALL_STRAIGHT);
                         break;
                     case DiceScore.LARGE_STRAIGHT:
                         ScoreText(DiceScore.LARGE_STRAIGHT);
                         break;
-                    case DiceScore.SMALL_STRAIGHT:
-                        ScoreText(DiceScore.SMALL_STRAIGHT);
-                        break;
                     case DiceScore.FULL_HOUSE:
                         ScoreText(DiceScore.FULL_HOUSE);
                         break;
-                   
                 }
             }
         }
@@ -475,6 +490,7 @@ public class DiceManager : Singleton<DiceManager>
         //SelectUI가 보이게 하기
         if (isArrays) return;
         isArrays = true;
+      
         if (dices != null)
         {
             System.Array.Sort(dices, (a, b) => a.GetDiceValue().CompareTo(b.GetDiceValue()));
@@ -570,8 +586,8 @@ public class DiceManager : Singleton<DiceManager>
     }
     void ScoreText(string text)
     {
-
         scoreText.text = text;
+        scoreText.gameObject.SetActive(true);
         AudioController.instance.PlayScoreTextSound(text);
     }
 }

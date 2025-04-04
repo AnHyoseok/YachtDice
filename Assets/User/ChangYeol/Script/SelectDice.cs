@@ -30,18 +30,20 @@ public class SelectDice : MonoBehaviour
         photon = GetComponent<PhotonView>();
         mainCamera = Camera.main;
         escbutton.onClick.AddListener(() => StartCoroutine(OnClickEscButton()));
+        
     }
     private void Update()
     {
         if (currentTargetIndex >= 0 && TurnManager.instance.IsMyTurn() && DiceManager.Instance.rollsLeft > 0)
         {
             photon.RPC("EscKeySetActive", RpcTarget.All, (DiceManager.Instance.newdicelist.Length != 5 && DiceManager.Instance.isDiceArray));
-            photon.RPC("SetActiveScoreText", RpcTarget.All, DiceManager.Instance.isDiceArray);
+            
             isPut = Input.GetKey(KeyCode.R);
             if (isPut || isRButton)
             {
+               DiceManager.Instance.scoreText.gameObject.SetActive(false);
                 //점수판 ui 알파값 0 
-                DiceManager.Instance.ShowPreviewScore();
+
 
                 foreach (Dice dice in DiceManager.Instance.dices)
                 {
@@ -57,6 +59,7 @@ public class SelectDice : MonoBehaviour
                         DiceManager.Instance.dices[i] = null;
                     }
                 }
+                DiceManager.Instance.isArray = false;   //소리,텍스트용
                 DiceManager.Instance.isDiceArray = false;
                 photon.RPC("EscKeySetActive", RpcTarget.All, DiceManager.Instance.isDiceArray);
                 DiceManager.Instance.cupController.StartCupState(true);
@@ -261,6 +264,8 @@ public class SelectDice : MonoBehaviour
         currentActiveUI = null;
     }
     #endregion
+
+ 
     /// <summary> </summary>
     public void OnTurnEnd()
     {
@@ -280,6 +285,6 @@ public class SelectDice : MonoBehaviour
     /// <summary> </summary>
     [PunRPC]
     void EscKeySetActive(bool isEsc) => escbutton.gameObject.SetActive(isEsc);
-    [PunRPC]
-    void SetActiveScoreText(bool SetActive) => DiceManager.Instance.scoreText.gameObject.SetActive(SetActive);
+   
+   
 }

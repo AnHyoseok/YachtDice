@@ -395,7 +395,7 @@ public class ScoreboardEntry : MonoBehaviour
 
             Color c = kvp.Value.color;
 
-            if (kvp.Key == DiceScore.SUBTOTAL || kvp.Key == DiceScore.BONUS)
+            if (kvp.Key == DiceScore.SUBTOTAL || kvp.Key == DiceScore.BONUS )
             {
                 c.a = 1f;
             }

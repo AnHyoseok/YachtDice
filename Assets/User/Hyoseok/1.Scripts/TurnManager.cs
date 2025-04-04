@@ -262,6 +262,8 @@ public class TurnManager : MonoBehaviourPunCallbacks
         yield return null;
         yield return new WaitForSeconds(2f);
 
+        //점수 텍스트
+     
         AudioController.instance.PlayarrayDice(); 
         DiceManager.Instance.ShowPreviewScore();
        

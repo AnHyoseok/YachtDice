@@ -28,6 +28,10 @@ public class AudioController : MonoBehaviour
         PlayClip(cupShakeSound);
     }
 
+    public void StopCupShake()
+    {
+        sfxSource.Stop();
+    }
     public void PlayDiceRoll()
     {
         PlayClip(diceRollSound);
