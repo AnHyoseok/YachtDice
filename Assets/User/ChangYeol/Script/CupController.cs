@@ -156,8 +156,14 @@ public class CupController : MonoBehaviour
         StartCupState(false);
         isShake = false;
         diceManager.rollsLeft--;
+        photonView.RPC("RPC_SyncRollsLeft", RpcTarget.All, diceManager.rollsLeft);
     }
-
+    [PunRPC]
+    public void RPC_SyncRollsLeft(int newRollsLeft)
+    {
+        diceManager.rollsLeft = newRollsLeft;
+        diceManager.rollsLeftText.text = diceManager.rollsLeft.ToString() + " left";
+    }
     [PunRPC]
     void RandomPoition(int index)
     {
@@ -197,7 +203,10 @@ public class CupController : MonoBehaviour
             diceManager.boxobject[i].SetActive(true);
         }
     }
-
+    public void PlayShake()
+    {
+        AudioController.instance.PlayCupShake();
+    }
     [PunRPC]
     public void AddDiceList(int diceID)
     {

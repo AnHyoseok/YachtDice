@@ -68,9 +68,11 @@ public class DiceManager : Singleton<DiceManager>
     {
         CheckDiceStopped();
         //스코어 기록 
-        rollsLeftText.text = rollsLeft.ToString() + " left";
-        //Debug.Log($"[Check] isArray={isArray}, dices length={dices.Length}");
+       
     }
+
+
+    
 
     public Vector3 GetUniqueRandomPosition(float minRangeX, float maxRangeX)
     {
