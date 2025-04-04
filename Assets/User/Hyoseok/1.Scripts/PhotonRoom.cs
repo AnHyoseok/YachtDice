@@ -104,6 +104,8 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
 
         UIManager.instance.ShowTeamUI();
         StartCoroutine(DelayedTeamUIUpdate());
+
+        CheckCanAddAI();
     }
     //딜레이용 
     private IEnumerator DelayedTeamUIUpdate()
@@ -295,7 +297,7 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
             Debug.Log($"OnPlayerPropertiesUpdate() 호출됨 - {targetPlayer.NickName} 속성 변경 감지!");
 
             UpdateTeamUI(); //  UI 업데이트하여 모든 클라이언트에서 같은 프로필을 보이게 함
-            CheckAllReady();
+            StartCoroutine(DelayedCheckAllReady());
         }
     }
 
@@ -417,52 +419,58 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
         foreach (Player player in PhotonNetwork.PlayerList)
         {
             bool isPlayerReady = player.CustomProperties.ContainsKey("Ready") && (bool)player.CustomProperties["Ready"];
-            if (!isPlayerReady)
-            {
-                allReady = false;
-            }
+            if (!isPlayerReady) allReady = false;
 
             string team = player.CustomProperties.ContainsKey("Team") ? (string)player.CustomProperties["Team"] : "Red";
             if (team == "Red") redTeamCount++;
-            else if (team == "Blue") blueTeamCount++;
+            else blueTeamCount++;
         }
 
-        //  AI 플레이어 확인 (팀 밸런스에 포함)
+        int aiCount = 0;
         if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("AIPlayers"))
         {
             string[] aiPlayers = (string[])PhotonNetwork.CurrentRoom.CustomProperties["AIPlayers"];
+            aiCount = aiPlayers.Length;
             foreach (string aiName in aiPlayers)
             {
-                ExitGames.Client.Photon.Hashtable aiProperties =
-                    (ExitGames.Client.Photon.Hashtable)PhotonNetwork.CurrentRoom.CustomProperties[aiName];
+                ExitGames.Client.Photon.Hashtable aiProps = (ExitGames.Client.Photon.Hashtable)PhotonNetwork.CurrentRoom.CustomProperties[aiName];
 
-                bool isAIReady = aiProperties.ContainsKey("Ready") && (bool)aiProperties["Ready"];
-                if (!isAIReady)
-                {
-                    allReady = false;
-                }
+                bool isAIReady = aiProps.ContainsKey("Ready") && (bool)aiProps["Ready"];
+                if (!isAIReady) allReady = false;
 
-                string aiTeam = aiProperties.ContainsKey("Team") ? (string)aiProperties["Team"] : "Red";
+                string aiTeam = aiProps.ContainsKey("Team") ? (string)aiProps["Team"] : "Red";
                 if (aiTeam == "Red") redTeamCount++;
-                else if (aiTeam == "Blue") blueTeamCount++;
+                else blueTeamCount++;
             }
         }
 
-        bool isBalanced = (redTeamCount == blueTeamCount);
+        // 게임 모드에 따라 인원 체크
+        int gameMode = (int)PhotonNetwork.CurrentRoom.CustomProperties["GameMode"];
+        int totalPlayers = PhotonNetwork.PlayerList.Length + aiCount;
 
-        if (startGameButton == null)
+        if (gameMode == 2 && totalPlayers < 4)
         {
-            Debug.LogError(" startGameButton이 null입니다! Inspector에서 연결하세요.");
-            return;
+            Debug.LogWarning("2:2 모드에서 4명이 아니므로 시작 불가");
+            allReady = false;
         }
 
-        bool canStartGame = allReady && isBalanced;
-        startGameButton.interactable = canStartGame;
-        startGameButton.gameObject.SetActive(true);
+        bool isBalanced = redTeamCount == blueTeamCount;
 
-        Debug.Log($"StartGameButton 상태 - 활성화: {startGameButton.gameObject.activeSelf}, 상호작용 가능: {startGameButton.interactable}");
+        if (startGameButton != null)
+        {
+            bool canStartGame = allReady && isBalanced;
+            startGameButton.interactable = canStartGame;
+            startGameButton.gameObject.SetActive(true);
+
+            Debug.Log($"[CheckAllReady] 모드: {gameMode}, 총 인원: {totalPlayers}, 준비 상태: {allReady}, 팀 균형: {isBalanced}, 시작 가능: {canStartGame}");
+        }
     }
 
+    private IEnumerator DelayedCheckAllReady()
+    {
+        yield return new WaitForSeconds(0.1f);
+        CheckAllReady();
+    }
 
     public void StartGame()
     {
@@ -546,7 +554,7 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
         }
 
         UpdateTeamUI();
-        CheckAllReady();
+        StartCoroutine(DelayedCheckAllReady());
     }
 
     private IEnumerator DestroyRoomAndExit()
@@ -633,6 +641,7 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
         {
             Debug.Log("AI 플레이어 목록 변경 감지 - UI 업데이트");
             UpdateTeamUI();
+            CheckCanAddAI();
         }
     }
 
@@ -734,6 +743,7 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
         
         // UI 업데이트
         UpdateTeamUI();
+        StartCoroutine(DelayedCheckAllReady());
     }
     public void RemoveSpecificAI(string aiName)
     {
@@ -778,8 +788,32 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
             PhotonNetwork.CurrentRoom.IsOpen = true;
             Debug.Log("AI가 삭제되어 방이 다시 열렸습니다. 새로운 플레이어가 입장할 수 있습니다.");
         }
+  
+        CheckCanAddAI();
+        StartCoroutine(DelayedCheckAllReady());
     }
+    public void CheckCanAddAI()
+    {
+        if (!PhotonNetwork.IsMasterClient) return;
 
+        int maxPlayers = PhotonNetwork.CurrentRoom.MaxPlayers;
+        int currentPlayers = PhotonNetwork.PlayerList.Length;
+        int aiCount = 0;
+
+        if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("AIPlayers"))
+        {
+            string[] aiPlayers = (string[])PhotonNetwork.CurrentRoom.CustomProperties["AIPlayers"];
+            aiCount = aiPlayers.Length;
+        }
+
+        int totalPlayers = currentPlayers + aiCount;
+
+      
+        bool canAddAI = totalPlayers < maxPlayers;
+        //Debug.Log($"[CheckCanAddAI] 현재 총 인원: {totalPlayers}/{maxPlayers}, AI 추가 가능: {canAddAI}");
+        //버튼갱신
+        UIManager.instance.addAIButton.interactable = canAddAI;
+    }
     // 🔹 AI 삭제 후 팀 인원 데이터를 정확하게 업데이트하는 함수
     private void UpdateTeamData()
     {
