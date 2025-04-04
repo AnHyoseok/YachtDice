@@ -1104,6 +1104,14 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1479907104113647938, guid: 3b1f2e5b017bc214bad474a072ce3b8e, type: 3}
+      propertyPath: clickClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 65b3fbfc7d0dfcb4892da388b67da391, type: 3}
+    - target: {fileID: 1479907104113647938, guid: 3b1f2e5b017bc214bad474a072ce3b8e, type: 3}
+      propertyPath: hoverClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 66a8626f0cd16cb4cb67f638d08e2b7b, type: 3}
+    - target: {fileID: 1479907104113647938, guid: 3b1f2e5b017bc214bad474a072ce3b8e, type: 3}
       propertyPath: buttons.Array.size
       value: 4
       objectReference: {fileID: 0}
