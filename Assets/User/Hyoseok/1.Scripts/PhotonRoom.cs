@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using ExitGames.Client.Photon;
@@ -118,13 +118,22 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
         {
             //  1:1 모드 → Left: 411, Right: 0
             //  2:2 모드 → Left: 158, Right: -158
-            int leftValue = (gameMode == 1) ? 411 : 158;
-            int rightValue = (gameMode == 1) ? 0 : -158;
+            int leftValue = (gameMode == 1) ? 0 : -75;
+            int rightValue = (gameMode == 1) ? 0 : -65;
 
-            teamPanel.offsetMin = new Vector2(leftValue, teamPanel.offsetMin.y);
-            teamPanel.offsetMax = new Vector2(rightValue, teamPanel.offsetMax.y);
+            teamPanel.GetComponent<HorizontalLayoutGroup>().padding.left = leftValue;
+            teamPanel.GetComponent<HorizontalLayoutGroup>().padding.right = rightValue;
 
             Debug.Log($" TeamPanel 크기 조정됨: Left={leftValue}, Right={rightValue}");
+        }
+        if (redTeamPanel != null && blueTeamPanel != null)
+        {
+            int Value = (gameMode == 1) ? 0 : 60;
+            redTeamPanel.GetComponent<HorizontalLayoutGroup>().childAlignment = (gameMode == 1) ? TextAnchor.MiddleCenter : TextAnchor.MiddleLeft;
+            redTeamPanel.GetComponent<HorizontalLayoutGroup>().padding.left = Value;
+
+            blueTeamPanel.GetComponent<HorizontalLayoutGroup>().childAlignment = (gameMode == 1) ? TextAnchor.MiddleCenter : TextAnchor.MiddleLeft;
+            blueTeamPanel.GetComponent<HorizontalLayoutGroup>().padding.left = Value;
         }
     }
 
@@ -168,7 +177,6 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
                 else if (team == "Blue") blueTeamCount++;
             }
         }
-
         // 🔹 AI 포함하여 팀 인원 확인
         if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("AIPlayers"))
         {
@@ -275,7 +283,8 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         Debug.Log($" {newPlayer.NickName}님이 방에 입장했습니다!");
-        UpdateTeamUI();
+        //UpdateTeamUI();
+        StartCoroutine(DelayedTeamUIUpdate());
     }
 
 
@@ -473,10 +482,8 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
         PhotonNetwork.CurrentRoom.IsVisible = false; // 방 목록에서 제거
         PhotonNetwork.CurrentRoom.IsOpen = false; //  추가 입장 불가
 
+        
         PhotonNetwork.LoadLevel("GameScene"); //  모든 플레이어가 동시에 이동
-
-
-
     }
 
     //유저정보 저장 (팀, 프로필 , 닉네임)
@@ -813,7 +820,4 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
 
         Debug.Log($"팀 인원 업데이트 완료 - Red: {redTeamCount}, Blue: {blueTeamCount}");
     }
-
-
-
 }

@@ -20,6 +20,7 @@ public class SelectDice : MonoBehaviour
     public int currentTargetIndex = 0;
     public int movesThisTurn = 0;
     private bool isGoMove = false;
+    private bool isRButton = false;
     public bool foundEmptyPosition;
     public bool isPut = false;
     #endregion
@@ -28,16 +29,16 @@ public class SelectDice : MonoBehaviour
     {
         photon = GetComponent<PhotonView>();
         mainCamera = Camera.main;
+        escbutton.onClick.AddListener(() => StartCoroutine(OnClickEscButton()));
     }
     private void Update()
     {
-        if (currentTargetIndex >= 0 && TurnManager.instance.IsMyTurn())
+        if (currentTargetIndex >= 0 && TurnManager.instance.IsMyTurn() && DiceManager.Instance.rollsLeft > 0)
         {
-            photon.RPC("EscKeySetActive", RpcTarget.All, (DiceManager.Instance.newdicelist.Length != 5 && DiceManager.Instance.isDiceArray) || DiceManager.Instance.rollsLeft != 0);
+            photon.RPC("EscKeySetActive", RpcTarget.All, (DiceManager.Instance.newdicelist.Length != 5 && DiceManager.Instance.isDiceArray));
             photon.RPC("SetActiveScoreText", RpcTarget.All, DiceManager.Instance.isDiceArray);
-            escbutton.onClick.AddListener(() => OnClickEscButton());
             isPut = Input.GetKey(KeyCode.R);
-            if (isPut)
+            if (isPut || isRButton)
             {
                 //점수판 ui 알파값 0 
                 DiceManager.Instance.ShowPreviewScore();
@@ -58,6 +59,7 @@ public class SelectDice : MonoBehaviour
                 }
                 DiceManager.Instance.isDiceArray = false;
                 photon.RPC("EscKeySetActive", RpcTarget.All, DiceManager.Instance.isDiceArray);
+                DiceManager.Instance.cupController.StartCupState(true);
             }
         }
         if (Input.GetMouseButtonDown(0) && TurnManager.instance.IsMyTurn())
@@ -269,28 +271,11 @@ public class SelectDice : MonoBehaviour
         //ScoreboardManager.instance.HighlightLocalScore("고른카테고리"); 
     }
     /// <summary> </summary>
-    void OnClickEscButton()
+    IEnumerator OnClickEscButton()
     {
-        GameSceneManager.Instance.ShowOnlyScoredForCurrentPlayer();
-
-        foreach (Dice dice in DiceManager.Instance.dices)
-        {
-            if (dice != null)
-            {
-                PhotonNetwork.Destroy(dice.gameObject);
-            }
-        }
-        for (int i = 0; i < DiceManager.Instance.dices.Length; i++)
-        {
-            if (DiceManager.Instance.dices[i] != null)
-            {
-                DiceManager.Instance.dices[i] = null;
-            }
-        }
-        DiceManager.Instance.isDiceArray = false;
-        photon.RPC("EscKeySetActive", RpcTarget.All, DiceManager.Instance.isDiceArray);
-        photon.RPC("SetActiveScoreText", RpcTarget.All, DiceManager.Instance.isDiceArray);
-        DiceManager.Instance.cupController.StartCupState(true);
+        isRButton = true;
+        yield return new WaitForSeconds(1);
+        isRButton = false;
     }
     /// <summary> </summary>
     [PunRPC]
