@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
 using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
 
 public class DiceScore
@@ -48,7 +49,6 @@ public class DiceManager : Singleton<DiceManager>
     public TextMeshProUGUI rollsLeftText;
     public TextMeshProUGUI scoreText;
 
-    private HashSet<float> usedYValues = new HashSet<float>(); // 중복 방지용 Y값 저장
     private int upperSectionScore = 0;
     private bool boonsGiven = false;
     public bool isArray = false;
@@ -67,27 +67,19 @@ public class DiceManager : Singleton<DiceManager>
     private void Update()
     {
         CheckDiceStopped();
-        //스코어 기록 
-       
     }
-
-
+    public void UpdataRollsLeft()
+    {
+        rollsLeftText.text = rollsLeft.ToString() + "left";
+        photonView.RPC("RPC_SyncRollsleft", RpcTarget.All, rollsLeft);
+    }
+    [PunRPC]
+    void RPC_SyncRollsleft(int SyncRollsleft)
+    {
+        rollsLeftText.text = SyncRollsleft.ToString() + "left";
+    }
     
 
-    public Vector3 GetUniqueRandomPosition(float minRangeX, float maxRangeX)
-    {
-        float y = Random.Range(minRangeY, maxRangeY);
-        float z = Random.Range(minRange, maxRange);
-        float x;
-        do
-        {
-            x = Random.Range(minRangeX, maxRangeX);
-        } while (usedYValues.Contains(y)); // Y 값이 중복되지 않을 때까지 반복
-
-        usedYValues.Add(y); // 사용한 Y 값 저장
-
-        return new Vector3(x, y, z);
-    }
     public int[] GetDiceValues()
     {
         if (newdicelist == null || newdicelist.Length == 0)

@@ -168,6 +168,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
         if (DiceManager.Instance != null)
         {
             DiceManager.Instance.rollsLeft = 3;
+            DiceManager.Instance.UpdataRollsLeft();
             DiceManager.Instance.isDiceArray = false;
             DiceManager.Instance.isArrays = false;
             cupController.StartCupState(true);

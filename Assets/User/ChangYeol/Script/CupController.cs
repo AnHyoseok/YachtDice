@@ -21,6 +21,7 @@ public class CupController : MonoBehaviour
     public bool isShake = false;
     private float timer;
     public float pourOutTime = 5;
+    private bool isShakeSound;
     private CameraMove cameraMove;
 
     public const string DiceCount = "DiceCount";
@@ -118,7 +119,7 @@ public class CupController : MonoBehaviour
     public void ObjectInstantiate()
     {
         if (!TurnManager.instance.IsMyTurn() && !TurnManager.instance.IsAITurnNow()) return;
-
+        isShakeSound = true;
         boxGroup.SetActive(false);
         GetComponent<BoxCollider>().enabled = false;
 
@@ -155,14 +156,9 @@ public class CupController : MonoBehaviour
         diceManager.isArray = false;
         StartCupState(false);
         isShake = false;
-        diceManager.rollsLeft--;
-        photonView.RPC("RPC_SyncRollsLeft", RpcTarget.All, diceManager.rollsLeft);
-    }
-    [PunRPC]
-    public void RPC_SyncRollsLeft(int newRollsLeft)
-    {
-        diceManager.rollsLeft = newRollsLeft;
-        diceManager.rollsLeftText.text = diceManager.rollsLeft.ToString() + " left";
+        diceManager.rollsLeft-- ;
+        diceManager.UpdataRollsLeft();
+        isShakeSound = false;
     }
     [PunRPC]
     void RandomPoition(int index)
@@ -205,7 +201,7 @@ public class CupController : MonoBehaviour
     }
     public void PlayShake()
     {
-        AudioController.instance.PlayCupShake();
+        if(!isShakeSound && !TurnManager.instance.IsAITurn()) AudioController.instance.PlayCupShake();
     }
     [PunRPC]
     public void AddDiceList(int diceID)
