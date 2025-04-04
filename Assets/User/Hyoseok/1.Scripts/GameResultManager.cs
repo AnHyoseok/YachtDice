@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GameResultManager : MonoBehaviour
@@ -18,7 +19,7 @@ public class GameResultManager : MonoBehaviour
     public GameObject winloseCanvas;
     public Transform resultContentParent;
     public GameObject userResultPrefab;
-
+    public Button lobbyButton;
     private void Awake()
     {
         Instance = this;
@@ -26,7 +27,7 @@ public class GameResultManager : MonoBehaviour
 
     private void Start()
     {
-       
+        lobbyButton.onClick.AddListener(GoToLobby);
         nextButton.onClick.AddListener(() => StartCoroutine(ShowResultsAfterDelay()));
        
     }
@@ -52,7 +53,7 @@ public class GameResultManager : MonoBehaviour
     private IEnumerator ResultFlow()
     {
         yield return new WaitForSeconds(1f);
-
+        AudioController.instance.ChangeBGM();
         fadein.SetActive(true);
         backgroundPanel.SetActive(true);
         scoreboardPanel.transform.localPosition = Vector3.zero;
@@ -76,7 +77,7 @@ public class GameResultManager : MonoBehaviour
         List<object> blueTeam = new List<object>();
         Dictionary<object, int> playerScores = new Dictionary<object, int>();
 
-        // Á¡¼ö ¹× ÆÀ »ö»ó ¼öÁı
+        // ì ìˆ˜ ë° íŒ€ ìƒ‰ìƒ ìˆ˜ì§‘
         foreach (var kvp in GameSceneManager.Instance.scoreboardEntries)
         {
             var entry = kvp.Value;
@@ -139,7 +140,7 @@ public class GameResultManager : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning($"[Result] ScoreboardEntry¸¦ Ã£À» ¼ö ¾øÀ½: {actorNumber}");
+                Debug.LogWarning($"[Result] ScoreboardEntryë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŒ: {actorNumber}");
             }
         }
     }
@@ -152,5 +153,11 @@ public class GameResultManager : MonoBehaviour
         int lower = 0;
         for (int i = 8; i <= 13; i++) lower += scores[i];
         return subtotal + bonus + lower;
+    }
+
+    public void GoToLobby()
+    {
+        PhotonNetwork.LeaveRoom();
+        SceneManager.LoadScene("LobbyScene");
     }
 }

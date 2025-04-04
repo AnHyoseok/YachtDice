@@ -13,7 +13,7 @@ public class AudioController : MonoBehaviour
     public AudioClip arrayDiceSound;
     public AudioClip selectScoreSound;
     public AudioClip[] scoreTextSound;
-
+    public AudioClip resultBgmSound;
     private string lastPlayedCategory = "";
     //페이드 
     public AudioClip fadeinSound;
@@ -73,7 +73,13 @@ public class AudioController : MonoBehaviour
         }
         lastPlayedCategory = category;
     }
+    public void ChangeBGM()
+    { 
 
+        bgmSource.Stop();
+        bgmSource.clip = resultBgmSound;
+        bgmSource.Play();
+    }
     //페이드
     public void Playfadein()
     {
