@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="LoadBalancingClient.cs" company="Exit Games GmbH">
 //   Loadbalancing Framework for Photon - Copyright (C) 2018 Exit Games GmbH
 // </copyright>
@@ -2729,7 +2729,7 @@ namespace Photon.Realtime
             #else
             if (level == DebugLevel.ERROR)
             {
-                Debug.LogError(message);
+                //Debug.LogError(message);
             }
             else if (level == DebugLevel.WARNING)
             {

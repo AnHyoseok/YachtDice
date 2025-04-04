@@ -14,11 +14,11 @@ public class TitleController : MonoBehaviour
     public Button optionsButton;
     public Button quitGameButton;
 
-    //µÚ·Î°¡±â
+    //ë’¤ë¡œê°€ê¸°
     public Button optionBackbutton;
     public Button tutorialBackButton;
 
-    //»ç¿îµå
+    //ì‚¬ìš´ë“œ
     public Slider masterSlider;
     public Slider soundSlider;
     public Slider musicSlider;
@@ -54,7 +54,7 @@ public class TitleController : MonoBehaviour
 
     void OnQuitGame()
     {
-
+        Application.Quit();
     }
 
     void OnOptionBack()
@@ -67,12 +67,12 @@ public class TitleController : MonoBehaviour
         TutorialCanvas.SetActive(false);
     }
 
-    // Reset Default ¹öÆ° Å¬¸¯ ½Ã È£ÃâµÇ´Â ÇÔ¼ö
+    // Reset Default ë²„íŠ¼ í´ë¦­ ì‹œ í˜¸ì¶œë˜ëŠ” í•¨ìˆ˜
     public void OnResetDefaultButtonClick()
     {
         if (masterSlider != null)
         {
-            masterSlider.value = 1; // MasterSliderÀÇ °ªÀ» 1·Î ¼³Á¤
+            masterSlider.value = 1; // MasterSliderì˜ ê°’ì„ 1ë¡œ ì„¤ì •
             soundSlider.value = 1;
             musicSlider.value = 1;
 

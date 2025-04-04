@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.Audio;
-using BS.Audio;
+
 
 namespace BS.Utility
 {
@@ -64,9 +64,9 @@ namespace BS.Utility
             // 사운드 재생 시작
             source.Play();
             // 일정 시간이 지나면 오브젝트를 자동으로 제거하는 컴포넌트 추가
-            TimedSelfDestruct timedSelfDestruct = impactSfxInstance.AddComponent<TimedSelfDestruct>();
+          
             // 클립 길이만큼 유지 후 제거
-            timedSelfDestruct.LifeTime = clip.length;
+       
             return source;
         }
 
