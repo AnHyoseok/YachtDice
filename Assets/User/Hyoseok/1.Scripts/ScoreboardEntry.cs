@@ -6,6 +6,7 @@ using ExitGames.Client.Photon;
 using System.Collections.Generic;
 using Photon.Pun;
 using System.Collections;
+using UnityEngine.EventSystems;
 
 
 public class ScoreboardEntry : MonoBehaviour
@@ -27,6 +28,12 @@ public class ScoreboardEntry : MonoBehaviour
     public Dictionary<string, TextMeshProUGUI> scoreTexts = new Dictionary<string, TextMeshProUGUI>();
     public string AIName => aiName;
 
+
+    //마우스 호버 
+    public GameObject hoverAnimationPrefab;
+    private GameObject currentHoverEffect;
+
+   
     void Awake()
     {
         string[] categories = {
@@ -34,7 +41,7 @@ public class ScoreboardEntry : MonoBehaviour
     "SUBTOTAL", "BONUS",
     "Choice", "4 of a Kind", "FULL_HOUSE", "SMALL_STRAIGHT", "LARGE_STRAIGHT", "YAHTZEE"
 };
-
+        
         for (int i = 0; i < upperSectionTexts.Length; i++)
         {
             scoreTexts[categories[i]] = upperSectionTexts[i];
@@ -45,7 +52,61 @@ public class ScoreboardEntry : MonoBehaviour
             scoreTexts[categories[i + upperSectionTexts.Length]] = lowerSectionTexts[i];
         }
     }
- 
+    void Update()
+    {
+        HandleHoverEffect();
+    }
+
+    private void HandleHoverEffect()
+    {
+        if (EventSystem.current == null) return;
+
+        // 현재 마우스 위치를 기반으로 PointerEventData 생성
+        PointerEventData pointerData = new PointerEventData(EventSystem.current)
+        {
+            position = Input.mousePosition
+        };
+
+        // UI 요소와의 충돌 결과 리스트
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointerData, results);
+
+        bool hoveringOverScoreText = false;
+
+        foreach (RaycastResult result in results)
+        {
+            TextMeshProUGUI text = result.gameObject.GetComponent<TextMeshProUGUI>();
+            if (text != null && scoreTexts.ContainsValue(text))
+            {
+                hoveringOverScoreText = true;
+
+                if (currentHoverEffect == null)
+                {
+                    // hoveranimation 프리팹 생성
+                    currentHoverEffect = Instantiate(hoverAnimationPrefab, text.transform);
+                    currentHoverEffect.transform.localPosition = Vector3.zero; // 중앙 배치
+
+                    //currentHoverEffect.transform.SetAsLastSibling();
+                }
+                else if (currentHoverEffect.transform.parent != text.transform)
+                {
+                    // 기존 hover가 다른 텍스트에 붙어 있으면 재생성
+                    Destroy(currentHoverEffect);
+                    currentHoverEffect = Instantiate(hoverAnimationPrefab, text.transform);
+                    currentHoverEffect.transform.localPosition = Vector3.zero;
+                    //currentHoverEffect.transform.SetAsLastSibling();
+                }
+
+                break;
+            }
+        }
+
+        // 아무 텍스트에도 마우스가 안 올라가 있으면 hoveranimation 제거
+        if (!hoveringOverScoreText && currentHoverEffect != null)
+        {
+            Destroy(currentHoverEffect);
+        }
+    }
     public void SetPlayerData(Player player)
     {
         this.player = player;
@@ -75,7 +136,7 @@ public class ScoreboardEntry : MonoBehaviour
             if (btn != null)
             {
                 btn.interactable = true;
-                string category = kvp.Key; 
+                string category = kvp.Key;
                 btn.onClick.RemoveAllListeners();
                 btn.onClick.AddListener(() => HighlightScore(category));
             }
@@ -330,7 +391,7 @@ public class ScoreboardEntry : MonoBehaviour
                 }
                 else
                 {
-                    SetAlpha(text, 0.5f); 
+                    SetAlpha(text, 0.5f);
                 }
             }
 
@@ -395,7 +456,7 @@ public class ScoreboardEntry : MonoBehaviour
 
             Color c = kvp.Value.color;
 
-            if (kvp.Key == DiceScore.SUBTOTAL || kvp.Key == DiceScore.BONUS )
+            if (kvp.Key == DiceScore.SUBTOTAL || kvp.Key == DiceScore.BONUS)
             {
                 c.a = 1f;
             }
@@ -447,7 +508,7 @@ public class ScoreboardEntry : MonoBehaviour
         UpdateScore(category, score);
 
 
-       
+
         TurnManager.instance.EndMyTurn();
     }
 
@@ -474,7 +535,7 @@ public class ScoreboardEntry : MonoBehaviour
     //선택 초기화
     public void ClearHighlight()
     {
-       
+
         foreach (var kvp in scoreTexts)
         {
             string key = kvp.Key;
