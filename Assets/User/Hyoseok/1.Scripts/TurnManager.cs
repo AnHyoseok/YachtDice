@@ -44,6 +44,12 @@ public class TurnManager : MonoBehaviourPunCallbacks
             yield return null;
         }
 
+        while (cupController == null)
+        {
+            cupController = FindAnyObjectByType<CupController>();
+            yield return null;
+        }
+
         //  TurnIndex가 모든 플레이어에게 할당될 때까지 대기
         while (!AllPlayersHaveTurnIndex())
         {

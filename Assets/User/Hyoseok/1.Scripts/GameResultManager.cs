@@ -157,6 +157,8 @@ public class GameResultManager : MonoBehaviour
 
     public void GoToLobby()
     {
+        Destroy(GameSceneManager.Instance.gameObject);
+        GameSceneManager.Instance = null;
         PhotonNetwork.LeaveRoom();
         SceneManager.LoadScene("LobbyScene");
     }
