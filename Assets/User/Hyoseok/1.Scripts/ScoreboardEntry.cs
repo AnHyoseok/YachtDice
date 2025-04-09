@@ -32,8 +32,9 @@ public class ScoreboardEntry : MonoBehaviour
     //마우스 호버 
     public GameObject hoverAnimationPrefab;
     private GameObject currentHoverEffect;
+    private float hoverCheckInterval = 0.05f;
+    private float hoverTimer = 0f;
 
-   
     void Awake()
     {
         string[] categories = {
@@ -54,7 +55,12 @@ public class ScoreboardEntry : MonoBehaviour
     }
     void Update()
     {
-        HandleHoverEffect();
+        hoverTimer += Time.unscaledDeltaTime;
+        if (hoverTimer >= hoverCheckInterval)
+        {
+            hoverTimer = 0f;
+            HandleHoverEffect();
+        }
     }
 
     private void HandleHoverEffect()
