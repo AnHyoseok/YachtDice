@@ -14,7 +14,7 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
     public SelectDice selectDice;
     public Transform scoreboardPanel;
     public GameObject scoreboardPrefab;
-    private bool previewShown = false;
+
     public Dictionary<int, ScoreboardEntry> scoreboardEntries = new Dictionary<int, ScoreboardEntry>();
 
     void Awake()
@@ -55,16 +55,10 @@ public class GameSceneManager : MonoBehaviourPunCallbacks
 
     void Update()
     {
-        if (DiceManager.Instance != null && DiceManager.Instance.isDiceArray && !previewShown)
+        // 매 프레임 미리보기 계산하지 않도록 조건 검사
+        if (DiceManager.Instance != null && DiceManager.Instance.isDiceArray)
         {
             DiceManager.Instance.ShowPreviewScore();
-            previewShown = true;
-        }
-
-        // isDiceArray가 false가 되면 다시 초기화
-        if (DiceManager.Instance != null && !DiceManager.Instance.isDiceArray)
-        {
-            previewShown = false;
         }
     }
 

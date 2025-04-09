@@ -478,28 +478,24 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
 
 
             return;
-        //Debug.Log($" 현재 방의 플레이어 수: {PhotonNetwork.PlayerList.Length}");
+        Debug.Log($" 현재 방의 플레이어 수: {PhotonNetwork.PlayerList.Length}");
         foreach (Player player in PhotonNetwork.PlayerList)
         {
-            //Debug.Log($"씬 이동 전 플레이어 - 닉네임: {player.NickName}, ID: {player.ActorNumber}, 방장 여부: {player.IsMasterClient}");
+            Debug.Log($"씬 이동 전 플레이어 - 닉네임: {player.NickName}, ID: {player.ActorNumber}, 방장 여부: {player.IsMasterClient}");
         }
 
         SavePlayerData(); //  씬 변경 전에 플레이어 정보 저장
-        //Debug.Log(" GameScene으로 씬 이동 중...");
+        Debug.Log(" GameScene으로 씬 이동 중...");
         //현재 방 로비에서 제거 
         PhotonNetwork.CurrentRoom.IsVisible = false; // 방 목록에서 제거
         PhotonNetwork.CurrentRoom.IsOpen = false; //  추가 입장 불가
 
+        
+        PhotonNetwork.LoadLevel("GameScene"); //  모든 플레이어가 동시에 이동
+    }
 
-        StartCoroutine(LoadGameSceneWithPreload()); //  모든 플레이어가 동시에 이동
-    }
-    IEnumerator LoadGameSceneWithPreload()
-    {
-        yield return new WaitForSeconds(0.5f);
-        PhotonNetwork.LoadLevel("GameScene");
-    }
-        //유저정보 저장 (팀, 프로필 , 닉네임)
-        void SavePlayerData()
+    //유저정보 저장 (팀, 프로필 , 닉네임)
+    void SavePlayerData()
     {
         foreach (Player player in PhotonNetwork.PlayerList)
         {

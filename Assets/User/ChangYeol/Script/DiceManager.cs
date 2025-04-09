@@ -261,23 +261,15 @@ public class DiceManager : Singleton<DiceManager>
     // 점수 미리보기 호출 (내가 주사위 던졌을 때 실행)
     public void ShowPreviewScore()
     {
+        //Debug.Log("[ShowPreviewScore] 호출됨 - 턴 주인: " +
+        //    (TurnManager.instance.IsAITurnNow() ? "AI" : "Player"));
+
         if (!isDiceArray) return;
 
-        // 1. 주사위 값 수집 (GC 최소화)
-        List<int> valuesList = new List<int>();
-        valuesList.AddRange(GetDiceValues());
-        valuesList.AddRange(GetDiceValue());
-        int[] values = valuesList.ToArray();
+        int[] values = GetDiceValues().Concat(GetDiceValue()).ToArray();
+        int[] counts = new int[7];
+        foreach (int v in values) counts[v]++;
 
-        // 2. 각 숫자별 개수 계산
-        int[] counts = new int[7]; // 1~6
-        for (int i = 0; i < values.Length; i++)
-        {
-            if (values[i] >= 1 && values[i] <= 6)
-                counts[values[i]]++;
-        }
-
-        // 3. 기본 점수 계산
         Dictionary<string, int> previewScores = new Dictionary<string, int>();
         previewScores[DiceScore.ONES] = counts[1] * 1;
         previewScores[DiceScore.TWOS] = counts[2] * 2;
@@ -286,14 +278,18 @@ public class DiceManager : Singleton<DiceManager>
         previewScores[DiceScore.FIVES] = counts[5] * 5;
         previewScores[DiceScore.SIXES] = counts[6] * 6;
 
-        // 4. 상단 subtotal 점수 확인
         int subtotal = 0;
+
+        //  여기서 AI 먼저 체크
         int actorNumber;
         string aiName = TurnManager.instance.GetCurrentAIName();
 
         if (TurnManager.instance.IsAITurnNow() && !string.IsNullOrEmpty(aiName))
         {
             actorNumber = aiName.GetHashCode();
+            //Debug.Log($"[ShowPreviewScore] AI actorNumber={actorNumber}");
+
+            //total 체크
             if (GameSceneManager.Instance.scoreboardEntries.TryGetValue(actorNumber, out var aiEntry))
             {
                 for (int i = 0; i <= 5; i++)
@@ -310,41 +306,23 @@ public class DiceManager : Singleton<DiceManager>
             if (currentPlayer.CustomProperties.TryGetValue("Score", out object rawScore))
             {
                 int[] confirmedScores = (int[])rawScore;
-                for (int i = 0; i <= 5; i++)
-                    subtotal += confirmedScores[i];
+                for (int i = 0; i <= 5; i++) subtotal += confirmedScores[i];
             }
 
             actorNumber = currentPlayer.ActorNumber;
+            //Debug.Log($"[ShowPreviewScore] Player actorNumber={actorNumber}");
         }
 
         previewScores[DiceScore.SUBTOTAL] = subtotal;
         previewScores[DiceScore.BONUS] = subtotal >= 63 ? 35 : 0;
-
-        // 5. 나머지 점수 계산
-        int sum = 0;
-        bool hasThree = false;
-        bool hasTwo = false;
-        bool hasFour = false;
-        bool hasFive = false;
-
-        for (int i = 1; i <= 6; i++)
-        {
-            int c = counts[i];
-            sum += i * c;
-            if (c == 5) hasFive = true;
-            if (c >= 4) hasFour = true;
-            if (c == 3) hasThree = true;
-            if (c == 2) hasTwo = true;
-        }
-
-        previewScores[DiceScore.Choice] = sum;
-        previewScores[DiceScore.FOUR_KIND] = hasFour ? sum : 0;
-        previewScores[DiceScore.FULL_HOUSE] = (hasThree && hasTwo) ? sum : 0;
+        previewScores[DiceScore.Choice] = values.Sum();
+        previewScores[DiceScore.FOUR_KIND] = counts.Any(c => c >= 4) ? values.Sum() : 0;
+        bool hasThree = counts.Any(c => c == 3);
+        bool hasTwo = counts.Any(c => c == 2);
+        previewScores[DiceScore.FULL_HOUSE] = (hasThree && hasTwo) ? values.Sum() : 0;
         previewScores[DiceScore.SMALL_STRAIGHT] = HasStraight(values, 4) ? 15 : 0;
         previewScores[DiceScore.LARGE_STRAIGHT] = HasStraight(values, 5) ? 30 : 0;
-        previewScores[DiceScore.YAHTZEE] = hasFive ? 50 : 0;
-
-        // 6. 미기입 항목만 필터링하여 전송
+        previewScores[DiceScore.YAHTZEE] = counts.Any(c => c == 5) ? 50 : 0;
         if (GameSceneManager.Instance.scoreboardEntries.TryGetValue(actorNumber, out var entry))
         {
             Dictionary<string, int> filteredPreview = new Dictionary<string, int>();
@@ -358,20 +336,14 @@ public class DiceManager : Singleton<DiceManager>
                 }
             }
 
-            string[] keys = new string[filteredPreview.Count];
-            int[] vals = new int[filteredPreview.Count];
-            int idx = 0;
-            foreach (var kvp in filteredPreview)
-            {
-                keys[idx] = kvp.Key;
-                vals[idx] = kvp.Value;
-                idx++;
-            }
+            string[] keys = filteredPreview.Keys.ToArray();
+            int[] vals = filteredPreview.Values.ToArray();
 
+   
             photonView.RPC("RPC_ShowPreviewScore", RpcTarget.All, actorNumber, keys, vals);
         }
-    }
 
+    }
 
 
     private bool HasStraight(int[] values, int requiredLength)
