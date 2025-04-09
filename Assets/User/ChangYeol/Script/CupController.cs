@@ -26,6 +26,9 @@ public class CupController : MonoBehaviour
 
     public const string DiceCount = "DiceCount";
     public const string IsButton = "IsButton";
+
+    private int lastDiceCount = -1;
+    private bool lastButtonState = false;
     #endregion
     private void Start()
     {
@@ -51,7 +54,19 @@ public class CupController : MonoBehaviour
                 timer = 0;
             }
         }
-        UpdateCupState();
+        //  값이 바뀔 때만 동기화
+        if (TurnManager.instance.IsMyTurn() || TurnManager.instance.IsAITurnNow())
+        {
+            int currentDiceCount = selectDice.turnLimit - selectDice.movesThisTurn;
+            bool currentButton = button.isButton;
+
+            if (currentDiceCount != lastDiceCount || currentButton != lastButtonState)
+            {
+                photonView.RPC("SyncAnimatorState", RpcTarget.All, currentDiceCount, currentButton);
+                lastDiceCount = currentDiceCount;
+                lastButtonState = currentButton;
+            }
+        }
     }
    public void UpdateCupState()
     {

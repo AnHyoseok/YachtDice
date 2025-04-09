@@ -52,7 +52,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
         //  TurnIndex가 모든 플레이어에게 할당될 때까지 대기
         while (!AllPlayersHaveTurnIndex())
         {
-            Debug.Log("TurnIndex가 아직 안 들어온 플레이어가 있습니다. 대기 중...");
+            //Debug.Log("TurnIndex가 아직 안 들어온 플레이어가 있습니다. 대기 중...");
             yield return null;
         }
 
@@ -112,12 +112,12 @@ public class TurnManager : MonoBehaviourPunCallbacks
 
         if (currentPlayerIndex < 0 || currentPlayerIndex >= playersInRoom.Count)
         {
-            Debug.LogWarning($"currentPlayerIndex({currentPlayerIndex})가 플레이어 수({playersInRoom.Count})를 벗어났습니다.");
+            //Debug.LogWarning($"currentPlayerIndex({currentPlayerIndex})가 플레이어 수({playersInRoom.Count})를 벗어났습니다.");
             return false;
         }
 
         var current = playersInRoom[currentPlayerIndex];
-        Debug.Log($"내 이름: {PhotonNetwork.LocalPlayer.NickName}, 현재 턴 플레이어: {current.NickName}");
+        //Debug.Log($"내 이름: {PhotonNetwork.LocalPlayer.NickName}, 현재 턴 플레이어: {current.NickName}");
 
         return PhotonNetwork.LocalPlayer == current;
 
@@ -130,26 +130,26 @@ public class TurnManager : MonoBehaviourPunCallbacks
 
     public void EndMyTurn()
     {
-        Debug.Log(" EndMyTurn() 호출됨");
+        //Debug.Log(" EndMyTurn() 호출됨");
         //Debug.Log($" GameSceneManager.Instance == null ? {GameSceneManager.Instance == null}");
         //if (!PhotonNetwork.IsMasterClient) return;
         int nextIndex = currentPlayerIndex + 1;
         int nextRound = currentTurnRound;
-        Debug.Log($"현재 인덱스{nextIndex-1}");
+        //Debug.Log($"현재 인덱스{nextIndex-1}");
         if (nextIndex >= playersInRoom.Count)
         {
             nextIndex = 0;
             nextRound++;
 
-            Debug.Log($"다음 인덱스{nextIndex}");
+            //Debug.Log($"다음 인덱스{nextIndex}");
             if (nextRound >= MAX_ROUNDS)
             {
                GameResultManager.Instance.StartResultSequence();
-                Debug.Log("게임 종료!");
+                //Debug.Log("게임 종료!");
                 return;
             }
 
-            Debug.Log($"다음 라운드 시작: {nextRound + 1}턴째");
+            //Debug.Log($"다음 라운드 시작: {nextRound + 1}턴째");
         }
 
         // 본인만 즉시 적용
@@ -158,14 +158,14 @@ public class TurnManager : MonoBehaviourPunCallbacks
         GameSceneManager.Instance.BroadcastTurn(nextIndex, nextRound);
         if (IsAITurnNow())
         {
-            Debug.Log("[AI] 자동 턴 시작");
+            //Debug.Log("[AI] 자동 턴 시작");
             StartCoroutine(AI_TurnRoutine());
         }
     }
 
     public void UpdateTurn(int playerIndex, int round)
     {
-        Debug.Log("UpdateTurn() 호출됨");
+        //Debug.Log("UpdateTurn() 호출됨");
 
         currentPlayerIndex = playerIndex;
         currentTurnRound = round;
@@ -187,7 +187,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
             }
         }
         else
-            Debug.LogWarning("DiceManager.Instance가 null입니다.");
+            //Debug.LogWarning("DiceManager.Instance가 null입니다.");
 
         currentturnText.text = $"{currentTurnRound + 1} / {MAX_ROUNDS}";
 
@@ -202,13 +202,13 @@ public class TurnManager : MonoBehaviourPunCallbacks
                 if (GameSceneManager.Instance.scoreboardEntries.TryGetValue(actorNumber, out var aiEntry))
                 {
                     aiEntry.UpdateScoreData(aiProps);
-                    Debug.Log($"[AI] 점수 복원 완료: {aiName}");
+                    //Debug.Log($"[AI] 점수 복원 완료: {aiName}");
                 }
             }
         }
         if (IsAITurn())
         {
-            Debug.Log("AI 턴 감지! AI 자동 행동 시작");
+            //Debug.Log("AI 턴 감지! AI 자동 행동 시작");
             StartCoroutine(AI_TurnRoutine());
         }
         foreach (var entry in FindObjectsByType<ScoreboardEntry>(FindObjectsSortMode.None))
@@ -220,14 +220,14 @@ public class TurnManager : MonoBehaviourPunCallbacks
         // 알림은 RPC로 실행
         if (PhotonNetwork.LocalPlayer == TurnManager.instance.GetCurrentPlayer())
         {
-            Debug.Log($"{PhotonNetwork.LocalPlayer}=현재 유저 ");
+            //Debug.Log($"{PhotonNetwork.LocalPlayer}=현재 유저 ");
 
             cupController.photonView.RequestOwnership();
-            Debug.Log($"[요청] CupController 소유권 요청: {PhotonNetwork.LocalPlayer.NickName}");
+            //Debug.Log($"[요청] CupController 소유권 요청: {PhotonNetwork.LocalPlayer.NickName}");
 
             StartCoroutine(DelayedOwnershipCheck());
         }
-        Debug.Log($"현재 턴: {round + 1}턴 - 플레이어: {GetCurrentPlayer()?.NickName}");
+        //Debug.Log($"현재 턴: {round + 1}턴 - 플레이어: {GetCurrentPlayer()?.NickName}");
     }
     public bool IsAITurn()
     {
@@ -235,7 +235,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
     }
     private IEnumerator AI_TurnRoutine()
     {
-        Debug.Log("[AI] 턴 시작 - 컵 흔들기 시작");
+        //Debug.Log("[AI] 턴 시작 - 컵 흔들기 시작");
         cupController.isShake = true;
         yield return new WaitForSeconds(2f);
         if(cupController.isShake)
@@ -287,12 +287,12 @@ public class TurnManager : MonoBehaviourPunCallbacks
             
             aiEntry.UpdateScore(bestCategory, score);
             aiEntry.ClearHighlight();
-            Debug.Log($"[AI] 점수 선택 완료: {bestCategory} = {score}");
+            //Debug.Log($"[AI] 점수 선택 완료: {bestCategory} = {score}");
             AudioController.instance.PlayselectScore();
         }
         else
         {
-            Debug.LogWarning($"[AI_TurnRoutine] AI 점수판 못 찾음: {aiName} / hash = {actorNumber}");
+            //Debug.LogWarning($"[AI_TurnRoutine] AI 점수판 못 찾음: {aiName} / hash = {actorNumber}");
         }
 
         TurnManager.instance.EndMyTurn();
@@ -375,7 +375,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
 
         if (!string.IsNullOrEmpty(bestUpper))
         {
-            Debug.Log($"[AI 전략] 상단 최다 수 선택: {bestUpper}");
+            //Debug.Log($"[AI 전략] 상단 최다 수 선택: {bestUpper}");
             return bestUpper;
         }
 

@@ -94,7 +94,7 @@ public class DiceManager : Singleton<DiceManager>
             values[i] = newdicelist[i].GetDiceValue();
         }
 
-        Debug.Log(" 주사위 값 리스트: " + string.Join(", ", values));
+        //Debug.Log(" 주사위 값 리스트: " + string.Join(", ", values));
         return values;
     }
     public int[] GetDiceValue()
@@ -119,7 +119,7 @@ public class DiceManager : Singleton<DiceManager>
             values[i] = dices[i].GetDiceValue();
         }
 
-        Debug.Log(" 주사위 값 리스트: " + string.Join(", ", values));
+        //Debug.Log(" 주사위 값 리스트: " + string.Join(", ", values));
         return values;
     }
     public int CalculateScore(string category, bool previewOnly = false)
@@ -209,7 +209,7 @@ public class DiceManager : Singleton<DiceManager>
         }
         else
         {
-            Debug.LogError("[CalculateScore] actorNumber를 식별할 수 없습니다.");
+            //Debug.LogError("[CalculateScore] actorNumber를 식별할 수 없습니다.");
             return 0;
         }
 
@@ -223,7 +223,7 @@ public class DiceManager : Singleton<DiceManager>
         }
         else
         {
-            Debug.LogWarning($"[CalculateScore] scoreboardEntry 찾기 실패: actorNumber={actorNumber}");
+            //Debug.LogWarning($"[CalculateScore] scoreboardEntry 찾기 실패: actorNumber={actorNumber}");
         }
         if (!previewOnly)
         {
@@ -261,8 +261,8 @@ public class DiceManager : Singleton<DiceManager>
     // 점수 미리보기 호출 (내가 주사위 던졌을 때 실행)
     public void ShowPreviewScore()
     {
-        Debug.Log("[ShowPreviewScore] 호출됨 - 턴 주인: " +
-            (TurnManager.instance.IsAITurnNow() ? "AI" : "Player"));
+        //Debug.Log("[ShowPreviewScore] 호출됨 - 턴 주인: " +
+        //    (TurnManager.instance.IsAITurnNow() ? "AI" : "Player"));
 
         if (!isDiceArray) return;
 
@@ -287,7 +287,7 @@ public class DiceManager : Singleton<DiceManager>
         if (TurnManager.instance.IsAITurnNow() && !string.IsNullOrEmpty(aiName))
         {
             actorNumber = aiName.GetHashCode();
-            Debug.Log($"[ShowPreviewScore] AI actorNumber={actorNumber}");
+            //Debug.Log($"[ShowPreviewScore] AI actorNumber={actorNumber}");
 
             //total 체크
             if (GameSceneManager.Instance.scoreboardEntries.TryGetValue(actorNumber, out var aiEntry))
@@ -310,7 +310,7 @@ public class DiceManager : Singleton<DiceManager>
             }
 
             actorNumber = currentPlayer.ActorNumber;
-            Debug.Log($"[ShowPreviewScore] Player actorNumber={actorNumber}");
+            //Debug.Log($"[ShowPreviewScore] Player actorNumber={actorNumber}");
         }
 
         previewScores[DiceScore.SUBTOTAL] = subtotal;
@@ -377,12 +377,12 @@ public class DiceManager : Singleton<DiceManager>
 
         if (GameSceneManager.Instance.scoreboardEntries.TryGetValue(actorNumber, out var entry))
         {
-            Debug.Log($"[RPC_ShowPreviewScore] entry 찾음: actorNumber={actorNumber}, isAI={entry.isAI}");
+            //Debug.Log($"[RPC_ShowPreviewScore] entry 찾음: actorNumber={actorNumber}, isAI={entry.isAI}");
             entry.ShowPreview(previewScores);
         }
         else
         {
-            Debug.LogWarning($"[ShowPreviewScore] scoreEntry 못 찾음: actorNumber={actorNumber}");
+            //Debug.LogWarning($"[ShowPreviewScore] scoreEntry 못 찾음: actorNumber={actorNumber}");
         }
 
         bool hasYahtzee = keys.Contains(DiceScore.YAHTZEE);
@@ -427,7 +427,7 @@ public class DiceManager : Singleton<DiceManager>
     {
         if (!boonsGiven && upperSectionScore >= 63)
         {
-            Debug.Log("보너스 점수 획득");
+            //Debug.Log("보너스 점수 획득");
             upperSectionScore += 35;
             boonsGiven = true;
         }
@@ -455,7 +455,7 @@ public class DiceManager : Singleton<DiceManager>
         }
         else
         {
-            Debug.LogWarning($"[UpdateScoreboard] scoreboardEntry 찾기 실패: actorNumber={actorNumber}, category={category}, score={score}");
+            //Debug.LogWarning($"[UpdateScoreboard] scoreboardEntry 찾기 실패: actorNumber={actorNumber}, category={category}, score={score}");
         }
     }
     public int GetUpperSectionScore()
@@ -468,7 +468,7 @@ public class DiceManager : Singleton<DiceManager>
         {
             if (dices[i] == null)
             {
-                Debug.LogWarning($"[CheckDiceStopped] dice {i} is null");
+                //Debug.LogWarning($"[CheckDiceStopped] dice {i} is null");
                 return;
             }
             if (!isArray)
@@ -478,7 +478,7 @@ public class DiceManager : Singleton<DiceManager>
 
                 if (allStopped && dices.Length > 0)
                 {
-                    Debug.Log(" 모든 주사위 멈춤 - Dicearray() 실행");
+                    //Debug.Log(" 모든 주사위 멈춤 - Dicearray() 실행");
                     Dicearray();
                     DiceManager.Instance.ShowPreviewScore();
                 }

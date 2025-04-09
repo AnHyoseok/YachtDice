@@ -33,11 +33,13 @@ public class CameraMove : MonoBehaviour
     {
         if(!isMoveingToTarget)
         {
+            Debug.Log("22");
             transform.position += transform.forward * moveSpeed * Time.deltaTime;
 
             //특정 거리 안에 들어오면 목표 위치로 이동 시작
             if (Vector3.Distance(transform.position, targetTransform[0].position) < triggerDistance)
             {
+                Debug.Log("3");
                 StartCoroutine(MoveToTarget());
             }
         }

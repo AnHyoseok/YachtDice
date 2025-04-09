@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using System.Collections.Generic;
@@ -38,7 +38,7 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
     {
         if (roomListParent == null || roomPrefab == null)
         {
-            Debug.LogError("❌ roomListParent 또는 roomPrefab이 null입니다! Inspector에서 설정하세요.");
+            //Debug.LogError("❌ roomListParent 또는 roomPrefab이 null입니다! Inspector에서 설정하세요.");
             return;
         }
 
@@ -54,7 +54,7 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
         {
             if (room.RemovedFromList || room.PlayerCount == 0) // 삭제된 방 제거
             {
-                Debug.Log($"삭제된 방: {room.Name}");
+                //Debug.Log($"삭제된 방: {room.Name}");
                 continue;
             }
 
@@ -67,14 +67,14 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
             }
             else
             {
-                Debug.LogError("RoomButton 스크립트가 RoomButtonPrefab에 추가되지 않았습니다!");
+                //Debug.LogError("RoomButton 스크립트가 RoomButtonPrefab에 추가되지 않았습니다!");
             }
 
             roomButtons.Add(roomButton);
-            Debug.Log($"새로 추가된 방: {room.Name}");
+            //Debug.Log($"새로 추가된 방: {room.Name}");
         }
 
-        Debug.Log($"현재 UI에 표시된 방 개수: {roomButtons.Count}");
+        //Debug.Log($"현재 UI에 표시된 방 개수: {roomButtons.Count}");
     }
 
     //  CreateRoom 버튼 클릭 시 모드 선택 UI 열기
@@ -102,12 +102,12 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
     {
         if (!PhotonNetwork.IsConnectedAndReady || !PhotonNetwork.InLobby)
         {
-            Debug.LogError(" CreateRoom() 호출 실패 - 현재 로비에 있지 않음!");
+            //Debug.LogError(" CreateRoom() 호출 실패 - 현재 로비에 있지 않음!");
             return;
         }
 
         string roomName = "Room_" + Random.Range(1000, 9999);
-        Debug.Log($" 방 생성 시도: {roomName} (GameMode: {gameMode})");
+        //Debug.Log($" 방 생성 시도: {roomName} (GameMode: {gameMode})");
 
         RoomOptions options = new RoomOptions()
         {
@@ -121,7 +121,7 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
             CustomRoomPropertiesForLobby = new string[] { "GameMode", "HostName" } // 로비에서 표시할 정보
         };
 
-        Debug.Log($"방 생성 데이터: RoomName={roomName}, HostName={PhotonNetwork.NickName}, GameMode={gameMode}");
+        //Debug.Log($"방 생성 데이터: RoomName={roomName}, HostName={PhotonNetwork.NickName}, GameMode={gameMode}");
 
         PhotonNetwork.CreateRoom(roomName, options);
     }
@@ -141,7 +141,7 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
 
     public override void OnLeftRoom()
     {
-        Debug.Log("방에서 퇴장했습니다. 로비로 돌아갑니다.");
+        //Debug.Log("방에서 퇴장했습니다. 로비로 돌아갑니다.");
 
         //  기존 방 목록 정리
         foreach (GameObject button in roomButtons)
@@ -163,7 +163,7 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
 
     public override void OnCreateRoomFailed(short returnCode, string message)
     {
-        Debug.LogError($"방 생성 실패! 코드: {returnCode}, 메시지: {message}");
+        //Debug.LogError($"방 생성 실패! 코드: {returnCode}, 메시지: {message}");
     }
 
 
@@ -183,7 +183,7 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
         }
         else
         {
-            Debug.LogError(" Photon이 아직 연결되지 않음. JoinLobby() 호출 불가능!");
+            //Debug.LogError(" Photon이 아직 연결되지 않음. JoinLobby() 호출 불가능!");
         }
     }
 
