@@ -363,7 +363,7 @@ public class ScoreboardEntry : MonoBehaviour
 
     public void ShowPreview(Dictionary<string, int> previewScores)
     {
-        //Debug.Log($"[ShowPreview] 호출됨 - isAI={isAI}, aiName={aiName}");
+        Debug.Log($"[ShowPreview] 호출됨 - isAI={isAI}, aiName={aiName}");
         ClearHighlight();
 
         foreach (var scoreEntry in previewScores)
