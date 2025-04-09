@@ -1420,7 +1420,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 97b7b0941fa10264caab79f6346632c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cupController: {fileID: 0}
+  cupController: {fileID: 3469287836958276106}
   currentturnText: {fileID: 6002163824048972396}
   currentPlayerIndex: 0
   currentTurnRound: 0
@@ -15753,7 +15753,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6071cee7c7bb3eb4ba680d6481db4caf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  photonView: {fileID: 0}
+  photonView: {fileID: 3469287836958276110}
   button: {fileID: 1740718681}
   boxGroup: {fileID: 1323024319}
   wall: {fileID: 3325980841883998428}

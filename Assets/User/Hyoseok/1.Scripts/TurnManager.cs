@@ -31,7 +31,6 @@ public class TurnManager : MonoBehaviourPunCallbacks
 
     private void Start()
     {
-
         cupController = FindAnyObjectByType<CupController>();
         currentturnText.text = currentTurnRound.ToString() + "/12";
         StartCoroutine(WaitAndInitPlayers());
@@ -171,7 +170,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
         currentPlayerIndex = playerIndex;
         currentTurnRound = round;
 
-        if (DiceManager.Instance != null)
+        if (DiceManager.Instance != null && cupController != null)
         {
             DiceManager.Instance.rollsLeft = 3;
             DiceManager.Instance.UpdataRollsLeft();

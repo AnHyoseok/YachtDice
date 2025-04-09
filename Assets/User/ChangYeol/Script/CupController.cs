@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
+using Unity.VisualScripting;
 
 public class CupController : MonoBehaviour
 {
@@ -17,7 +18,7 @@ public class CupController : MonoBehaviour
     private List<GameObject> falseDices = new List<GameObject>();
     private GameObject Dice;
     private GameObject Forcedice;
-    [HideInInspector] public Animator animator;
+    public Animator animator;
     public bool isShake = false;
     private float timer;
     public float pourOutTime = 5;
@@ -41,25 +42,16 @@ public class CupController : MonoBehaviour
     private void Update()
     {
         if (diceManager.isDiceArray || diceManager.isArrays || diceManager.rollsLeft == 0 || !cameraMove.isStop) return;
-        //Debug.Log($"[흔들기 진입] isShake={isShake}, isButton={button.isButton}, timer={timer}");
         if (!button.isButton)
         {
             timer += Time.deltaTime;
-            //Debug.Log($"[버튼 대기] timer={timer}");
             if (timer >= pourOutTime)
             {
                 button.isButton = true;
-               
                 timer = 0;
-                //Debug.Log("[버튼 활성화 완료]");
-
             }
         }
         UpdateCupState();
-
-       
-           
-        
     }
    public void UpdateCupState()
     {
@@ -88,6 +80,10 @@ public class CupController : MonoBehaviour
     [PunRPC]
     void StartSyncAnimatorState(bool isStart)
     {
+        if(animator == null)
+        {
+            animator = GetComponent<Animator>();
+        }
         animator.SetBool("IsStart", isStart);
     }
     public void TryRollDice()
