@@ -186,9 +186,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
                 DiceManager.Instance.selectDice.isTarget[i] = false;
             }
         }
-        else
-            //Debug.LogWarning("DiceManager.Instance가 null입니다.");
-
+       
         currentturnText.text = $"{currentTurnRound + 1} / {MAX_ROUNDS}";
 
         if (IsAITurnNow())
