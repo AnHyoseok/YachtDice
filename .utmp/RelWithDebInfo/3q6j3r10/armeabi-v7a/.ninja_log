@@ -1,0 +1,10 @@
+# ninja log v5
+23	1300	7659725593905551	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	3fca6295dd49b22b
+13	1342	7659725594330967	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	b8606657f879593f
+0	1352	7659725594441612	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	2820508864c7a0cd
+35	1428	7659725595204204	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	6e5b80ed343360ba
+29	1446	7659725595414422	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	b890fe5ebec8b948
+5	1460	7659725595512174	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	c2b43c6598b6b208
+18	1654	7659725597483355	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	3c98186f81dae02e
+8	1747	7659725598375709	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	aa78ad78fef52223
+1747	1848	7659725599406837	D:/YachtDice2/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/3q6j3r10/obj/armeabi-v7a/libgame.so	e6504b77f830955e

@@ -67,5 +67,5 @@ MonoBehaviour:
   - RPC_SyncRollsLeft
   - RPC_SyncRollsleft
   DisableAutoOpenWizard: 1
-  ShowSettings: 0
+  ShowSettings: 1
   DevRegionSetOnce: 1

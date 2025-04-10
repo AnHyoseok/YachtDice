@@ -116,6 +116,8 @@ public class TurnManager : MonoBehaviourPunCallbacks
             return false;
         }
 
+      
+
         var current = playersInRoom[currentPlayerIndex];
         //Debug.Log($"내 이름: {PhotonNetwork.LocalPlayer.NickName}, 현재 턴 플레이어: {current.NickName}");
 
@@ -130,6 +132,8 @@ public class TurnManager : MonoBehaviourPunCallbacks
 
     public void EndMyTurn()
     {
+
+
         //Debug.Log(" EndMyTurn() 호출됨");
         //Debug.Log($" GameSceneManager.Instance == null ? {GameSceneManager.Instance == null}");
         //if (!PhotonNetwork.IsMasterClient) return;
@@ -188,7 +192,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
         }
        
         currentturnText.text = $"{currentTurnRound + 1} / {MAX_ROUNDS}";
-
+        
         if (IsAITurnNow())
         {
             string aiName = GetCurrentAIName();
